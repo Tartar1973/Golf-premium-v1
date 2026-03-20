@@ -46,8 +46,12 @@ export default async function handler(req, res) {
       );
 
       const r = await fetch(u.toString(), {
-        headers: { 'User-Agent': 'GolfJourneyRoulette/1.0' }
-      });
+  headers: {
+    'User-Agent': 'GolfJourneyRoulette/1.0',
+    'Referer': 'https://golf-premium-v1.vercel.app/',
+    'Origin': 'https://golf-premium-v1.vercel.app'
+  }
+});
 
       if (!r.ok) {
         const t = await r.text();
