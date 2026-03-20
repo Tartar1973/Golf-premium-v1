@@ -15,6 +15,7 @@ export default async function handler(req, res) {
     const applicationId = process.env.RAKUTEN_APPLICATION_ID;
     const accessKey = process.env.RAKUTEN_ACCESS_KEY;
     const affiliateId = process.env.RAKUTEN_AFFILIATE_ID || '';
+
     if (!applicationId || !accessKey) {
       res.status(500).send('Missing Vercel environment variables.');
       return;
@@ -22,7 +23,7 @@ export default async function handler(req, res) {
 
     let all = [];
     for (let page = 1; page <= 3 && all.length < 25; page++) {
-      const u = new URL('https://app.rakuten.co.jp/services/api/Gora/GoraGolfCourseSearch/20170623');
+      const u = new URL('https://openapi.rakuten.co.jp/engine/api/Gora/GoraGolfCourseSearch/20170623');
       u.searchParams.set('format', 'json');
       u.searchParams.set('formatVersion', '2');
       u.searchParams.set('applicationId', applicationId);
@@ -33,7 +34,7 @@ export default async function handler(req, res) {
       u.searchParams.set('hits', '30');
       u.searchParams.set('page', String(page));
       u.searchParams.set('reservation', '1');
-      u.searchParams.set('elements', 'golfCourseId,golfCourseName,evaluation,golfCourseDetailUrl,reserveCalUrl,address,golfCourseCaption,golfCourseImageUrl');
+      u.searchParams.set('elements', 'golfCourseId,golfCourseName,golfCourseAbbr,golfCourseNameKana,golfCourseCaption,address,latitude,longitude,highway,golfCourseDetailUrl,reserveCalUrl,ratingUrl,golfCourseImageUrl,evaluation');
 
       const r = await fetch(u.toString(), { headers: { 'User-Agent': 'GolfJourneyRoulette/1.0' } });
       if (!r.ok) {
