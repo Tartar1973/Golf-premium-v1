@@ -52,7 +52,9 @@ export default async function handler(req, res) {
     'Origin': 'https://golf-premium-v1.vercel.app'
   }
 });
-
+if (r.status === 404) {
+  break;
+}
       if (!r.ok) {
         const t = await r.text();
         res.status(r.status).send(t);
