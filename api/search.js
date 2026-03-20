@@ -1,13 +1,8 @@
 export default async function handler(req, res) {
   try {
     const { prefCode, pref = '' } = req.query;
-
     if (!prefCode) {
-      res.status(200).json({
-        ok: true,
-        message: 'alive',
-        usage: '/api/search?prefCode=13&pref=東京都'
-      });
+      res.status(200).json({ ok: true, message: 'alive', usage: '/api/search?prefCode=13&pref=東京都' });
       return;
     }
 
@@ -26,9 +21,17 @@ export default async function handler(req, res) {
       return;
     }
 
-    let all = [];
+    async function fetchWithRetry(url, options = {}, retries = 2) {
+      for (let i = 0; i <= retries; i++) {
+        const res = await fetch(url, options);
+        if (res.status !== 429) return res;
+        if (i === retries) return res;
+        await new Promise(resolve => setTimeout(resolve, 1200));
+      }
+    }
 
-    for (let page = 1; page <= 3 && all.length < 25; page++) {
+    let all = [];
+    for (let page = 1; page <= 2 && all.length < 20; page++) {
       const u = new URL('https://openapi.rakuten.co.jp/engine/api/Gora/GoraGolfCourseSearch/20170623');
       u.searchParams.set('format', 'json');
       u.searchParams.set('formatVersion', '2');
@@ -37,24 +40,20 @@ export default async function handler(req, res) {
       if (affiliateId) u.searchParams.set('affiliateId', affiliateId);
       u.searchParams.set('areaCode', String(code));
       u.searchParams.set('sort', 'evaluation');
-      u.searchParams.set('hits', '30');
+      u.searchParams.set('hits', '15');
       u.searchParams.set('page', String(page));
-      u.searchParams.set('reservation', '1');
-      u.searchParams.set(
-        'elements',
-        'golfCourseId,golfCourseName,golfCourseAbbr,golfCourseNameKana,golfCourseCaption,address,latitude,longitude,highway,golfCourseDetailUrl,reserveCalUrl,ratingUrl,golfCourseImageUrl,evaluation'
-      );
+      u.searchParams.set('elements', 'golfCourseId,golfCourseName,golfCourseAbbr,golfCourseNameKana,golfCourseCaption,address,latitude,longitude,highway,golfCourseDetailUrl,reserveCalUrl,ratingUrl,golfCourseImageUrl,evaluation');
 
-      const r = await fetch(u.toString(), {
-  headers: {
-    'User-Agent': 'GolfJourneyRoulette/1.0',
-    'Referer': 'https://golf-premium-v1.vercel.app/',
-    'Origin': 'https://golf-premium-v1.vercel.app'
-  }
-});
-if (r.status === 404) {
-  break;
-}
+      const r = await fetchWithRetry(u.toString(), {
+        headers: {
+          'User-Agent': 'GolfJourneyRoulette/1.0',
+          'Referer': 'https://golf-premium-v1.vercel.app/',
+          'Origin': 'https://golf-premium-v1.vercel.app'
+        }
+      });
+
+      if (r.status === 404) break;
+
       if (!r.ok) {
         const t = await r.text();
         res.status(r.status).send(t);
