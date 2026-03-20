@@ -1,21 +1,12 @@
-# Golf Journey Roulette - Secure Rakuten API Edition
+# Golf Journey Roulette - Secure Fixed Edition
 
-この版は APIキーをブラウザに埋め込まず、Vercel Functions で楽天GORA APIを呼ぶ安全版です。
+400対策版です。
 
-## ファイル
-- index.html
-- api/search.js
-- vercel.json
-- README.md
+## 修正点
+- フロント → API は `prefCode` の数値で送信
+- `/api/search` 単体アクセスは 200 のヘルス応答に変更
 
 ## Vercel に設定する環境変数
 - RAKUTEN_APPLICATION_ID
 - RAKUTEN_ACCESS_KEY
 - RAKUTEN_AFFILIATE_ID
-
-## 使い方
-1. GitHub にアップ
-2. Vercel で Import
-3. 上の3つの環境変数を設定
-4. 再デプロイ
-5. 公開URLを開く
