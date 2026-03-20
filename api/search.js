@@ -1,13 +1,8 @@
 export default async function handler(req, res) {
   try {
     const { prefCode, pref = '' } = req.query;
-
     if (!prefCode) {
-      res.status(200).json({
-        ok: true,
-        message: 'alive',
-        usage: '/api/search?prefCode=13&pref=東京都',
-      });
+      res.status(200).json({ ok: true, message: 'alive', usage: '/api/search?prefCode=13&pref=東京都' });
       return;
     }
 
@@ -27,50 +22,34 @@ export default async function handler(req, res) {
     }
 
     let all = [];
-
     for (let page = 1; page <= 3 && all.length < 25; page++) {
-      const u = new URL(
-        'https://openapi.rakuten.co.jp/engine/api/Gora/GoraGolfCourseSearch/20170623'
-      );
-
+      const u = new URL('https://openapi.rakuten.co.jp/engine/api/Gora/GoraGolfCourseSearch/20170623');
       u.searchParams.set('format', 'json');
       u.searchParams.set('formatVersion', '2');
       u.searchParams.set('applicationId', applicationId);
       u.searchParams.set('accessKey', accessKey);
-
-      if (affiliateId) {
-        u.searchParams.set('affiliateId', affiliateId);
-      }
-
+      if (affiliateId) u.searchParams.set('affiliateId', affiliateId);
       u.searchParams.set('areaCode', String(code));
       u.searchParams.set('sort', 'evaluation');
       u.searchParams.set('hits', '30');
       u.searchParams.set('page', String(page));
       u.searchParams.set('reservation', '1');
-      u.searchParams.set(
-        'elements',
-        'golfCourseId,golfCourseName,golfCourseAbbr,golfCourseNameKana,golfCourseCaption,address,latitude,longitude,highway,golfCourseDetailUrl,reserveCalUrl,ratingUrl,golfCourseImageUrl,evaluation'
-      );
+      u.searchParams.set('elements', 'golfCourseId,golfCourseName,golfCourseAbbr,golfCourseNameKana,golfCourseCaption,address,latitude,longitude,highway,golfCourseDetailUrl,reserveCalUrl,ratingUrl,golfCourseImageUrl,evaluation');
 
-      const r = await fetch(u.toString(), {
-        headers: { 'User-Agent': 'GolfJourneyRoulette/1.0' },
-      });
-
+      const r = await fetch(u.toString(), { headers: { 'User-Agent': 'GolfJourneyRoulette/1.0' } });
       if (!r.ok) {
         const t = await r.text();
         res.status(r.status).send(t);
         return;
       }
-
       const data = await r.json();
       const items = data.Items || data.items || [];
-
       if (!items.length) break;
       all.push(...items);
     }
 
     const seen = new Set();
-    all = all.filter((item) => {
+    all = all.filter(item => {
       const id = item.golfCourseId;
       if (seen.has(id)) return false;
       seen.add(id);
@@ -78,12 +57,7 @@ export default async function handler(req, res) {
     });
 
     res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=86400');
-    res.status(200).json({
-      ok: true,
-      pref,
-      prefCode: code,
-      items: all,
-    });
+    res.status(200).json({ ok: true, pref, prefCode: code, items: all });
   } catch (e) {
     res.status(500).send(e?.message || 'Server error');
   }
