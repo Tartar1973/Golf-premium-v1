@@ -1,64 +1,813 @@
-export default async function handler(req, res) {
-  try {
-    const { prefCode, pref = '' } = req.query;
-    if (!prefCode) {
-      res.status(200).json({ ok: true, message: 'alive', usage: '/api/search?prefCode=13&pref=東京都' });
-      return;
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Golf Journey Roulette</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --panel: rgba(17, 24, 39, 0.92);
+      --line: rgba(255, 255, 255, 0.12);
+      --text: #eef2ff;
+      --muted: #a5b4cc;
+      --gold: #d4af37;
+      --gold2: #f6e27a;
     }
 
-    const code = Number(prefCode);
-    if (!Number.isFinite(code) || code < 1 || code > 47) {
-      res.status(400).send('Invalid prefCode.');
-      return;
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
+      background:
+        radial-gradient(circle at top, rgba(212,175,55,.10), transparent 30%),
+        linear-gradient(180deg, #08101d 0%, #0b1220 48%, #111827 100%);
+      min-height: 100vh;
     }
 
-    const applicationId = process.env.RAKUTEN_APPLICATION_ID;
-    const accessKey = process.env.RAKUTEN_ACCESS_KEY;
-    const affiliateId = process.env.RAKUTEN_AFFILIATE_ID || '';
-
-    if (!applicationId || !accessKey) {
-      res.status(500).send('Missing Vercel environment variables.');
-      return;
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 18px;
     }
 
-    let all = [];
-    for (let page = 1; page <= 3 && all.length < 25; page++) {
-      const u = new URL('https://openapi.rakuten.co.jp/engine/api/Gora/GoraGolfCourseSearch/20170623');
-      u.searchParams.set('format', 'json');
-      u.searchParams.set('formatVersion', '2');
-      u.searchParams.set('applicationId', applicationId);
-      u.searchParams.set('accessKey', accessKey);
-      if (affiliateId) u.searchParams.set('affiliateId', affiliateId);
-      u.searchParams.set('areaCode', String(code));
-      u.searchParams.set('sort', 'evaluation');
-      u.searchParams.set('hits', '30');
-      u.searchParams.set('page', String(page));
-      u.searchParams.set('reservation', '1');
-      u.searchParams.set('elements', 'golfCourseId,golfCourseName,golfCourseAbbr,golfCourseNameKana,golfCourseCaption,address,latitude,longitude,highway,golfCourseDetailUrl,reserveCalUrl,ratingUrl,golfCourseImageUrl,evaluation');
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 40px);
+      font-weight: 900;
+      background: linear-gradient(90deg, #fff, var(--gold2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
 
-      const r = await fetch(u.toString(), { headers: { 'User-Agent': 'GolfJourneyRoulette/1.0' } });
-      if (!r.ok) {
-        const t = await r.text();
-        res.status(r.status).send(t);
+    .sub {
+      color: var(--muted);
+      line-height: 1.6;
+      margin-top: 8px;
+      margin-bottom: 18px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 350px 1fr;
+      gap: 18px;
+    }
+
+    .panel, .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 18px;
+      backdrop-filter: blur(10px);
+    }
+
+    .ttl {
+      display: block;
+      color: var(--gold2);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin: 0 0 8px;
+    }
+
+    select, button {
+      font: inherit;
+    }
+
+    select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: #111827;
+      color: var(--text);
+      border: 1px solid var(--line);
+      outline: none;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 0 0 16px;
+    }
+
+    .chip {
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid var(--line);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .chip.active {
+      background: rgba(212,175,55,.16);
+      border-color: rgba(212,175,55,.45);
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 16px;
+      padding: 14px 16px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .primary {
+      background: linear-gradient(135deg, var(--gold), var(--gold2));
+      color: #241700;
+    }
+
+    .secondary {
+      background: rgba(255,255,255,.08);
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .roulette {
+      position: relative;
+      overflow: hidden;
+      height: 230px;
+      border-radius: 22px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.03);
+    }
+
+    .ticker {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      will-change: transform;
+    }
+
+    .item {
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: clamp(24px, 3vw, 34px);
+      border-bottom: 1px solid rgba(255,255,255,.04);
+    }
+
+    .item:nth-child(odd) {
+      background: rgba(255,255,255,.02);
+    }
+
+    .pointer {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 72px;
+      border-top: 2px solid rgba(212,175,55,.86);
+      border-bottom: 2px solid rgba(212,175,55,.86);
+      background: linear-gradient(90deg, transparent, rgba(212,175,55,.08), transparent);
+      pointer-events: none;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .pill {
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      font-size: 13px;
+    }
+
+    .status {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.15);
+      background: rgba(255,255,255,.05);
+      line-height: 1.5;
+    }
+
+    .ok {
+      background: rgba(34,197,94,.10);
+      border-color: rgba(34,197,94,.28);
+    }
+
+    .warn {
+      background: rgba(96,165,250,.08);
+      border-color: rgba(96,165,250,.25);
+    }
+
+    .err {
+      background: rgba(248,113,113,.10);
+      border-color: rgba(248,113,113,.28);
+    }
+
+    .result {
+      display: grid;
+      grid-template-columns: 1.08fr .92fr;
+      gap: 18px;
+    }
+
+    .pref {
+      font-size: 42px;
+      font-weight: 900;
+    }
+
+    .course {
+      font-size: 26px;
+      font-weight: 900;
+      line-height: 1.35;
+    }
+
+    .desc, .subline {
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .list {
+      max-height: 560px;
+      overflow: auto;
+    }
+
+    .row {
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+
+    .row:last-child {
+      border-bottom: none;
+    }
+
+    .links a {
+      display: inline-block;
+      margin: 8px 8px 0 0;
+      padding: 10px 12px;
+      border-radius: 12px;
+      text-decoration: none;
+      color: var(--text);
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.08);
+    }
+
+    .links a.primaryLink {
+      background: linear-gradient(135deg, #1f6feb, #60a5fa);
+      border: none;
+    }
+
+    .small {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    @media (max-width: 900px) {
+      .grid, .result {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Golf Journey Roulette</h1>
+    <div class="sub">
+      楽天GORA検索API連携の完成版。県ルーレットを先に回し、その後で候補を取得する高速版です。
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <label class="ttl">Season</label>
+        <select id="season">
+          <option value="auto">自動判定</option>
+          <option value="spring">春</option>
+          <option value="summer">夏</option>
+          <option value="autumn">秋</option>
+          <option value="winter">冬</option>
+        </select>
+
+        <label class="ttl" style="margin-top:16px;">Area</label>
+        <select id="area">
+          <option value="all">全国</option>
+          <option value="hokkaido">北海道</option>
+          <option value="tohoku">東北</option>
+          <option value="kanto">関東</option>
+          <option value="chubu">中部</option>
+          <option value="kinki">近畿</option>
+          <option value="chugoku">中国</option>
+          <option value="shikoku">四国</option>
+          <option value="kyushu">九州</option>
+          <option value="okinawa">沖縄</option>
+        </select>
+
+        <label class="ttl" style="margin-top:16px;">Brand</label>
+        <div id="brandChips" class="chips"></div>
+
+        <div class="actions">
+          <button id="spinBtn" class="btn primary">ルーレット開始</button>
+          <button id="rerollBtn" class="btn secondary">同じ県で再抽選</button>
+        </div>
+
+        <div id="statusBox" class="status warn">
+          サーバー側で楽天GORA APIを呼びます。Vercel環境変数を設定してください。
+        </div>
+        <div class="small" style="margin-top:10px;">その他は評価 3.8 以上のみ表示します。</div>
+      </div>
+
+      <div>
+        <div class="card">
+          <div class="roulette">
+            <div class="pointer"></div>
+            <div id="ticker" class="ticker"></div>
+          </div>
+
+          <div class="meta">
+            <span id="seasonLabel" class="pill">季節: -</span>
+            <span id="areaLabel" class="pill">エリア: 全国</span>
+            <span id="statusLabel" class="pill">待機中</span>
+          </div>
+        </div>
+
+        <div class="result" style="margin-top:18px;">
+          <div class="card">
+            <div id="winPref" class="pref">-</div>
+            <div id="winCourse" class="course">まだ結果がありません</div>
+            <div id="winDesc" class="desc">ルーレットを回してください。</div>
+            <div id="winMeta" class="meta"></div>
+            <div id="winLinks" class="links"></div>
+          </div>
+
+          <div class="card">
+            <h3 style="margin-top:0;">候補一覧</h3>
+            <div id="candidateList" class="list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const PREF_CODES = {
+      '北海道':1,'青森県':2,'岩手県':3,'宮城県':4,'秋田県':5,'山形県':6,'福島県':7,
+      '茨城県':8,'栃木県':9,'群馬県':10,'埼玉県':11,'千葉県':12,'東京都':13,'神奈川県':14,
+      '新潟県':15,'富山県':16,'石川県':17,'福井県':18,'山梨県':19,'長野県':20,'岐阜県':21,'静岡県':22,'愛知県':23,'三重県':24,
+      '滋賀県':25,'京都府':26,'大阪府':27,'兵庫県':28,'奈良県':29,'和歌山県':30,
+      '鳥取県':31,'島根県':32,'岡山県':33,'広島県':34,'山口県':35,
+      '徳島県':36,'香川県':37,'愛媛県':38,'高知県':39,
+      '福岡県':40,'佐賀県':41,'長崎県':42,'熊本県':43,'大分県':44,'宮崎県':45,'鹿児島県':46,'沖縄県':47
+    };
+
+    const AREAS = {
+      all: Object.keys(PREF_CODES),
+      hokkaido: ['北海道'],
+      tohoku: ['青森県','岩手県','宮城県','秋田県','山形県','福島県'],
+      kanto: ['茨城県','栃木県','群馬県','埼玉県','千葉県','東京都','神奈川県'],
+      chubu: ['新潟県','富山県','石川県','福井県','山梨県','長野県','岐阜県','静岡県','愛知県','三重県'],
+      kinki: ['滋賀県','京都府','大阪府','兵庫県','奈良県','和歌山県'],
+      chugoku: ['鳥取県','島根県','岡山県','広島県','山口県'],
+      shikoku: ['徳島県','香川県','愛媛県','高知県'],
+      kyushu: ['福岡県','佐賀県','長崎県','熊本県','大分県','宮崎県','鹿児島県'],
+      okinawa: ['沖縄県']
+    };
+
+    const BRANDS = ['GRAND PGM', 'PGM', 'アコーディア', 'その他'];
+
+    const REGION_SCORE = {
+      "北海道":{"cool":10,"warm":-6,"snow":10},
+      "青森県":{"cool":8,"warm":-4,"snow":8},
+      "岩手県":{"cool":8,"warm":-4,"snow":7},
+      "宮城県":{"cool":5,"warm":0,"snow":3},
+      "秋田県":{"cool":8,"warm":-4,"snow":8},
+      "山形県":{"cool":8,"warm":-3,"snow":8},
+      "福島県":{"cool":6,"warm":-1,"snow":5},
+      "茨城県":{"cool":2,"warm":4,"snow":0},
+      "栃木県":{"cool":5,"warm":2,"snow":4},
+      "群馬県":{"cool":5,"warm":2,"snow":4},
+      "埼玉県":{"cool":0,"warm":3,"snow":0},
+      "千葉県":{"cool":1,"warm":8,"snow":0},
+      "東京都":{"cool":0,"warm":4,"snow":0},
+      "神奈川県":{"cool":1,"warm":6,"snow":0},
+      "新潟県":{"cool":6,"warm":-2,"snow":9},
+      "富山県":{"cool":5,"warm":-1,"snow":6},
+      "石川県":{"cool":4,"warm":1,"snow":5},
+      "福井県":{"cool":4,"warm":2,"snow":4},
+      "山梨県":{"cool":6,"warm":1,"snow":4},
+      "長野県":{"cool":10,"warm":-3,"snow":8},
+      "岐阜県":{"cool":5,"warm":0,"snow":5},
+      "静岡県":{"cool":3,"warm":8,"snow":0},
+      "愛知県":{"cool":1,"warm":5,"snow":0},
+      "三重県":{"cool":1,"warm":7,"snow":0},
+      "滋賀県":{"cool":2,"warm":3,"snow":2},
+      "京都府":{"cool":1,"warm":4,"snow":1},
+      "大阪府":{"cool":0,"warm":5,"snow":0},
+      "兵庫県":{"cool":2,"warm":5,"snow":1},
+      "奈良県":{"cool":2,"warm":4,"snow":1},
+      "和歌山県":{"cool":1,"warm":9,"snow":0},
+      "鳥取県":{"cool":3,"warm":4,"snow":2},
+      "島根県":{"cool":3,"warm":5,"snow":2},
+      "岡山県":{"cool":1,"warm":7,"snow":0},
+      "広島県":{"cool":1,"warm":6,"snow":0},
+      "山口県":{"cool":2,"warm":7,"snow":0},
+      "徳島県":{"cool":1,"warm":7,"snow":0},
+      "香川県":{"cool":1,"warm":8,"snow":0},
+      "愛媛県":{"cool":1,"warm":8,"snow":0},
+      "高知県":{"cool":2,"warm":9,"snow":0},
+      "福岡県":{"cool":1,"warm":7,"snow":0},
+      "佐賀県":{"cool":1,"warm":7,"snow":0},
+      "長崎県":{"cool":2,"warm":8,"snow":0},
+      "熊本県":{"cool":3,"warm":7,"snow":0},
+      "大分県":{"cool":3,"warm":7,"snow":0},
+      "宮崎県":{"cool":2,"warm":10,"snow":0},
+      "鹿児島県":{"cool":2,"warm":10,"snow":0},
+      "沖縄県":{"cool":4,"warm":10,"snow":0}
+    };
+
+    const BRAND_KEYWORDS = {
+      "GRAND PGM": [
+        "【grand pgm】","グランドpgm","grand pgm","総武カントリークラブ","pgmマリアゴルフリンクス",
+        "pgm武蔵ゴルフクラブ","pgm石岡ゴルフクラブ","利府ゴルフ倶楽部","桂ゴルフ倶楽部",
+        "千代田カントリークラブ","セゴビアゴルフクラブ","大宝塚ゴルフクラブ","花の木ゴルフクラブ","ザ・ゴルフクラブ竜ヶ崎"
+      ],
+      "PGM": [
+        "【pgm】","パシフィックゴルフ","pgm","チサン","ムーンレイク","千葉国際カントリークラブ",
+        "大多喜カントリークラブ","成田の森カントリークラブ","長太郎カントリークラブ","ザ・インペリアルカントリークラブ",
+        "皐月ゴルフ倶楽部","近江ヒルズゴルフ倶楽部","枚方国際ゴルフ倶楽部","関西空港ゴルフ倶楽部","岸和田カントリークラブ",
+        "pgmゴルフリゾート沖縄"
+      ],
+      "アコーディア": [
+        "【アコーディア・ゴルフ】","アコーディア・ゴルフ","accordia","東京相武カントリークラブ",
+        "習志野カントリークラブ","東千葉カントリークラブ","花生カントリークラブ","成田東カントリークラブ",
+        "ニュー南総ゴルフ倶楽部","ロータリーゴルフ倶楽部","六甲カントリー倶楽部","パームヒルズゴルフリゾートクラブ",
+        "ザ・サザンリンクスゴルフクラブ"
+      ]
+    };
+
+    const ticker = document.getElementById('ticker');
+    const brandChips = document.getElementById('brandChips');
+    const statusBox = document.getElementById('statusBox');
+
+    let activeBrands = new Set(BRANDS);
+    let lastPref = null;
+    let cache = new Map();
+
+    function esc(s) {
+      return String(s || '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;');
+    }
+
+    function normalize(s) {
+      return (s || '')
+        .replace(/[Ａ-Ｚａ-ｚ０-９]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0))
+        .replace(/[　]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .toLowerCase();
+    }
+
+    function inferBrand(name) {
+      const n = normalize(name);
+      for (const [brand, words] of Object.entries(BRAND_KEYWORDS)) {
+        for (const word of words) {
+          if (n.includes(normalize(word))) return brand;
+        }
+      }
+      return 'その他';
+    }
+
+    function seasonKey() {
+      const v = document.getElementById('season').value;
+      if (v !== 'auto') return v;
+      const m = new Date().getMonth() + 1;
+      if ([3,4,5].includes(m)) return 'spring';
+      if ([6,7,8].includes(m)) return 'summer';
+      if ([9,10,11].includes(m)) return 'autumn';
+      return 'winter';
+    }
+
+    function seasonLabel(v) {
+      return {
+        spring: '春',
+        summer: '夏',
+        autumn: '秋',
+        winter: '冬'
+      }[v];
+    }
+
+    function comfort(pref, brand, evaluation) {
+      const s = seasonKey();
+      const t = REGION_SCORE[pref] || { cool: 0, warm: 0, snow: 0 };
+
+      let score = 70 + (brand === 'GRAND PGM' ? 8 : brand === 'PGM' ? 5 : brand === 'アコーディア' ? 3 : 0);
+      score += Math.max(0, ((evaluation || 3.8) - 3.8) * 12);
+
+      if (s === 'summer') score += t.cool * 1.8 - t.warm * 0.2 - t.snow * 0.1;
+      if (s === 'winter') score += t.warm * 1.9 - t.snow * 2.2;
+      if (s === 'spring') score += t.warm * 0.5 + t.cool * 0.3;
+      if (s === 'autumn') score += t.cool * 0.5 + t.warm * 0.3;
+
+      return Math.max(50, Math.min(99, Math.round(score)));
+    }
+
+    function setStatus(kind, html) {
+      statusBox.className = 'status ' + kind;
+      statusBox.innerHTML = html;
+    }
+
+    function renderBrandChips() {
+      brandChips.innerHTML = '';
+      BRANDS.forEach((b, i) => {
+        const d = document.createElement('div');
+        d.className = 'chip active';
+        d.textContent = b;
+        d.onclick = () => {
+          if (activeBrands.has(b)) {
+            activeBrands.delete(b);
+          } else {
+            activeBrands.add(b);
+          }
+
+          if (activeBrands.size === 0) {
+            activeBrands.add(b);
+          }
+
+          [...brandChips.children].forEach((el, j) => {
+            el.classList.toggle('active', activeBrands.has(BRANDS[j]));
+          });
+
+          cache.clear();
+        };
+        brandChips.appendChild(d);
+      });
+    }
+
+    renderBrandChips();
+
+    async function fetchCourses(pref) {
+      const code = PREF_CODES[pref];
+      const key = pref + '::' + code + '::' + [...activeBrands].sort().join(',') + '::' + seasonKey();
+
+      if (cache.has(key)) return cache.get(key);
+
+      const res = await fetch('/api/search?prefCode=' + encodeURIComponent(code) + '&pref=' + encodeURIComponent(pref));
+      if (!res.ok) {
+        throw new Error(await res.text() || 'API error');
+      }
+
+      const data = await res.json();
+
+      let list = (data.items || []).map(item => {
+        const brand = inferBrand(item.golfCourseName);
+        return {
+          pref,
+          golfCourseId: item.golfCourseId,
+          name: item.golfCourseName,
+          evaluation: Number(item.evaluation || 0),
+          address: item.address || '',
+          detailUrl: item.golfCourseDetailUrl || '',
+          reserveUrl: item.reserveCalUrl || item.golfCourseDetailUrl || '',
+          imageUrl: item.golfCourseImageUrl || '',
+          brand,
+          comfort: comfort(pref, brand, Number(item.evaluation || 0))
+        };
+      });
+
+      list = list.filter(c => activeBrands.has(c.brand));
+      list = list.filter(c => c.brand !== 'その他' || c.evaluation >= 3.8);
+      list.sort((a, b) => b.comfort - a.comfort || b.evaluation - a.evaluation);
+
+      cache.set(key, list);
+      return list;
+    }
+
+    function currentAreaPrefs() {
+      return AREAS[document.getElementById('area').value];
+    }
+
+    function pickWeightedPref(prefs) {
+      const s = seasonKey();
+      const scored = prefs.map(pref => {
+        const t = REGION_SCORE[pref] || { cool: 0, warm: 0, snow: 0 };
+        let w = 1;
+
+        if (s === 'summer') w += Math.max(0, t.cool * 0.25);
+        if (s === 'winter') w += Math.max(0, t.warm * 0.25) + Math.max(0, (3 - t.snow) * 0.1);
+        if (s === 'spring' || s === 'autumn') w += 0.3;
+
+        return { pref, weight: Math.max(0.4, w) };
+      });
+
+      const total = scored.reduce((a, b) => a + b.weight, 0);
+      let r = Math.random() * total;
+
+      for (const item of scored) {
+        r -= item.weight;
+        if (r <= 0) return item.pref;
+      }
+      return scored[scored.length - 1].pref;
+    }
+
+    async function fetchFirstValidPref(prefs) {
+      const tried = new Set();
+      const order = [];
+
+      while (order.length < prefs.length) {
+        const p = pickWeightedPref(prefs.filter(x => !tried.has(x)));
+        tried.add(p);
+        order.push(p);
+      }
+
+      for (const pref of order) {
+        try {
+          const list = await fetchCourses(pref);
+          if (list.length) return { pref, list };
+        } catch (e) {}
+      }
+
+      return { pref: null, list: [] };
+    }
+
+    const ITEM_H = 72;
+    const BOX_H = 230;
+
+    function renderTicker(items) {
+      ticker.innerHTML = '';
+      items.forEach(name => {
+        const d = document.createElement('div');
+        d.className = 'item';
+        d.textContent = name;
+        ticker.appendChild(d);
+      });
+    }
+
+    function makeTickerItems(prefs, winner) {
+      const rep = [];
+      for (let i = 0; i < 6; i++) rep.push(...prefs);
+      rep.push(winner);
+      return [...rep, ...prefs.slice(0, 8)];
+    }
+
+    function chooseOne(list) {
+      if (!list.length) return null;
+      const top = list.slice(0, Math.min(10, list.length));
+      return top[Math.floor(Math.random() * top.length)];
+    }
+
+    function drawCandidates(list, pickedId) {
+      const box = document.getElementById('candidateList');
+      box.innerHTML = '';
+
+      if (!list.length) {
+        box.innerHTML = '<div class="subline">条件に合う候補がありません。</div>';
         return;
       }
-      const data = await r.json();
-      const items = data.Items || data.items || [];
-      if (!items.length) break;
-      all.push(...items);
+
+      list.forEach(c => {
+        const row = document.createElement('div');
+        row.className = 'row';
+        row.innerHTML = `
+          <div><b>${c.golfCourseId === pickedId ? '★ ' : ''}${esc(c.name)}</b></div>
+          <div class="subline">${esc(c.brand)} / 快適度 ${c.comfort} / 評価 ${Number(c.evaluation || 0).toFixed(1)}</div>
+          <div class="subline">${esc(c.address)}</div>
+          <div class="subline"><a href="${c.detailUrl}" target="_blank" rel="noopener noreferrer">詳細</a> / <a href="${c.reserveUrl}" target="_blank" rel="noopener noreferrer">予約カレンダー</a></div>
+        `;
+        box.appendChild(row);
+      });
     }
 
-    const seen = new Set();
-    all = all.filter(item => {
-      const id = item.golfCourseId;
-      if (seen.has(id)) return false;
-      seen.add(id);
-      return true;
-    });
+    function drawWinner(pref, picked, list) {
+      document.getElementById('winPref').textContent = pref || '-';
 
-    res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=86400');
-    res.status(200).json({ ok: true, pref, prefCode: code, items: all });
-  } catch (e) {
-    res.status(500).send(e?.message || 'Server error');
-  }
-}
+      if (!picked) {
+        document.getElementById('winCourse').textContent = '候補がありません';
+        document.getElementById('winDesc').textContent = '環境変数やブランド選択を確認してください。';
+        document.getElementById('winMeta').innerHTML = '';
+        document.getElementById('winLinks').innerHTML = '';
+        drawCandidates([]);
+        return;
+      }
+
+      document.getElementById('winCourse').textContent = picked.name;
+      document.getElementById('winDesc').textContent = picked.address || '';
+      document.getElementById('winMeta').innerHTML = `
+        <span class="pill">${picked.brand}</span>
+        <span class="pill">快適度 ${picked.comfort}</span>
+        <span class="pill">評価 ${Number(picked.evaluation || 0).toFixed(1)}</span>
+      `;
+      document.getElementById('winLinks').innerHTML = `
+        <a class="primaryLink" href="${picked.detailUrl}" target="_blank" rel="noopener noreferrer">ゴルフ場詳細</a>
+        <a href="${picked.reserveUrl}" target="_blank" rel="noopener noreferrer">予約カレンダー</a>
+      `;
+      drawCandidates(list, picked.golfCourseId);
+    }
+
+    async function spin() {
+      try {
+        document.getElementById('seasonLabel').textContent = '季節: ' + seasonLabel(seasonKey());
+        document.getElementById('areaLabel').textContent = 'エリア: ' + document.getElementById('area').selectedOptions[0].textContent;
+        document.getElementById('statusLabel').textContent = 'ルーレット中';
+        setStatus('warn', '県ルーレットを回しています。');
+
+        const prefs = currentAreaPrefs();
+        if (!prefs.length) throw new Error('エリア候補がありません。');
+
+        const winner = pickWeightedPref(prefs);
+        const items = makeTickerItems(prefs, winner);
+        renderTicker(items);
+
+        const idx = items.lastIndexOf(winner);
+        const targetY = (BOX_H / 2) - (ITEM_H / 2) - (idx * ITEM_H);
+
+        await new Promise(resolve => {
+          const start = performance.now();
+          const dur = 2200;
+          const ease = t => 1 - Math.pow(1 - t, 3);
+
+          function frame(now) {
+            const p = Math.min(1, (now - start) / dur);
+            ticker.style.transform = `translateY(${targetY * ease(p)}px)`;
+            if (p < 1) {
+              requestAnimationFrame(frame);
+            } else {
+              resolve();
+            }
+          }
+
+          requestAnimationFrame(frame);
+        });
+
+        document.getElementById('statusLabel').textContent = '県決定: ' + winner;
+        setStatus('warn', '選ばれた県の候補を取得しています。');
+
+        let list = [];
+        try {
+          list = await fetchCourses(winner);
+        } catch (e) {}
+
+        let finalPref = winner;
+
+        if (!list.length) {
+          const fallback = await fetchFirstValidPref(prefs.filter(p => p !== winner));
+          finalPref = fallback.pref;
+          list = fallback.list;
+        }
+
+        if (!finalPref || !list.length) throw new Error('候補が見つかりませんでした。');
+
+        lastPref = finalPref;
+        document.getElementById('statusLabel').textContent = '決定: ' + finalPref;
+        drawWinner(finalPref, chooseOne(list), list);
+        setStatus('ok', '候補名・評価・詳細URL・予約カレンダーは楽天GORAの実データです。');
+      } catch (e) {
+        document.getElementById('statusLabel').textContent = 'エラー';
+        setStatus('err', esc(e.message || 'エラー'));
+      }
+    }
+
+    async function reroll() {
+      if (!lastPref) return;
+      try {
+        const list = await fetchCourses(lastPref);
+        drawWinner(lastPref, chooseOne(list), list);
+        document.getElementById('statusLabel').textContent = '再抽選: ' + lastPref;
+      } catch (e) {
+        setStatus('err', esc(e.message || 'エラー'));
+      }
+    }
+
+    document.getElementById('spinBtn').onclick = spin;
+    document.getElementById('rerollBtn').onclick = reroll;
+
+    document.getElementById('season').onchange = () => {
+      document.getElementById('seasonLabel').textContent = '季節: ' + seasonLabel(seasonKey());
+      cache.clear();
+    };
+
+    document.getElementById('area').onchange = () => {
+      document.getElementById('areaLabel').textContent = 'エリア: ' + document.getElementById('area').selectedOptions[0].textContent;
+      lastPref = null;
+    };
+
+    document.getElementById('seasonLabel').textContent = '季節: ' + seasonLabel(seasonKey());
+    document.getElementById('areaLabel').textContent = 'エリア: ' + document.getElementById('area').selectedOptions[0].textContent;
+
+    const boot = makeTickerItems(AREAS.all, '東京都');
+    renderTicker(boot);
+    const idx0 = boot.lastIndexOf('東京都');
+    ticker.style.transform = `translateY(${(BOX_H / 2) - (ITEM_H / 2) - (idx0 * ITEM_H)}px)`;
+  </script>
+</body>
+</html>
