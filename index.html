@@ -161,7 +161,7 @@ const T = {
     appSub:"県ルーレットを先に回して、その県の楽天GORA候補を取得します。",
     seasonTtl:"Season", areaTtl:"Area", brandTtl:"Brand",
     spin:"ルーレット開始", reroll:"同じ県で再抽選",
-    envNotice:'Vercel の環境変数に <code>RAKUTEN_APPLICATION_ID</code> / <code>RAKUTEN_ACCESS_KEY</code> / <code>RAKUTEN_AFFILIATE_ID</code> を設定して使ってください。',
+    envNotice:'次のゴルフ旅、どこにする？<br>仲間とルーレットを回して、行き先選びまで楽しもう。',
     seasonPill:"季節", areaPill:"エリア", statusPill:"待機中",
     noResultYet:"まだ結果がありません", pleaseSpin:"ルーレットを回してください。", candidateTitle:"候補一覧",
     noMatch:"条件に合う候補がありません。", brand:"ブランド", comfort:"快適度", rating:"評価", detail:"詳細", reserve:"予約カレンダー",
@@ -175,7 +175,7 @@ const T = {
     appSub:"Spin the prefecture roulette first, then fetch golf course candidates from Rakuten GORA for that prefecture.",
     seasonTtl:"Season", areaTtl:"Area", brandTtl:"Brand",
     spin:"Spin Roulette", reroll:"Pick Another in Same Prefecture",
-    envNotice:'Set <code>RAKUTEN_APPLICATION_ID</code>, <code>RAKUTEN_ACCESS_KEY</code>, and <code>RAKUTEN_AFFILIATE_ID</code> in Vercel environment variables before using the app.',
+    envNotice:'Where should your next golf trip be?<br>Spin the roulette and enjoy choosing the destination with your friends.',
     seasonPill:"Season", areaPill:"Area", statusPill:"Standby",
     noResultYet:"No result yet", pleaseSpin:"Spin the roulette to get started.", candidateTitle:"Candidate Courses",
     noMatch:"No candidates matched the current filters.", brand:"Brand", comfort:"Comfort", rating:"Rating", detail:"Details", reserve:"Booking Calendar",
@@ -436,7 +436,7 @@ function setLanguage(lang, openApp = true) {
   populateAreaOptions();
   renderBrandChips();
   refreshLabels();
-  setStatus('warn', tr('envNotice'));
+  setStatus('', tr('envNotice'));
   const boot = makeTickerItems(AREAS.all, '東京都');
   renderTicker(boot);
   const idx0 = boot.lastIndexOf('東京都');
@@ -524,7 +524,7 @@ populateAreaOptions();
 renderBrandChips();
 document.getElementById('winCourse').textContent = tr('noResultYet');
 document.getElementById('winDesc').textContent = tr('pleaseSpin');
-setStatus('warn', tr('envNotice'));
+setStatus('', tr('envNotice'));
 refreshLabels();
 const boot = makeTickerItems(AREAS.all, '東京都');
 renderTicker(boot);
