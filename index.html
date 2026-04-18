@@ -528,19 +528,20 @@ async function fetchFirstValidPref(prefs) {
   }
   return { pref: null, list: [] };
 }
+function getTickerMetrics() {
+  const firstItem = ticker.querySelector('.item');
+  const roulette = document.querySelector('.roulette');
 
-const ITEM_H = 72, BOX_H = 230;
-function renderTicker(items) {
-  ticker.innerHTML = '';
-  items.forEach(name => {
-    const d = document.createElement('div');
-    d.className = 'item';
-    d.textContent = displayPref(name);
-    ticker.appendChild(d);
-  });
+  const itemH = firstItem ? firstItem.getBoundingClientRect().height : 72;
+  const boxH = roulette ? roulette.getBoundingClientRect().height : 230;
+
+  return { itemH, boxH };
 }
 function makeTickerItems(prefs, winner) {
-  const rep = []; for (let i = 0; i < 6; i++) rep.push(...prefs); rep.push(winner); return [...rep, ...prefs.slice(0, 8)];
+  const rep = [];
+  for (let i = 0; i < 12; i++) rep.push(...prefs);
+  rep.push(winner);
+  return [...rep, ...prefs, ...prefs.slice(0, 12)];
 }
 function chooseOne(list) { if (!list.length) return null; const top = list.slice(0, Math.min(10, list.length)); return top[Math.floor(Math.random() * top.length)]; }
 function drawCandidates(list, pickedId) {
@@ -628,7 +629,8 @@ function setLanguage(lang, openApp = true) {
   const boot = makeTickerItems(AREAS.all, '東京都');
   renderTicker(boot);
   const idx0 = boot.lastIndexOf('東京都');
-  ticker.style.transform = `translateY(${(BOX_H / 2) - (ITEM_H / 2) - (idx0 * ITEM_H)}px)`;
+ const { itemH, boxH } = getTickerMetrics();
+ticker.style.transform = `translateY(${(boxH / 2) - (itemH / 2) - (idx0 * itemH)}px)`;
   if (openApp) {
     document.getElementById('languageGate').classList.add('hidden');
     document.getElementById('app').classList.remove('hidden');
@@ -650,7 +652,8 @@ async function spin() {
     const items = makeTickerItems(prefs, winner);
     renderTicker(items);
     const idx = items.lastIndexOf(winner);
-    const targetY = (BOX_H / 2) - (ITEM_H / 2) - (idx * ITEM_H);
+const { itemH, boxH } = getTickerMetrics();
+const targetY = (boxH / 2) - (itemH / 2) - (idx * itemH);
 
     await new Promise(resolve => {
       const start = performance.now(), dur = 2200;
@@ -728,8 +731,8 @@ refreshLabels();
 const boot = makeTickerItems(AREAS.all, '東京都');
 renderTicker(boot);
 const idx0 = boot.lastIndexOf('東京都');
-ticker.style.transform = `translateY(${(BOX_H / 2) - (ITEM_H / 2) - (idx0 * ITEM_H)}px)`;
-
+const { itemH, boxH } = getTickerMetrics();
+ticker.style.transform = `translateY(${(boxH / 2) - (itemH / 2) - (idx0 * itemH)}px)`;
 if (savedLang === 'ja' || savedLang === 'en') {
   setLanguage(savedLang, true);
 }
