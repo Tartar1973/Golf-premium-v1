@@ -7,7 +7,4 @@
 - ブランド絞り込み後に空なら、評価3.8以上のその他候補へフォールバック
 - 県ルーレットを先に回して、その県だけ取得
 
-## 必要な環境変数
-- RAKUTEN_APPLICATION_ID
-- RAKUTEN_ACCESS_KEY
-- RAKUTEN_AFFILIATE_ID
+
