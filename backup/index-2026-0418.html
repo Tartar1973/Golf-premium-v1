@@ -92,8 +92,7 @@ select{width:100%;padding:12px 14px;border-radius:14px;background:#111827;color:
 
       <label class="ttl" id="areaTtl" style="margin-top:16px">Area</label>
       <select id="area"></select>
-<label class="ttl" id="hokkaidoAreaTtl" style="margin-top:16px">Hokkaido Area</label>
-<select id="hokkaidoArea"></select>
+
       <label class="ttl" id="brandTtl" style="margin-top:16px">Brand</label>
       <div id="brandChips" class="chips"></div>
 
@@ -156,27 +155,11 @@ const SEASON_NAMES = {
   ja: {"auto":"自動判定","spring":"春","summer":"夏","autumn":"秋","winter":"冬"},
   en: {"auto":"Auto","spring":"Spring","summer":"Summer","autumn":"Autumn","winter":"Winter"}
 };
-const HOKKAIDO_AREA_LABELS = {
-  ja: {
-    all: '北海道全体',
-    central: '道央',
-    south: '道南',
-    east: '道東',
-    north: '道北'
-  },
-  en: {
-    all: 'All Hokkaido',
-    central: 'Central Hokkaido',
-    south: 'Southern Hokkaido',
-    east: 'Eastern Hokkaido',
-    north: 'Northern Hokkaido'
-  }
-};
 const T = {
   ja: {
     htmlLang:"ja", gateEyebrow:"WELCOME", gateTitle:"Golf Journey Roulette", gateSub:"最初に言語を選んでください。県ルーレットを回すと、選ばれた県の楽天GORA候補を表示します。", gateNote:"アプリに入った後も、日本語と英語はいつでも切り替えできます。",
     appSub:"県ルーレットを先に回して、その県の楽天GORA候補を取得します。",
-    seasonTtl:"Season", areaTtl:"Area", hokkaidoAreaTtl:"Hokkaido Area", brandTtl:"Brand",
+    seasonTtl:"Season", areaTtl:"Area", brandTtl:"Brand",
     spin:"ルーレット開始", reroll:"同じ県で再抽選",
     envNotice:'次のゴルフ旅、どこにする？<br>仲間とルーレットを回して、行き先選びまで楽しもう。',
     seasonPill:"季節", areaPill:"エリア", statusPill:"待機中",
@@ -190,7 +173,7 @@ const T = {
   en: {
     htmlLang:"en", gateEyebrow:"WELCOME", gateTitle:"Golf Journey Roulette", gateSub:"Choose your language first. Then spin the roulette to pick a prefecture and get real golf course candidates from Rakuten GORA.", gateNote:"You can switch between Japanese and English anytime after entering.",
     appSub:"Spin the prefecture roulette first, then fetch golf course candidates from Rakuten GORA for that prefecture.",
-    seasonTtl:"Season", areaTtl:"Area", hokkaidoAreaTtl:"Hokkaido Area", brandTtl:"Brand",
+    seasonTtl:"Season", areaTtl:"Area", brandTtl:"Brand",
     spin:"Spin Roulette", reroll:"Pick Another in Same Prefecture",
     envNotice:'Where should your next golf trip be?<br>Spin the roulette and enjoy choosing the destination with your friends.',
     seasonPill:"Season", areaPill:"Area", statusPill:"Standby",
@@ -274,30 +257,7 @@ function populateAreaOptions() {
     area.appendChild(opt);
   });
 }
-function populateHokkaidoAreaOptions() {
-  const el = document.getElementById('hokkaidoArea');
-  const current = el.value || 'all';
-  el.innerHTML = '';
 
-  ['all', 'central', 'south', 'east', 'north'].forEach(v => {
-    const opt = document.createElement('option');
-    opt.value = v;
-    opt.textContent = HOKKAIDO_AREA_LABELS[currentLang][v];
-    if (v === current) opt.selected = true;
-    el.appendChild(opt);
-  });
-}
-
-function refreshHokkaidoAreaVisibility() {
-  const areaValue = document.getElementById('area').value;
-  const label = document.getElementById('hokkaidoAreaTtl');
-  const select = document.getElementById('hokkaidoArea');
-
-  const show = areaValue === 'hokkaido';
-
-  label.style.display = show ? 'block' : 'none';
-  select.style.display = show ? 'block' : 'none';
-}
 function renderBrandChips() {
   brandChips.innerHTML = '';
   BRANDS.forEach((b) => {
@@ -313,39 +273,15 @@ function renderBrandChips() {
     brandChips.appendChild(d);
   });
 }
+
 async function fetchCourses(pref) {
   const code = PREF_CODES[pref];
-  const selectedHokkaidoArea = document.getElementById('hokkaidoArea').value || 'all';
-
-  const key =
-    pref +
-    '::' +
-    code +
-    '::' +
-    [...activeBrands].sort().join(',') +
-    '::' +
-    seasonKey() +
-    '::' +
-    selectedHokkaidoArea;
-
+  const key = pref + '::' + code + '::' + [...activeBrands].sort().join(',') + '::' + seasonKey();
   if (cache.has(key)) return cache.get(key);
-
-  let url =
-    '/api/search?prefCode=' +
-    encodeURIComponent(code) +
-    '&pref=' +
-    encodeURIComponent(pref);
-
-  if (pref === '北海道' && selectedHokkaidoArea !== 'all') {
-    url += '&hokkaidoArea=' + encodeURIComponent(selectedHokkaidoArea);
-  }
-
-  const res = await fetch(url);
+  const res = await fetch('/api/search?prefCode=' + encodeURIComponent(code) + '&pref=' + encodeURIComponent(pref));
   if (!res.ok) throw new Error(await res.text() || 'API error');
-
   const data = await res.json();
   const rawItems = data.items || data.Items || [];
-
   let list = rawItems.map(item => {
     const brand = inferBrand(item.golfCourseName || '');
     return {
@@ -360,10 +296,8 @@ async function fetchCourses(pref) {
       comfort: comfort(pref, brand, Number(item.evaluation || 0))
     };
   });
-
   list = list.filter(c => activeBrands.has(c.brand) || (activeBrands.has('その他') && c.brand === 'その他'));
-  list = list.filter(c => c.brand !== 'その他' || c.evaluation >= 0);
-
+  list = list.filter(c => c.brand !== 'その他' || c.evaluation >= 3.8);
   if (!list.length && rawItems.length) {
     list = rawItems.map(item => ({
       pref,
@@ -375,13 +309,13 @@ async function fetchCourses(pref) {
       reserveUrl: item.reserveCalUrl || item.golfCourseDetailUrl || '',
       brand: 'その他',
       comfort: comfort(pref, 'その他', Number(item.evaluation || 0))
-    })).filter(c => c.evaluation >= 0);
+    })).filter(c => c.evaluation >= 3.8);
   }
-
   list.sort((a, b) => b.comfort - a.comfort || b.evaluation - a.evaluation);
   cache.set(key, list);
   return list;
-};
+}
+
 function currentAreaPrefs() { return AREAS[document.getElementById('area').value]; }
 function pickWeightedPref(prefs) {
   const s = seasonKey();
@@ -476,7 +410,6 @@ function updateStaticTexts() {
   document.getElementById('appSub').textContent = tr('appSub');
   document.getElementById('seasonTtl').textContent = tr('seasonTtl');
   document.getElementById('areaTtl').textContent = tr('areaTtl');
-  document.getElementById('hokkaidoAreaTtl').textContent = tr('hokkaidoAreaTtl');
   document.getElementById('brandTtl').textContent = tr('brandTtl');
   document.getElementById('spinBtn').textContent = tr('spin');
   document.getElementById('rerollBtn').textContent = tr('reroll');
@@ -501,10 +434,8 @@ function setLanguage(lang, openApp = true) {
   updateStaticTexts();
   populateSeasonOptions();
   populateAreaOptions();
-  populateHokkaidoAreaOptions();
   renderBrandChips();
   refreshLabels();
-  refreshHokkaidoAreaVisibility();
   setStatus('', tr('envNotice'));
   const boot = makeTickerItems(AREAS.all, '東京都');
   renderTicker(boot);
@@ -584,24 +515,13 @@ document.getElementById('langEn').onclick = () => setLanguage('en', true);
 document.getElementById('spinBtn').onclick = spin;
 document.getElementById('rerollBtn').onclick = reroll;
 document.getElementById('season').onchange = () => { refreshLabels(); cache.clear(); };
-document.getElementById('area').onchange = () => {
-  refreshLabels();
-  refreshHokkaidoAreaVisibility();
-  lastPref = null;
-  cache.clear(); 
-};
-document.getElementById('hokkaidoArea').onchange = () => {
-  cache.clear();
-  lastPref = null;
-};
+document.getElementById('area').onchange = () => { refreshLabels(); lastPref = null; };
+
 const savedLang = localStorage.getItem('golfJourneyLang');
 updateStaticTexts();
 populateSeasonOptions();
 populateAreaOptions();
-populateHokkaidoAreaOptions();
 renderBrandChips();
-refreshLabels();
-refreshHokkaidoAreaVisibility();
 document.getElementById('winCourse').textContent = tr('noResultYet');
 document.getElementById('winDesc').textContent = tr('pleaseSpin');
 setStatus('', tr('envNotice'));
