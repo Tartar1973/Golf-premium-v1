@@ -537,6 +537,15 @@ function getTickerMetrics() {
 
   return { itemH, boxH };
 }
+function renderTicker(items) {
+  ticker.innerHTML = '';
+  items.forEach(name => {
+    const d = document.createElement('div');
+    d.className = 'item';
+    d.textContent = displayPref(name);
+    ticker.appendChild(d);
+  });
+}
 function makeTickerItems(prefs, winner) {
   const rep = [];
   for (let i = 0; i < 12; i++) rep.push(...prefs);
