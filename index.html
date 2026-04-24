@@ -243,7 +243,13 @@ select{width:100%;padding:12px 14px;border-radius:14px;background:#111827;color:
           <div id="winLinks" class="links"></div>
         </div>
         <div class="card">
-          <h3 id="candidateTitle" style="margin-top:0"></h3>
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px">
+            <h3 id="candidateTitle" style="margin:0"></h3>
+            <div id="sortBtns" style="display:flex;gap:6px">
+              <button id="sortComfort" class="miniBtn active" style="font-size:12px;padding:6px 10px" onclick="setSortKey('comfort')">快適度順</button>
+              <button id="sortRating" class="miniBtn" style="font-size:12px;padding:6px 10px" onclick="setSortKey('rating')">評価順</button>
+            </div>
+          </div>
           <div id="candidateList" class="list"></div>
         </div>
       </div>
@@ -329,6 +335,16 @@ let activeBrands = new Set(BRANDS);
 let lastPref = null;
 let cache = new Map();
 let currentLang = 'ja';
+let currentSortKey = 'comfort';
+let lastCandidateList = [];
+let lastPickedId = null;
+
+function setSortKey(key) {
+  currentSortKey = key;
+  document.getElementById('sortComfort').classList.toggle('active', key === 'comfort');
+  document.getElementById('sortRating').classList.toggle('active', key === 'rating');
+  drawCandidates(lastCandidateList, lastPickedId);
+}
 
 function tr(key) { return T[currentLang][key] || key; }
 function displayPref(pref) { return currentLang === 'en' ? (PREF_EN[pref] || pref) : pref; }
@@ -554,10 +570,18 @@ function makeTickerItems(prefs, winner) {
 }
 function chooseOne(list) { if (!list.length) return null; const top = list.slice(0, Math.min(10, list.length)); return top[Math.floor(Math.random() * top.length)]; }
 function drawCandidates(list, pickedId) {
+  lastCandidateList = list;
+  lastPickedId = pickedId;
+
+  const sorted = [...list].sort((a, b) =>
+    currentSortKey === 'rating'
+      ? (b.evaluation - a.evaluation || b.comfort - a.comfort)
+      : (b.comfort - a.comfort || b.evaluation - a.evaluation)
+  );
   const box = document.getElementById('candidateList');
   box.innerHTML = '';
-  if (!list.length) { box.innerHTML = '<div class="subline">' + esc(tr('noMatch')) + '</div>'; return; }
-  list.forEach(c => {
+  if (!sorted.length) { box.innerHTML = '<div class="subline">' + esc(tr('noMatch')) + '</div>'; return; }
+  sorted.forEach(c => {
     const row = document.createElement('div');
     row.className = 'row';
     row.innerHTML = `
@@ -609,6 +633,8 @@ function updateStaticTexts() {
   document.getElementById('brandTtl').textContent = tr('brandTtl');
   document.getElementById('spinBtn').textContent = tr('spin');
   document.getElementById('rerollBtn').textContent = tr('reroll');
+  document.getElementById('sortComfort').textContent = currentLang === 'ja' ? '快適度順' : 'By Comfort';
+  document.getElementById('sortRating').textContent = currentLang === 'ja' ? '評価順' : 'By Rating';
   document.getElementById('candidateTitle').textContent = tr('candidateTitle');
   document.getElementById('langJa').classList.toggle('active', currentLang === 'ja');
   document.getElementById('langEn').classList.toggle('active', currentLang === 'en');
