@@ -44,7 +44,6 @@ export default async function handler(req, res) {
         const r = await fetch(url, {
           headers: {
             'User-Agent': 'GolfJourneyRoulette/1.0',
-            'Referer': 'https://golf-premium-v1.vercel.app/',
           }
         });
         if (r.status !== 429) return r;
