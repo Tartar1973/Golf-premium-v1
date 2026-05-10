@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>近隣ホテル一覧 - Golf Journey Roulette</title>
+<style>
+:root{--bg:#0b1220;--panel:rgba(17,24,39,.92);--line:rgba(255,255,255,.12);--text:#eef2ff;--muted:#a5b4cc;--gold:#d4af37;--gold2:#f6e27a;--green:#34d399}
+*{box-sizing:border-box}
+body{margin:0;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans JP",sans-serif;background:radial-gradient(circle at top,rgba(52,211,153,.08),transparent 30%),linear-gradient(180deg,#08101d 0%,#0b1220 48%,#111827 100%);min-height:100vh}
+.wrap{max-width:960px;margin:0 auto;padding:20px 16px}
+.back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);text-decoration:none;font-size:14px;margin-bottom:16px}
+.back:hover{color:var(--text)}
+h1{margin:0 0 4px;font-size:clamp(22px,4vw,32px);font-weight:900;background:linear-gradient(90deg,#fff,var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sub{color:var(--muted);font-size:14px;margin-bottom:20px;line-height:1.6}
+.badge{display:inline-block;background:rgba(52,211,153,.15);border:1px solid rgba(52,211,153,.35);color:var(--green);border-radius:999px;padding:4px 12px;font-size:12px;font-weight:700;margin-bottom:12px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.fBtn{padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--text);cursor:pointer;font:inherit;font-size:13px}
+.fBtn.active{background:rgba(52,211,153,.15);border-color:rgba(52,211,153,.4);color:var(--green)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:16px;backdrop-filter:blur(10px);display:flex;flex-direction:column;gap:10px}
+.card img{width:100%;height:160px;object-fit:cover;border-radius:12px;background:#1a2435}
+.card img.noimg{opacity:.3;filter:grayscale(1)}
+.hName{font-weight:800;font-size:16px;line-height:1.4}
+.hAddr{color:var(--muted);font-size:13px;line-height:1.5}
+.stars{color:var(--gold);font-size:14px}
+.price{font-weight:900;font-size:18px;color:var(--green)}
+.priceNote{color:var(--muted);font-size:11px}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pill{padding:4px 10px;border:1px solid var(--line);border-radius:999px;font-size:11px;color:var(--muted)}
+.reserveBtn{display:block;text-align:center;padding:11px;border-radius:12px;background:linear-gradient(135deg,#065f46,#34d399);color:#fff;text-decoration:none;font-weight:800;font-size:14px;margin-top:auto}
+.reserveBtn:hover{opacity:.9}
+.status{padding:16px;border-radius:14px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);line-height:1.6;margin-bottom:20px}
+.warn{background:rgba(96,165,250,.08);border-color:rgba(96,165,250,.25)}
+.err{background:rgba(248,113,113,.10);border-color:rgba(248,113,113,.28)}
+.ok{background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.28)}
+.loader{text-align:center;padding:60px 0;color:var(--muted)}
+.spin{display:inline-block;width:36px;height:36px;border:3px solid rgba(255,255,255,.1);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sortRow{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.sortLabel{color:var(--muted);font-size:13px}
+.distance{font-size:12px;color:var(--muted)}
+@media(max-width:600px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="javascript:window.close()" class="back">← 閉じる</a>
+
+  <div class="badge" id="courseBadge">⛳ ゴルフ場読み込み中...</div>
+  <h1>近隣ホテル・宿泊施設</h1>
+  <div class="sub" id="subText">ゴルフ場から車で約1時間以内（半径60km）の宿泊施設を楽天トラベルから検索しています。</div>
+
+  <div id="statusBox" class="status warn">🔍 ホテルを検索中...</div>
+
+  <div class="sortRow" id="sortRow" style="display:none">
+    <span class="sortLabel">並び替え:</span>
+    <button class="fBtn active" onclick="setSort('price')">料金順</button>
+    <button class="fBtn" onclick="setSort('rating')">評価順</button>
+    <button class="fBtn" onclick="setSort('distance')">距離順</button>
+  </div>
+
+  <div id="hotelGrid" class="grid"></div>
+</div>
+
+<script>
+const params = new URLSearchParams(location.search);
+const lat = parseFloat(params.get('lat') || '0');
+const lng = parseFloat(params.get('lng') || '0');
+const courseName = params.get('name') || 'ゴルフ場';
+const pref = params.get('pref') || '';
+
+document.getElementById('courseBadge').textContent = '⛳ ' + courseName;
+document.getElementById('subText').textContent =
+  `「${courseName}」から車で約1時間以内（半径60km）の宿泊施設を楽天トラベルから検索しています。`;
+
+let allHotels = [];
+let currentSort = 'price';
+
+function setSort(key) {
+  currentSort = key;
+  document.querySelectorAll('.sortRow .fBtn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  renderHotels();
+}
+
+function calcDistance(lat1, lng1, lat2, lng2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function starStr(n) {
+  const full = Math.round(n || 0);
+  return '★'.repeat(Math.min(5, full)) + '☆'.repeat(Math.max(0, 5 - full));
+}
+
+function renderHotels() {
+  const sorted = [...allHotels].sort((a, b) => {
+    if (currentSort === 'rating') return (b.reviewAverage || 0) - (a.reviewAverage || 0);
+    if (currentSort === 'distance') return (a.distance || 999) - (b.distance || 999);
+    return (a.minCharge || 99999) - (b.minCharge || 99999);
+  });
+
+  const grid = document.getElementById('hotelGrid');
+  grid.innerHTML = '';
+  sorted.forEach(h => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    const imgUrl = h.hotelImageUrl || '';
+    const price = h.minCharge ? `¥${h.minCharge.toLocaleString()}〜` : '要確認';
+    const dist = h.distance ? `📍 約${h.distance.toFixed(1)}km` : '';
+    const review = h.reviewAverage ? `${h.reviewAverage.toFixed(1)} (${h.reviewCount}件)` : '-';
+    card.innerHTML = `
+      ${imgUrl ? `<img src="${imgUrl}" alt="${h.hotelName}" onerror="this.classList.add('noimg');this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22/>'">` : ''}
+      <div class="hName">${h.hotelName || '-'}</div>
+      <div class="hAddr">${h.address1 || ''}${h.address2 || ''}</div>
+      <div class="stars">${starStr(h.hotelSpecial ? 4 : 3)} <span style="color:var(--muted);font-size:12px">${review}</span></div>
+      <div class="pills">
+        ${dist ? `<span class="pill">${dist}</span>` : ''}
+        ${h.hotelSpecial ? `<span class="pill">🏆 ${h.hotelSpecial.slice(0,20)}</span>` : ''}
+      </div>
+      <div class="price">${price} <span class="priceNote">/ 大人1名</span></div>
+      <a class="reserveBtn" href="${h.planListUrl || h.hotelInformationUrl || '#'}" target="_blank" rel="noopener noreferrer">楽天トラベルで予約</a>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+async function fetchHotels() {
+  if (!lat || !lng) {
+    document.getElementById('statusBox').className = 'status err';
+    document.getElementById('statusBox').textContent = '❌ 位置情報が取得できませんでした。';
+    return;
+  }
+
+  try {
+    const res = await fetch(
+      `/api/hotels?lat=${lat}&lng=${lng}&name=${encodeURIComponent(courseName)}`
+    );
+    if (!res.ok) throw new Error(await res.text() || 'API error');
+    const data = await res.json();
+    const items = data.hotels || [];
+
+    if (!items.length) {
+      document.getElementById('statusBox').className = 'status warn';
+      document.getElementById('statusBox').textContent = '⚠️ 近隣に宿泊施設が見つかりませんでした。エリアを広げてお試しください。';
+      return;
+    }
+
+    allHotels = items.map(h => ({
+      ...h,
+      distance: (h.latitude && h.longitude)
+        ? calcDistance(lat, lng, parseFloat(h.latitude), parseFloat(h.longitude))
+        : null
+    }));
+
+    document.getElementById('statusBox').className = 'status ok';
+    document.getElementById('statusBox').textContent = `✅ ${allHotels.length}件の宿泊施設が見つかりました（半径60km以内）`;
+    document.getElementById('sortRow').style.display = 'flex';
+    renderHotels();
+  } catch (e) {
+    document.getElementById('statusBox').className = 'status err';
+    document.getElementById('statusBox').textContent = '❌ エラー: ' + (e.message || '取得失敗');
+  }
+}
+
+fetchHotels();
+</script>
+</body>
+</html>
