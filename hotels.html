@@ -3,61 +3,123 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>近隣ホテル一覧 - Golf Journey Roulette</title>
+<title>近隣ホテル空室検索 - Golf Journey Roulette</title>
 <style>
 :root{--bg:#0b1220;--panel:rgba(17,24,39,.92);--line:rgba(255,255,255,.12);--text:#eef2ff;--muted:#a5b4cc;--gold:#d4af37;--gold2:#f6e27a;--green:#34d399}
 *{box-sizing:border-box}
 body{margin:0;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans JP",sans-serif;background:radial-gradient(circle at top,rgba(52,211,153,.08),transparent 30%),linear-gradient(180deg,#08101d 0%,#0b1220 48%,#111827 100%);min-height:100vh}
 .wrap{max-width:960px;margin:0 auto;padding:20px 16px}
-.back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);text-decoration:none;font-size:14px;margin-bottom:16px}
+.back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);text-decoration:none;font-size:14px;margin-bottom:16px;cursor:pointer;background:none;border:none;padding:0}
 .back:hover{color:var(--text)}
-h1{margin:0 0 4px;font-size:clamp(22px,4vw,32px);font-weight:900;background:linear-gradient(90deg,#fff,var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.sub{color:var(--muted);font-size:14px;margin-bottom:20px;line-height:1.6}
-.badge{display:inline-block;background:rgba(52,211,153,.15);border:1px solid rgba(52,211,153,.35);color:var(--green);border-radius:999px;padding:4px 12px;font-size:12px;font-weight:700;margin-bottom:12px}
-.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
-.fBtn{padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--text);cursor:pointer;font:inherit;font-size:13px}
-.fBtn.active{background:rgba(52,211,153,.15);border-color:rgba(52,211,153,.4);color:var(--green)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:16px;backdrop-filter:blur(10px);display:flex;flex-direction:column;gap:10px}
-.card img{width:100%;height:160px;object-fit:cover;border-radius:12px;background:#1a2435}
-.card img.noimg{opacity:.3;filter:grayscale(1)}
-.hName{font-weight:800;font-size:16px;line-height:1.4}
-.hAddr{color:var(--muted);font-size:13px;line-height:1.5}
-.stars{color:var(--gold);font-size:14px}
-.price{font-weight:900;font-size:18px;color:var(--green)}
-.priceNote{color:var(--muted);font-size:11px}
-.pills{display:flex;flex-wrap:wrap;gap:6px}
-.pill{padding:4px 10px;border:1px solid var(--line);border-radius:999px;font-size:11px;color:var(--muted)}
-.reserveBtn{display:block;text-align:center;padding:11px;border-radius:12px;background:linear-gradient(135deg,#065f46,#34d399);color:#fff;text-decoration:none;font-weight:800;font-size:14px;margin-top:auto}
-.reserveBtn:hover{opacity:.9}
-.status{padding:16px;border-radius:14px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);line-height:1.6;margin-bottom:20px}
+h1{margin:0 0 4px;font-size:clamp(20px,4vw,30px);font-weight:900;background:linear-gradient(90deg,#fff,var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.badge{display:inline-block;background:rgba(52,211,153,.15);border:1px solid rgba(52,211,153,.35);color:var(--green);border-radius:999px;padding:4px 12px;font-size:12px;font-weight:700;margin-bottom:10px}
+
+/* 検索フォーム */
+.searchBox{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:18px;margin-bottom:20px;backdrop-filter:blur(10px)}
+.formRow{display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:10px;align-items:end}
+.fGroup{display:flex;flex-direction:column;gap:6px}
+.fLabel{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.fInput{background:#111827;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;font-size:14px;width:100%}
+.fInput:focus{outline:none;border-color:rgba(52,211,153,.5)}
+.searchBtn{background:linear-gradient(135deg,#065f46,#34d399);color:#fff;border:none;border-radius:10px;padding:10px 20px;font:inherit;font-weight:800;font-size:14px;cursor:pointer;white-space:nowrap;height:42px}
+.searchBtn:hover{opacity:.9}
+
+.status{padding:14px;border-radius:14px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);line-height:1.6;margin-bottom:16px;font-size:14px}
 .warn{background:rgba(96,165,250,.08);border-color:rgba(96,165,250,.25)}
 .err{background:rgba(248,113,113,.10);border-color:rgba(248,113,113,.28)}
 .ok{background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.28)}
-.loader{text-align:center;padding:60px 0;color:var(--muted)}
-.spin{display:inline-block;width:36px;height:36px;border:3px solid rgba(255,255,255,.1);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:12px}
-@keyframes spin{to{transform:rotate(360deg)}}
+
 .sortRow{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap}
 .sortLabel{color:var(--muted);font-size:13px}
-.distance{font-size:12px;color:var(--muted)}
-@media(max-width:600px){.grid{grid-template-columns:1fr}}
+.fBtn{padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--text);cursor:pointer;font:inherit;font-size:13px}
+.fBtn.active{background:rgba(52,211,153,.15);border-color:rgba(52,211,153,.4);color:var(--green)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:16px;backdrop-filter:blur(10px);display:flex;flex-direction:column;gap:8px}
+.card img{width:100%;height:150px;object-fit:cover;border-radius:12px;background:#1a2435}
+.hName{font-weight:800;font-size:15px;line-height:1.4}
+.hAddr{color:var(--muted);font-size:12px;line-height:1.5}
+.stars{color:var(--gold);font-size:13px}
+.price{font-weight:900;font-size:20px;color:var(--green)}
+.priceNote{color:var(--muted);font-size:11px;font-weight:400}
+.pills{display:flex;flex-wrap:wrap;gap:5px}
+.pill{padding:3px 9px;border:1px solid var(--line);border-radius:999px;font-size:11px;color:var(--muted)}
+.ratingGrid{display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:11px;color:var(--muted)}
+.rItem{display:flex;justify-content:space-between}
+.rVal{color:var(--gold)}
+.reserveBtn{display:block;text-align:center;padding:11px;border-radius:12px;background:linear-gradient(135deg,#065f46,#34d399);color:#fff;text-decoration:none;font-weight:800;font-size:14px;margin-top:auto}
+.reserveBtn:hover{opacity:.9}
+.checkinInfo{font-size:12px;color:var(--muted);text-align:center}
+
+@media(max-width:700px){
+  .formRow{grid-template-columns:1fr 1fr}
+  .searchBtn{grid-column:1/-1}
+  .grid{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <a href="javascript:window.close()" class="back">← 閉じる</a>
+  <button class="back" onclick="window.close()">← 閉じる</button>
+  <div class="badge" id="courseBadge">⛳ 読み込み中...</div>
+  <h1>近隣ホテル空室検索</h1>
 
-  <div class="badge" id="courseBadge">⛳ ゴルフ場読み込み中...</div>
-  <h1>近隣ホテル・宿泊施設</h1>
-  <div class="sub" id="subText">ゴルフ場から車で約1時間以内（半径60km）の宿泊施設を楽天トラベルから検索しています。</div>
+  <!-- 検索フォーム -->
+  <div class="searchBox">
+    <div class="formRow">
+      <div class="fGroup">
+        <span class="fLabel">チェックイン</span>
+        <input class="fInput" type="date" id="checkin" />
+      </div>
+      <div class="fGroup">
+        <span class="fLabel">チェックアウト</span>
+        <input class="fInput" type="date" id="checkout" />
+      </div>
+      <div class="fGroup">
+        <span class="fLabel">大人人数</span>
+        <select class="fInput" id="adults">
+          <option value="1">1名</option>
+          <option value="2" selected>2名</option>
+          <option value="3">3名</option>
+          <option value="4">4名</option>
+          <option value="5">5名</option>
+          <option value="6">6名</option>
+        </select>
+      </div>
+      <div class="fGroup">
+        <span class="fLabel">部屋数</span>
+        <select class="fInput" id="rooms">
+          <option value="1" selected>1室</option>
+          <option value="2">2室</option>
+          <option value="3">3室</option>
+          <option value="4">4室</option>
+        </select>
+      </div>
+      <button class="searchBtn" onclick="doSearch()">🔍 再検索</button>
+    </div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:14px">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px">
+        <input type="checkbox" id="onsen" style="width:18px;height:18px;accent-color:var(--green);cursor:pointer">
+        <span>♨️ 温泉あり</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px">
+        <input type="checkbox" id="daiyoku" style="width:18px;height:18px;accent-color:var(--green);cursor:pointer">
+        <span>🛁 大浴場あり</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px">
+        <input type="checkbox" id="internet" style="width:18px;height:18px;accent-color:var(--green);cursor:pointer">
+        <span>📶 インターネット可</span>
+      </label>
+    </div>
+  </div>
 
-  <div id="statusBox" class="status warn">🔍 ホテルを検索中...</div>
+  <div id="statusBox" class="status warn">🔍 空室を検索中...</div>
 
   <div class="sortRow" id="sortRow" style="display:none">
     <span class="sortLabel">並び替え:</span>
-    <button class="fBtn active" onclick="setSort('price')">料金順</button>
-    <button class="fBtn" onclick="setSort('rating')">評価順</button>
-    <button class="fBtn" onclick="setSort('distance')">距離順</button>
+    <button class="fBtn active" onclick="setSort('price', event)">料金順</button>
+    <button class="fBtn" onclick="setSort('rating', event)">評価順</button>
+    <button class="fBtn" onclick="setSort('distance', event)">距離順</button>
   </div>
 
   <div id="hotelGrid" class="grid"></div>
@@ -68,19 +130,33 @@ const params = new URLSearchParams(location.search);
 const lat = parseFloat(params.get('lat') || '0');
 const lng = parseFloat(params.get('lng') || '0');
 const courseName = params.get('name') || 'ゴルフ場';
-const pref = params.get('pref') || '';
 
 document.getElementById('courseBadge').textContent = '⛳ ' + courseName;
-document.getElementById('subText').textContent =
-  `「${courseName}」から車で約1時間以内（半径60km）の宿泊施設を楽天トラベルから検索しています。`;
+
+// 日付デフォルト設定（今日・明日）
+function toDateStr(d) {
+  return d.toISOString().slice(0, 10);
+}
+const today = new Date();
+const tomorrow = new Date(today);
+tomorrow.setDate(tomorrow.getDate() + 1);
+document.getElementById('checkin').value = toDateStr(today);
+document.getElementById('checkout').value = toDateStr(tomorrow);
+
+// チェックイン変更時にチェックアウトを自動で翌日に
+document.getElementById('checkin').addEventListener('change', () => {
+  const ci = new Date(document.getElementById('checkin').value);
+  ci.setDate(ci.getDate() + 1);
+  document.getElementById('checkout').value = toDateStr(ci);
+});
 
 let allHotels = [];
 let currentSort = 'price';
 
-function setSort(key) {
+function setSort(key, e) {
   currentSort = key;
   document.querySelectorAll('.sortRow .fBtn').forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
+  e.target.classList.add('active');
   renderHotels();
 }
 
@@ -93,60 +169,109 @@ function calcDistance(lat1, lng1, lat2, lng2) {
 }
 
 function starStr(n) {
-  const full = Math.round(n || 0);
-  return '★'.repeat(Math.min(5, full)) + '☆'.repeat(Math.max(0, 5 - full));
+  const v = Math.round((n || 0) * 2) / 2;
+  let s = '';
+  for (let i = 1; i <= 5; i++) {
+    if (i <= v) s += '★';
+    else if (i - 0.5 <= v) s += '☆';
+    else s += '☆';
+  }
+  return s;
 }
 
 function renderHotels() {
   const sorted = [...allHotels].sort((a, b) => {
     if (currentSort === 'rating') return (b.reviewAverage || 0) - (a.reviewAverage || 0);
     if (currentSort === 'distance') return (a.distance || 999) - (b.distance || 999);
-    return (a.minCharge || 99999) - (b.minCharge || 99999);
+    return (a.minCharge || 99999999) - (b.minCharge || 99999999);
   });
+
+  const checkin  = document.getElementById('checkin').value;
+  const checkout = document.getElementById('checkout').value;
 
   const grid = document.getElementById('hotelGrid');
   grid.innerHTML = '';
+
   sorted.forEach(h => {
     const card = document.createElement('div');
     card.className = 'card';
-    const imgUrl = h.hotelImageUrl || '';
-    const price = h.minCharge ? `¥${h.minCharge.toLocaleString()}〜` : '要確認';
-    const dist = h.distance ? `📍 約${h.distance.toFixed(1)}km` : '';
-    const review = h.reviewAverage ? `${h.reviewAverage.toFixed(1)} (${h.reviewCount}件)` : '-';
+    const price = h.minCharge ? `¥${Number(h.minCharge).toLocaleString()}〜` : '要確認';
+    const dist  = h.distance != null ? `📍 約${h.distance.toFixed(1)}km` : '';
+    const review = h.reviewAverage
+      ? `${Number(h.reviewAverage).toFixed(1)} (${h.reviewCount || 0}件)`
+      : '-';
+
+    const ratingRows = [
+      ['サービス', h.serviceAverage],
+      ['立地',     h.locationAverage],
+      ['部屋',     h.roomAverage],
+      ['風呂',     h.bathAverage],
+      ['食事',     h.mealAverage],
+    ].filter(([, v]) => v).map(([k, v]) =>
+      `<div class="rItem"><span>${k}</span><span class="rVal">${Number(v).toFixed(1)}</span></div>`
+    ).join('');
+
+    // 予約URLにチェックイン日・人数を付与
+    const baseUrl = h.planListUrl || h.hotelInformationUrl || '#';
+    const reserveUrl = baseUrl !== '#'
+      ? `${baseUrl}&checkinDate=${checkin}&checkoutDate=${checkout}&adultNum=${document.getElementById('adults').value}&roomNum=${document.getElementById('rooms').value}`
+      : '#';
+
     card.innerHTML = `
-      ${imgUrl ? `<img src="${imgUrl}" alt="${h.hotelName}" onerror="this.classList.add('noimg');this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22/>'">` : ''}
-      <div class="hName">${h.hotelName || '-'}</div>
+      ${h.hotelImageUrl
+        ? `<img src="${h.hotelImageUrl}" alt="${h.hotelName}" loading="lazy" onerror="this.style.display='none'">`
+        : ''}
+      <div class="hName">${h.hotelName}</div>
       <div class="hAddr">${h.address1 || ''}${h.address2 || ''}</div>
-      <div class="stars">${starStr(h.hotelSpecial ? 4 : 3)} <span style="color:var(--muted);font-size:12px">${review}</span></div>
+      <div class="stars">${starStr(h.reviewAverage)} <span style="color:var(--muted);font-size:11px">${review}</span></div>
       <div class="pills">
         ${dist ? `<span class="pill">${dist}</span>` : ''}
-        ${h.hotelSpecial ? `<span class="pill">🏆 ${h.hotelSpecial.slice(0,20)}</span>` : ''}
+        ${h.checkinTime ? `<span class="pill">IN ${h.checkinTime}</span>` : ''}
+        ${h.checkoutTime ? `<span class="pill">OUT ${h.checkoutTime}</span>` : ''}
       </div>
-      <div class="price">${price} <span class="priceNote">/ 大人1名</span></div>
-      <a class="reserveBtn" href="${h.planListUrl || h.hotelInformationUrl || '#'}" target="_blank" rel="noopener noreferrer">楽天トラベルで予約</a>
+      ${ratingRows ? `<div class="ratingGrid">${ratingRows}</div>` : ''}
+      <div class="price">${price} <span class="priceNote">/ 1室</span></div>
+      <div class="checkinInfo">${checkin} 〜 ${checkout}</div>
+      <a class="reserveBtn" href="${reserveUrl}" target="_blank" rel="noopener noreferrer">楽天トラベルで予約</a>
     `;
     grid.appendChild(card);
   });
 }
 
-async function fetchHotels() {
+async function doSearch() {
+  document.getElementById('statusBox').className = 'status warn';
+  document.getElementById('statusBox').textContent = '🔍 空室を検索中...';
+  document.getElementById('sortRow').style.display = 'none';
+  document.getElementById('hotelGrid').innerHTML = '';
+
   if (!lat || !lng) {
     document.getElementById('statusBox').className = 'status err';
     document.getElementById('statusBox').textContent = '❌ 位置情報が取得できませんでした。';
     return;
   }
 
+  const checkin  = document.getElementById('checkin').value;
+  const checkout = document.getElementById('checkout').value;
+  const adults   = document.getElementById('adults').value;
+  const rooms    = document.getElementById('rooms').value;
+
+  // 絞り込み条件
+  const squeeze = [];
+  if (document.getElementById('onsen').checked)    squeeze.push('onsen');
+  if (document.getElementById('daiyoku').checked)  squeeze.push('daiyoku');
+  if (document.getElementById('internet').checked) squeeze.push('internet');
+
   try {
-    const res = await fetch(
-      `/api/hotels?lat=${lat}&lng=${lng}&name=${encodeURIComponent(courseName)}`
-    );
+    let url = `/api/hotels?lat=${lat}&lng=${lng}&name=${encodeURIComponent(courseName)}&checkin=${checkin}&checkout=${checkout}&adults=${adults}&rooms=${rooms}`;
+    if (squeeze.length) url += `&squeeze=${squeeze.join(',')}`;
+    const res = await fetch(url);
     if (!res.ok) throw new Error(await res.text() || 'API error');
     const data = await res.json();
     const items = data.hotels || [];
 
     if (!items.length) {
       document.getElementById('statusBox').className = 'status warn';
-      document.getElementById('statusBox').textContent = '⚠️ 近隣に宿泊施設が見つかりませんでした。エリアを広げてお試しください。';
+      document.getElementById('statusBox').innerHTML = '⚠️ 半径3km以内に空室のある宿泊施設が見つかりませんでした。<br>日付や人数を変更して再検索してみてください。';
       return;
     }
 
@@ -158,7 +283,7 @@ async function fetchHotels() {
     }));
 
     document.getElementById('statusBox').className = 'status ok';
-    document.getElementById('statusBox').textContent = `✅ ${allHotels.length}件の宿泊施設が見つかりました（半径60km以内）`;
+    document.getElementById('statusBox').textContent = `✅ ${allHotels.length}件の空室が見つかりました（半径3km以内 / ${checkin}〜${checkout}）`;
     document.getElementById('sortRow').style.display = 'flex';
     renderHotels();
   } catch (e) {
@@ -167,7 +292,8 @@ async function fetchHotels() {
   }
 }
 
-fetchHotels();
+// 初回自動検索
+doSearch();
 </script>
 </body>
 </html>
