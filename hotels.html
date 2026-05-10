@@ -1,39 +1,68 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>近隣ホテル空室検索 - Golf Journey Roulette</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ホテル検索 - Golf Journey Roulette</title>
 <style>
-:root{--bg:#0b1220;--panel:rgba(17,24,39,.92);--line:rgba(255,255,255,.12);--text:#eef2ff;--muted:#a5b4cc;--gold:#d4af37;--gold2:#f6e27a;--green:#34d399}
-*{box-sizing:border-box}
+:root{--bg:#0b1220;--panel:rgba(17,24,39,.92);--line:rgba(255,255,255,.12);--text:#eef2ff;--muted:#a5b4cc;--gold:#d4af37;--gold2:#f6e27a;--green:#34d399;--green2:#065f46}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans JP",sans-serif;background:radial-gradient(circle at top,rgba(52,211,153,.08),transparent 30%),linear-gradient(180deg,#08101d 0%,#0b1220 48%,#111827 100%);min-height:100vh}
-.wrap{max-width:960px;margin:0 auto;padding:20px 16px}
-.back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);text-decoration:none;font-size:14px;margin-bottom:16px;cursor:pointer;background:none;border:none;padding:0}
+.wrap{max-width:480px;margin:0 auto;padding:20px 16px}
+.wrapWide{max-width:960px;margin:0 auto;padding:20px 16px}
+.back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:14px;cursor:pointer;background:none;border:none;padding:0;margin-bottom:16px}
 .back:hover{color:var(--text)}
-h1{margin:0 0 4px;font-size:clamp(20px,4vw,30px);font-weight:900;background:linear-gradient(90deg,#fff,var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .badge{display:inline-block;background:rgba(52,211,153,.15);border:1px solid rgba(52,211,153,.35);color:var(--green);border-radius:999px;padding:4px 12px;font-size:12px;font-weight:700;margin-bottom:10px}
+h1{margin:0 0 6px;font-size:clamp(20px,5vw,28px);font-weight:900;background:linear-gradient(90deg,#fff,var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sub{color:var(--muted);font-size:13px;margin-bottom:24px}
 
-/* 検索フォーム */
-.searchBox{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:18px;margin-bottom:20px;backdrop-filter:blur(10px)}
-.formRow{display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:10px;align-items:end}
-.fGroup{display:flex;flex-direction:column;gap:6px}
-.fLabel{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.06em;text-transform:uppercase}
-.fInput{background:#111827;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;font-size:14px;width:100%}
-.fInput:focus{outline:none;border-color:rgba(52,211,153,.5)}
-.searchBtn{background:linear-gradient(135deg,#065f46,#34d399);color:#fff;border:none;border-radius:10px;padding:10px 20px;font:inherit;font-weight:800;font-size:14px;cursor:pointer;white-space:nowrap;height:42px}
-.searchBtn:hover{opacity:.9}
+/* ========= ドラムロール ========= */
+.drumSection{background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:20px;margin-bottom:16px;backdrop-filter:blur(10px)}
+.drumLabel{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
+.drumRow{display:flex;gap:10px;justify-content:center;align-items:center}
+.drumWrap{position:relative;flex:1}
+.drumWrap.sm{flex:0 0 72px}
+.drumWrap.md{flex:0 0 88px}
+.drum{height:180px;overflow:hidden;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(--line);position:relative;cursor:grab;user-select:none}
+.drum:active{cursor:grabbing}
+.drumInner{position:absolute;width:100%;transition:transform .15s ease}
+.drumItem{height:60px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:rgba(255,255,255,.35);transition:color .15s,font-size .15s}
+.drumItem.selected{color:var(--text);font-size:24px}
+.drumHighlight{position:absolute;top:50%;left:0;right:0;transform:translateY(-50%);height:60px;border-top:2px solid rgba(212,175,55,.7);border-bottom:2px solid rgba(212,175,55,.7);background:linear-gradient(90deg,transparent,rgba(212,175,55,.06),transparent);pointer-events:none;border-radius:4px}
+.drumFadeTop{position:absolute;top:0;left:0;right:0;height:60px;background:linear-gradient(to bottom,rgba(11,18,32,.95),transparent);pointer-events:none;border-radius:14px 14px 0 0}
+.drumFadeBot{position:absolute;bottom:0;left:0;right:0;height:60px;background:linear-gradient(to top,rgba(11,18,32,.95),transparent);pointer-events:none;border-radius:0 0 14px 14px}
+.sep{font-size:22px;font-weight:900;color:var(--muted);flex:0 0 auto}
+.weekday{text-align:center;font-size:18px;font-weight:900;color:var(--gold2);margin-top:12px;min-height:28px}
 
+/* nights + 人数 */
+.optRow{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.optBox{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px;backdrop-filter:blur(10px)}
+.optLabel{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+.stepper{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.stepBtn{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.08);color:var(--text);font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.stepBtn:active{background:rgba(255,255,255,.16)}
+.stepVal{font-size:22px;font-weight:900;min-width:32px;text-align:center}
+
+/* オプション */
+.optionsBox{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px;backdrop-filter:blur(10px);margin-bottom:16px}
+.optionsTitle{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
+.checkRow{display:flex;flex-direction:column;gap:10px}
+.checkItem{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:15px}
+.checkItem input{width:20px;height:20px;accent-color:var(--green);cursor:pointer;flex-shrink:0}
+
+/* 検索ボタン */
+.searchBtn{width:100%;padding:16px;border-radius:16px;border:none;background:linear-gradient(135deg,var(--green2),var(--green));color:#fff;font:inherit;font-size:18px;font-weight:900;cursor:pointer;margin-bottom:8px}
+.searchBtn:active{opacity:.9}
+
+/* ========= 結果画面 ========= */
 .status{padding:14px;border-radius:14px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);line-height:1.6;margin-bottom:16px;font-size:14px}
 .warn{background:rgba(96,165,250,.08);border-color:rgba(96,165,250,.25)}
 .err{background:rgba(248,113,113,.10);border-color:rgba(248,113,113,.28)}
 .ok{background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.28)}
-
 .sortRow{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap}
 .sortLabel{color:var(--muted);font-size:13px}
 .fBtn{padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--text);cursor:pointer;font:inherit;font-size:13px}
 .fBtn.active{background:rgba(52,211,153,.15);border-color:rgba(52,211,153,.4);color:var(--green)}
-
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:16px;backdrop-filter:blur(10px);display:flex;flex-direction:column;gap:8px}
 .card img{width:100%;height:150px;object-fit:cover;border-radius:12px;background:#1a2435}
@@ -44,114 +73,286 @@ h1{margin:0 0 4px;font-size:clamp(20px,4vw,30px);font-weight:900;background:line
 .priceNote{color:var(--muted);font-size:11px;font-weight:400}
 .pills{display:flex;flex-wrap:wrap;gap:5px}
 .pill{padding:3px 9px;border:1px solid var(--line);border-radius:999px;font-size:11px;color:var(--muted)}
-.ratingGrid{display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:11px;color:var(--muted)}
+.ratingGrid{display:grid;grid-template-columns:1fr 1fr;gap:3px;font-size:11px;color:var(--muted)}
 .rItem{display:flex;justify-content:space-between}
 .rVal{color:var(--gold)}
-.reserveBtn{display:block;text-align:center;padding:11px;border-radius:12px;background:linear-gradient(135deg,#065f46,#34d399);color:#fff;text-decoration:none;font-weight:800;font-size:14px;margin-top:auto}
+.reserveBtn{display:block;text-align:center;padding:11px;border-radius:12px;background:linear-gradient(135deg,var(--green2),var(--green));color:#fff;text-decoration:none;font-weight:800;font-size:14px;margin-top:auto}
 .reserveBtn:hover{opacity:.9}
 .checkinInfo{font-size:12px;color:var(--muted);text-align:center}
-
-@media(max-width:700px){
-  .formRow{grid-template-columns:1fr 1fr}
-  .searchBtn{grid-column:1/-1}
-  .grid{grid-template-columns:1fr}
-}
+.hidden{display:none}
+@media(max-width:600px){.grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<div class="wrap">
+
+<!-- ===== 日付選択画面 ===== -->
+<div id="pageDate" class="wrap">
   <button class="back" onclick="window.close()">← 閉じる</button>
   <div class="badge" id="courseBadge">⛳ 読み込み中...</div>
-  <h1>近隣ホテル空室検索</h1>
+  <h1>宿泊日を選ぶ</h1>
+  <div class="sub" id="courseSub">ゴルフ場周辺のホテルを楽天トラベルで検索します</div>
 
-  <!-- 検索フォーム -->
-  <div class="searchBox">
-    <div class="formRow">
-      <div class="fGroup">
-        <span class="fLabel">チェックイン</span>
-        <input class="fInput" type="date" id="checkin" />
-      </div>
-      <div class="fGroup">
-        <span class="fLabel">チェックアウト</span>
-        <input class="fInput" type="date" id="checkout" />
-      </div>
-      <div class="fGroup">
-        <span class="fLabel">大人人数</span>
-        <select class="fInput" id="adults">
-          <option value="1">1名</option>
-          <option value="2" selected>2名</option>
-          <option value="3">3名</option>
-          <option value="4">4名</option>
-          <option value="5">5名</option>
-          <option value="6">6名</option>
-        </select>
-      </div>
-      <div class="fGroup">
-        <span class="fLabel">部屋数</span>
-        <select class="fInput" id="rooms">
-          <option value="1" selected>1室</option>
-          <option value="2">2室</option>
-          <option value="3">3室</option>
-          <option value="4">4室</option>
-        </select>
-      </div>
-      <button class="searchBtn" onclick="doSearch()">🔍 再検索</button>
+  <!-- チェックイン ドラムロール -->
+  <div class="drumSection">
+    <div class="drumLabel">チェックイン</div>
+    <div class="drumRow">
+      <div class="drumWrap"><div class="drum" id="drumY"><div class="drumInner" id="innerY"></div><div class="drumHighlight"></div><div class="drumFadeTop"></div><div class="drumFadeBot"></div></div></div>
+      <div class="sep">年</div>
+      <div class="drumWrap sm"><div class="drum" id="drumM"><div class="drumInner" id="innerM"></div><div class="drumHighlight"></div><div class="drumFadeTop"></div><div class="drumFadeBot"></div></div></div>
+      <div class="sep">月</div>
+      <div class="drumWrap sm"><div class="drum" id="drumD"><div class="drumInner" id="innerD"></div><div class="drumHighlight"></div><div class="drumFadeTop"></div><div class="drumFadeBot"></div></div></div>
+      <div class="sep">日</div>
     </div>
-    <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:14px">
-      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px">
-        <input type="checkbox" id="onsen" style="width:18px;height:18px;accent-color:var(--green);cursor:pointer">
-        <span>♨️ 温泉あり</span>
-      </label>
-      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px">
-        <input type="checkbox" id="daiyoku" style="width:18px;height:18px;accent-color:var(--green);cursor:pointer">
-        <span>🛁 大浴場あり</span>
-      </label>
-      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px">
-        <input type="checkbox" id="internet" style="width:18px;height:18px;accent-color:var(--green);cursor:pointer">
-        <span>📶 インターネット可</span>
-      </label>
+    <div class="weekday" id="weekday"></div>
+  </div>
+
+  <!-- 泊数 + 人数 -->
+  <div class="optRow">
+    <div class="optBox">
+      <div class="optLabel">泊数</div>
+      <div class="stepper">
+        <button class="stepBtn" onclick="changeNights(-1)">−</button>
+        <div class="stepVal" id="nightsVal">1</div>
+        <button class="stepBtn" onclick="changeNights(1)">＋</button>
+      </div>
+    </div>
+    <div class="optBox">
+      <div class="optLabel">大人人数</div>
+      <div class="stepper">
+        <button class="stepBtn" onclick="changeAdults(-1)">−</button>
+        <div class="stepVal" id="adultsVal">1</div>
+        <button class="stepBtn" onclick="changeAdults(1)">＋</button>
+      </div>
     </div>
   </div>
 
-  <div id="statusBox" class="status warn">🔍 空室を検索中...</div>
+  <!-- オプション -->
+  <div class="optionsBox">
+    <div class="optionsTitle">絞り込み</div>
+    <div class="checkRow">
+      <label class="checkItem"><input type="checkbox" id="onsen"><span>♨️ 温泉あり</span></label>
+      <label class="checkItem"><input type="checkbox" id="daiyoku"><span>🛁 大浴場あり</span></label>
+      <label class="checkItem"><input type="checkbox" id="internet"><span>📶 インターネット可</span></label>
+    </div>
+  </div>
+
+  <button class="searchBtn" onclick="doSearch()">🔍 ホテルを検索する</button>
+</div>
+
+<!-- ===== 結果画面 ===== -->
+<div id="pageResult" class="wrapWide hidden">
+  <button class="back" onclick="showDatePage()">← 日付を変更</button>
+  <div class="badge" id="resultBadge">⛳</div>
+  <h1>空室ホテル一覧</h1>
+
+  <div id="statusBox" class="status warn">🔍 検索中...</div>
 
   <div class="sortRow" id="sortRow" style="display:none">
     <span class="sortLabel">並び替え:</span>
-    <button class="fBtn active" onclick="setSort('price', event)">料金順</button>
-    <button class="fBtn" onclick="setSort('rating', event)">評価順</button>
-    <button class="fBtn" onclick="setSort('distance', event)">距離順</button>
+    <button class="fBtn active" onclick="setSort('price',event)">料金順</button>
+    <button class="fBtn" onclick="setSort('rating',event)">評価順</button>
   </div>
 
   <div id="hotelGrid" class="grid"></div>
 </div>
 
 <script>
-const params = new URLSearchParams(location.search);
-const lat = parseFloat(params.get('lat') || '0');
-const lng = parseFloat(params.get('lng') || '0');
-const courseName = params.get('name') || 'ゴルフ場';
+const params     = new URLSearchParams(location.search);
+const courseName = params.get('name')    || 'ゴルフ場';
+const address    = params.get('address') || '';
+const pref       = params.get('pref')    || '';
 
 document.getElementById('courseBadge').textContent = '⛳ ' + courseName;
+document.getElementById('courseSub').textContent   = `「${courseName}」周辺のホテルを楽天トラベルで検索します`;
+document.getElementById('resultBadge').textContent = '⛳ ' + courseName;
 
-// 日付デフォルト設定（今日・明日）
-function toDateStr(d) {
-  return d.toISOString().slice(0, 10);
+// ========= ドラムロール =========
+const ITEM_H = 60;
+const DAYS_IN_MONTH = (y,m) => new Date(y, m, 0).getDate();
+const WEEKDAYS_JA = ['日','月','火','水','木','金','土'];
+
+const now = new Date();
+let selYear  = now.getFullYear();
+let selMonth = now.getMonth() + 1;
+let selDay   = now.getDate();
+let nights   = 1;
+let adults   = 1;
+
+// 年リスト: 今年〜来年
+const years  = [now.getFullYear(), now.getFullYear() + 1];
+const months = Array.from({length:12}, (_,i) => i+1);
+
+function getDays(y, m) { return Array.from({length: DAYS_IN_MONTH(y,m)}, (_,i) => i+1); }
+
+function makeDrum(innerId, items, selectedIdx, formatter) {
+  const inner = document.getElementById(innerId);
+  inner.innerHTML = '';
+  // パディング2アイテム分上下
+  for (let i = 0; i < 2; i++) {
+    const d = document.createElement('div');
+    d.className = 'drumItem';
+    inner.appendChild(d);
+  }
+  items.forEach((v, i) => {
+    const d = document.createElement('div');
+    d.className = 'drumItem' + (i === selectedIdx ? ' selected' : '');
+    d.textContent = formatter ? formatter(v) : String(v);
+    inner.appendChild(d);
+  });
+  for (let i = 0; i < 2; i++) {
+    const d = document.createElement('div');
+    d.className = 'drumItem';
+    inner.appendChild(d);
+  }
+  setDrumPos(inner, selectedIdx);
 }
-const today = new Date();
-const tomorrow = new Date(today);
-tomorrow.setDate(tomorrow.getDate() + 1);
-document.getElementById('checkin').value = toDateStr(today);
-document.getElementById('checkout').value = toDateStr(tomorrow);
 
-// チェックイン変更時にチェックアウトを自動で翌日に
-document.getElementById('checkin').addEventListener('change', () => {
-  const ci = new Date(document.getElementById('checkin').value);
-  ci.setDate(ci.getDate() + 1);
-  document.getElementById('checkout').value = toDateStr(ci);
-});
+function setDrumPos(inner, idx) {
+  inner.style.transition = 'transform .2s ease';
+  inner.style.transform  = `translateY(${-idx * ITEM_H}px)`;
+  // selected クラス更新
+  inner.querySelectorAll('.drumItem').forEach((el, i) => {
+    el.classList.toggle('selected', i - 2 === idx);
+  });
+}
 
-let allHotels = [];
-let currentSort = 'price';
+function updateWeekday() {
+  const d = new Date(selYear, selMonth - 1, selDay);
+  const w = WEEKDAYS_JA[d.getDay()];
+  const colors = ['#f87171','#eef2ff','#eef2ff','#eef2ff','#eef2ff','#eef2ff','#60a5fa'];
+  document.getElementById('weekday').textContent = `（${w}曜日）`;
+  document.getElementById('weekday').style.color = colors[d.getDay()];
+}
+
+function clampDay() {
+  const max = DAYS_IN_MONTH(selYear, selMonth);
+  if (selDay > max) selDay = max;
+}
+
+function rebuildDays() {
+  clampDay();
+  const days   = getDays(selYear, selMonth);
+  const dayIdx = selDay - 1;
+  makeDrum('innerD', days, dayIdx, v => String(v).padStart(2,'0'));
+  updateWeekday();
+}
+
+// ドラムをセットアップ
+function initDrums() {
+  const yIdx = years.indexOf(selYear);
+  const mIdx = selMonth - 1;
+  const dIdx = selDay - 1;
+  makeDrum('innerY', years,  yIdx, v => String(v));
+  makeDrum('innerM', months, mIdx, v => String(v).padStart(2,'0'));
+  makeDrum('innerD', getDays(selYear, selMonth), dIdx, v => String(v).padStart(2,'0'));
+  updateWeekday();
+}
+
+// タッチ・マウスドラッグ
+function addDrumEvents(drumId, innerId, getItems, onSelect) {
+  const drum  = document.getElementById(drumId);
+  const inner = document.getElementById(innerId);
+  let startY = 0, startIdx = 0, currentIdx = 0;
+
+  function getIdx() { return currentIdx; }
+
+  function clampIdx(idx, items) { return Math.max(0, Math.min(items.length - 1, idx)); }
+
+  function onStart(y) {
+    startY   = y;
+    startIdx = currentIdx;
+    inner.style.transition = 'none';
+  }
+  function onMove(y) {
+    const diff = y - startY;
+    const items = getItems();
+    const newIdx = clampIdx(Math.round(startIdx - diff / ITEM_H), items);
+    if (newIdx !== currentIdx) {
+      currentIdx = newIdx;
+      inner.style.transform = `translateY(${-currentIdx * ITEM_H}px)`;
+      inner.querySelectorAll('.drumItem').forEach((el, i) => {
+        el.classList.toggle('selected', i - 2 === currentIdx);
+      });
+      onSelect(items[currentIdx]);
+    }
+  }
+  function onEnd() {
+    const items = getItems();
+    inner.style.transition = 'transform .2s ease';
+    inner.style.transform  = `translateY(${-currentIdx * ITEM_H}px)`;
+    onSelect(items[currentIdx]);
+  }
+
+  // mouse
+  drum.addEventListener('mousedown', e => { onStart(e.clientY); e.preventDefault(); });
+  window.addEventListener('mousemove', e => { if (e.buttons === 1 && document.activeElement !== drum) return; });
+  drum.addEventListener('mousemove', e => { if (e.buttons) onMove(e.clientY); });
+  drum.addEventListener('mouseup', () => onEnd());
+  // touch
+  drum.addEventListener('touchstart', e => { onStart(e.touches[0].clientY); }, {passive:true});
+  drum.addEventListener('touchmove',  e => { onMove(e.touches[0].clientY); e.preventDefault(); }, {passive:false});
+  drum.addEventListener('touchend',   () => onEnd());
+
+  // 初期index同期
+  const syncIdx = () => {
+    const items = getItems();
+    currentIdx = clampIdx(currentIdx, items);
+  };
+  drum._syncIdx = (idx) => { currentIdx = idx; };
+}
+
+// Year drum
+addDrumEvents('drumY', 'innerY',
+  () => years,
+  val => { selYear = val; clampDay(); rebuildDays(); }
+);
+document.getElementById('drumY')._syncIdx(years.indexOf(selYear));
+
+// Month drum
+addDrumEvents('drumM', 'innerM',
+  () => months,
+  val => { selMonth = val; clampDay(); rebuildDays(); }
+);
+document.getElementById('drumM')._syncIdx(selMonth - 1);
+
+// Day drum
+addDrumEvents('drumD', 'innerD',
+  () => getDays(selYear, selMonth),
+  val => { selDay = val; updateWeekday(); }
+);
+document.getElementById('drumD')._syncIdx(selDay - 1);
+
+initDrums();
+
+// ========= ステッパー =========
+function changeNights(d) {
+  nights = Math.max(1, Math.min(7, nights + d));
+  document.getElementById('nightsVal').textContent = nights;
+}
+function changeAdults(d) {
+  adults = Math.max(1, Math.min(10, adults + d));
+  document.getElementById('adultsVal').textContent = adults;
+}
+
+// ========= 画面切り替え =========
+function showDatePage() {
+  document.getElementById('pageDate').classList.remove('hidden');
+  document.getElementById('pageResult').classList.add('hidden');
+}
+function showResultPage() {
+  document.getElementById('pageDate').classList.add('hidden');
+  document.getElementById('pageResult').classList.remove('hidden');
+}
+
+// ========= 検索 =========
+function toDateStr(y, m, d) {
+  return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+}
+
+let allHotels    = [];
+let currentSort  = 'price';
+let checkinStr   = '';
+let checkoutStr  = '';
 
 function setSort(key, e) {
   currentSort = key;
@@ -160,78 +361,52 @@ function setSort(key, e) {
   renderHotels();
 }
 
-function calcDistance(lat1, lng1, lat2, lng2) {
-  const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLng = (lng2 - lng1) * Math.PI / 180;
-  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-}
-
 function starStr(n) {
   const v = Math.round((n || 0) * 2) / 2;
-  let s = '';
-  for (let i = 1; i <= 5; i++) {
-    if (i <= v) s += '★';
-    else if (i - 0.5 <= v) s += '☆';
-    else s += '☆';
-  }
-  return s;
+  return '★'.repeat(Math.floor(v)) + (v % 1 ? '☆' : '') + '☆'.repeat(Math.max(0, 5 - Math.ceil(v)));
 }
 
 function renderHotels() {
-  const sorted = [...allHotels].sort((a, b) => {
-    if (currentSort === 'rating') return (b.reviewAverage || 0) - (a.reviewAverage || 0);
-    if (currentSort === 'distance') return (a.distance || 999) - (b.distance || 999);
-    return (a.minCharge || 99999999) - (b.minCharge || 99999999);
-  });
-
-  const checkin  = document.getElementById('checkin').value;
-  const checkout = document.getElementById('checkout').value;
+  const sorted = [...allHotels].sort((a, b) =>
+    currentSort === 'rating'
+      ? (b.reviewAverage || 0) - (a.reviewAverage || 0)
+      : (a.minCharge || 99999999) - (b.minCharge || 99999999)
+  );
 
   const grid = document.getElementById('hotelGrid');
   grid.innerHTML = '';
-
   sorted.forEach(h => {
     const card = document.createElement('div');
     card.className = 'card';
-    const price = h.minCharge ? `¥${Number(h.minCharge).toLocaleString()}〜` : '要確認';
-    const dist  = h.distance != null ? `📍 約${h.distance.toFixed(1)}km` : '';
-    const review = h.reviewAverage
-      ? `${Number(h.reviewAverage).toFixed(1)} (${h.reviewCount || 0}件)`
-      : '-';
-
+    const price   = h.minCharge ? `¥${Number(h.minCharge).toLocaleString()}〜` : '要確認';
+    const review  = h.reviewAverage ? `${Number(h.reviewAverage).toFixed(1)} (${h.reviewCount || 0}件)` : '-';
     const ratingRows = [
       ['サービス', h.serviceAverage],
       ['立地',     h.locationAverage],
       ['部屋',     h.roomAverage],
       ['風呂',     h.bathAverage],
       ['食事',     h.mealAverage],
-    ].filter(([, v]) => v).map(([k, v]) =>
-      `<div class="rItem"><span>${k}</span><span class="rVal">${Number(v).toFixed(1)}</span></div>`
-    ).join('');
+    ].filter(([,v]) => v)
+     .map(([k,v]) => `<div class="rItem"><span>${k}</span><span class="rVal">${Number(v).toFixed(1)}</span></div>`)
+     .join('');
 
-    // 予約URLにチェックイン日・人数を付与
-    const baseUrl = h.planListUrl || h.hotelInformationUrl || '#';
+    const baseUrl   = h.planListUrl || h.hotelInformationUrl || '#';
     const reserveUrl = baseUrl !== '#'
-      ? `${baseUrl}&checkinDate=${checkin}&checkoutDate=${checkout}&adultNum=${document.getElementById('adults').value}&roomNum=${document.getElementById('rooms').value}`
+      ? `${baseUrl}&checkinDate=${checkinStr}&checkoutDate=${checkoutStr}&adultNum=${adults}&roomNum=1`
       : '#';
 
     card.innerHTML = `
-      ${h.hotelImageUrl
-        ? `<img src="${h.hotelImageUrl}" alt="${h.hotelName}" loading="lazy" onerror="this.style.display='none'">`
-        : ''}
+      ${h.hotelImageUrl ? `<img src="${h.hotelImageUrl}" alt="${h.hotelName}" loading="lazy" onerror="this.style.display='none'">` : ''}
       <div class="hName">${h.hotelName}</div>
       <div class="hAddr">${h.address1 || ''}${h.address2 || ''}</div>
       <div class="stars">${starStr(h.reviewAverage)} <span style="color:var(--muted);font-size:11px">${review}</span></div>
       <div class="pills">
-        ${dist ? `<span class="pill">${dist}</span>` : ''}
-        ${h.checkinTime ? `<span class="pill">IN ${h.checkinTime}</span>` : ''}
+        ${h.checkinTime  ? `<span class="pill">IN ${h.checkinTime}</span>`  : ''}
         ${h.checkoutTime ? `<span class="pill">OUT ${h.checkoutTime}</span>` : ''}
       </div>
       ${ratingRows ? `<div class="ratingGrid">${ratingRows}</div>` : ''}
-      <div class="price">${price} <span class="priceNote">/ 1室</span></div>
-      <div class="checkinInfo">${checkin} 〜 ${checkout}</div>
+      <div class="price">${price} <span class="priceNote">/ 1室 ${nights}泊</span></div>
+      <div class="checkinInfo">${checkinStr} 〜 ${checkoutStr}（${nights}泊）</div>
       <a class="reserveBtn" href="${reserveUrl}" target="_blank" rel="noopener noreferrer">楽天トラベルで予約</a>
     `;
     grid.appendChild(card);
@@ -239,61 +414,48 @@ function renderHotels() {
 }
 
 async function doSearch() {
-  document.getElementById('statusBox').className = 'status warn';
-  document.getElementById('statusBox').textContent = '🔍 空室を検索中...';
-  document.getElementById('sortRow').style.display = 'none';
-  document.getElementById('hotelGrid').innerHTML = '';
+  // チェックアウト = チェックイン + 泊数
+  const ci = new Date(selYear, selMonth - 1, selDay);
+  const co = new Date(ci);
+  co.setDate(co.getDate() + nights);
+  checkinStr  = toDateStr(selYear, selMonth, selDay);
+  checkoutStr = toDateStr(co.getFullYear(), co.getMonth() + 1, co.getDate());
 
-  if (!lat || !lng) {
-    document.getElementById('statusBox').className = 'status err';
-    document.getElementById('statusBox').textContent = '❌ 位置情報が取得できませんでした。';
-    return;
-  }
-
-  const checkin  = document.getElementById('checkin').value;
-  const checkout = document.getElementById('checkout').value;
-  const adults   = document.getElementById('adults').value;
-  const rooms    = document.getElementById('rooms').value;
-
-  // 絞り込み条件
   const squeeze = [];
   if (document.getElementById('onsen').checked)    squeeze.push('onsen');
   if (document.getElementById('daiyoku').checked)  squeeze.push('daiyoku');
   if (document.getElementById('internet').checked) squeeze.push('internet');
 
+  showResultPage();
+  document.getElementById('statusBox').className   = 'status warn';
+  document.getElementById('statusBox').textContent = '🔍 空室を検索中...';
+  document.getElementById('sortRow').style.display = 'none';
+  document.getElementById('hotelGrid').innerHTML   = '';
+
   try {
-    let url = `/api/hotels?lat=${lat}&lng=${lng}&name=${encodeURIComponent(courseName)}&checkin=${checkin}&checkout=${checkout}&adults=${adults}&rooms=${rooms}`;
+    let url = `/api/hotels?name=${encodeURIComponent(courseName)}&address=${encodeURIComponent(address)}&pref=${encodeURIComponent(pref)}&checkin=${checkinStr}&checkout=${checkoutStr}&adults=${adults}&rooms=1`;
     if (squeeze.length) url += `&squeeze=${squeeze.join(',')}`;
-    const res = await fetch(url);
+
+    const res  = await fetch(url);
     if (!res.ok) throw new Error(await res.text() || 'API error');
     const data = await res.json();
-    const items = data.hotels || [];
+    allHotels  = data.hotels || [];
 
-    if (!items.length) {
-      document.getElementById('statusBox').className = 'status warn';
-      document.getElementById('statusBox').innerHTML = '⚠️ 半径3km以内に空室のある宿泊施設が見つかりませんでした。<br>日付や人数を変更して再検索してみてください。';
+    if (!allHotels.length) {
+      document.getElementById('statusBox').className   = 'status warn';
+      document.getElementById('statusBox').innerHTML   = `⚠️「${data.keyword}」周辺に空室のある宿泊施設が見つかりませんでした。<br>日付や人数を変えてお試しください。`;
       return;
     }
 
-    allHotels = items.map(h => ({
-      ...h,
-      distance: (h.latitude && h.longitude)
-        ? calcDistance(lat, lng, parseFloat(h.latitude), parseFloat(h.longitude))
-        : null
-    }));
-
-    document.getElementById('statusBox').className = 'status ok';
-    document.getElementById('statusBox').textContent = `✅ ${allHotels.length}件の空室が見つかりました（半径3km以内 / ${checkin}〜${checkout}）`;
+    document.getElementById('statusBox').className   = 'status ok';
+    document.getElementById('statusBox').textContent = `✅ ${allHotels.length}件の空室が見つかりました（${data.keyword} / ${checkinStr}〜${checkoutStr} ${nights}泊）`;
     document.getElementById('sortRow').style.display = 'flex';
     renderHotels();
   } catch (e) {
-    document.getElementById('statusBox').className = 'status err';
+    document.getElementById('statusBox').className   = 'status err';
     document.getElementById('statusBox').textContent = '❌ エラー: ' + (e.message || '取得失敗');
   }
 }
-
-// 初回自動検索
-doSearch();
 </script>
 </body>
 </html>

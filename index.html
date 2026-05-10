@@ -618,7 +618,7 @@ function drawWinner(pref, picked, list) {
   document.getElementById('winLinks').innerHTML = `
     <a class="primaryLink" href="${picked.detailUrl}" target="_blank" rel="noopener noreferrer">${esc(tr('golfDetail'))}</a>
     <a href="${picked.reserveUrl}" target="_blank" rel="noopener noreferrer">${esc(tr('reserve'))}</a>
-    ${picked.lat && picked.lng ? `<a class="hotelLink" href="/hotels.html?lat=${picked.lat}&lng=${picked.lng}&name=${encodeURIComponent(picked.name)}&pref=${encodeURIComponent(picked.pref)}" target="_blank" rel="noopener noreferrer">${esc(tr('hotelSearch'))}</a>` : ''}
+    <a class="hotelLink" href="/hotels.html?name=${encodeURIComponent(picked.name)}&address=${encodeURIComponent(picked.address)}&pref=${encodeURIComponent(picked.pref)}" target="_blank" rel="noopener noreferrer">${esc(tr('hotelSearch'))}</a>
   `;
   drawCandidates(list, picked.golfCourseId);
 }
