@@ -16,32 +16,31 @@ body{margin:0;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Se
 h1{margin:0 0 6px;font-size:clamp(20px,5vw,28px);font-weight:900;background:linear-gradient(90deg,#fff,var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .sub{color:var(--muted);font-size:13px;margin-bottom:24px}
 
-/* ========= ドラムロール ========= */
+/* ドラムロール */
 .drumSection{background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:20px;margin-bottom:16px;backdrop-filter:blur(10px)}
 .drumLabel{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
-.drumRow{display:flex;gap:10px;justify-content:center;align-items:center}
+.drumRow{display:flex;gap:8px;justify-content:center;align-items:center}
 .drumWrap{position:relative;flex:1}
-.drumWrap.sm{flex:0 0 72px}
-.drumWrap.md{flex:0 0 88px}
-.drum{height:180px;overflow:hidden;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(--line);position:relative;cursor:grab;user-select:none}
-.drum:active{cursor:grabbing}
-.drumInner{position:absolute;width:100%;transition:transform .15s ease}
-.drumItem{height:60px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:rgba(255,255,255,.35);transition:color .15s,font-size .15s}
-.drumItem.selected{color:var(--text);font-size:24px}
-.drumHighlight{position:absolute;top:50%;left:0;right:0;transform:translateY(-50%);height:60px;border-top:2px solid rgba(212,175,55,.7);border-bottom:2px solid rgba(212,175,55,.7);background:linear-gradient(90deg,transparent,rgba(212,175,55,.06),transparent);pointer-events:none;border-radius:4px}
-.drumFadeTop{position:absolute;top:0;left:0;right:0;height:60px;background:linear-gradient(to bottom,rgba(11,18,32,.95),transparent);pointer-events:none;border-radius:14px 14px 0 0}
-.drumFadeBot{position:absolute;bottom:0;left:0;right:0;height:60px;background:linear-gradient(to top,rgba(11,18,32,.95),transparent);pointer-events:none;border-radius:0 0 14px 14px}
-.sep{font-size:22px;font-weight:900;color:var(--muted);flex:0 0 auto}
-.weekday{text-align:center;font-size:18px;font-weight:900;color:var(--gold2);margin-top:12px;min-height:28px}
+.drumWrap.sm{flex:0 0 68px}
+.drum{height:180px;overflow:hidden;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(--line);position:relative;touch-action:none}
+.drumViewport{height:180px;overflow:hidden;position:relative}
+.drumInner{position:absolute;width:100%;will-change:transform}
+.drumItem{height:60px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:rgba(255,255,255,.3);transition:color .08s,font-size .08s}
+.drumItem.sel{color:var(--text);font-size:26px}
+.drumHL{position:absolute;top:50%;left:0;right:0;transform:translateY(-50%);height:60px;border-top:2px solid rgba(212,175,55,.7);border-bottom:2px solid rgba(212,175,55,.7);background:linear-gradient(90deg,transparent,rgba(212,175,55,.06),transparent);pointer-events:none}
+.drumFT{position:absolute;top:0;left:0;right:0;height:55px;background:linear-gradient(to bottom,rgba(11,18,32,.97),transparent);pointer-events:none}
+.drumFB{position:absolute;bottom:0;left:0;right:0;height:55px;background:linear-gradient(to top,rgba(11,18,32,.97),transparent);pointer-events:none}
+.sep{font-size:20px;font-weight:900;color:var(--muted);flex:0 0 auto}
+.weekday{text-align:center;font-size:17px;font-weight:900;color:var(--gold2);margin-top:12px;min-height:26px}
 
-/* nights + 人数 */
+/* ステッパー */
 .optRow{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
 .optBox{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px;backdrop-filter:blur(10px)}
 .optLabel{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
 .stepper{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.stepBtn{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.08);color:var(--text);font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.stepBtn:active{background:rgba(255,255,255,.16)}
-.stepVal{font-size:22px;font-weight:900;min-width:32px;text-align:center}
+.stepBtn{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.08);color:var(--text);font-size:22px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;user-select:none}
+.stepBtn:active{background:rgba(255,255,255,.2)}
+.stepVal{font-size:24px;font-weight:900;min-width:36px;text-align:center}
 
 /* オプション */
 .optionsBox{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px;backdrop-filter:blur(10px);margin-bottom:16px}
@@ -50,11 +49,10 @@ h1{margin:0 0 6px;font-size:clamp(20px,5vw,28px);font-weight:900;background:line
 .checkItem{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:15px}
 .checkItem input{width:20px;height:20px;accent-color:var(--green);cursor:pointer;flex-shrink:0}
 
-/* 検索ボタン */
 .searchBtn{width:100%;padding:16px;border-radius:16px;border:none;background:linear-gradient(135deg,var(--green2),var(--green));color:#fff;font:inherit;font-size:18px;font-weight:900;cursor:pointer;margin-bottom:8px}
-.searchBtn:active{opacity:.9}
+.searchBtn:active{opacity:.85}
 
-/* ========= 結果画面 ========= */
+/* 結果画面 */
 .status{padding:14px;border-radius:14px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);line-height:1.6;margin-bottom:16px;font-size:14px}
 .warn{background:rgba(96,165,250,.08);border-color:rgba(96,165,250,.25)}
 .err{background:rgba(248,113,113,.10);border-color:rgba(248,113,113,.28)}
@@ -85,28 +83,47 @@ h1{margin:0 0 6px;font-size:clamp(20px,5vw,28px);font-weight:900;background:line
 </head>
 <body>
 
-<!-- ===== 日付選択画面 ===== -->
+<!-- 日付選択画面 -->
 <div id="pageDate" class="wrap">
   <button class="back" onclick="window.close()">← 閉じる</button>
-  <div class="badge" id="courseBadge">⛳ 読み込み中...</div>
+  <div class="badge" id="courseBadge">⛳</div>
   <h1>宿泊日を選ぶ</h1>
-  <div class="sub" id="courseSub">ゴルフ場周辺のホテルを楽天トラベルで検索します</div>
+  <div class="sub" id="courseSub"></div>
 
-  <!-- チェックイン ドラムロール -->
   <div class="drumSection">
-    <div class="drumLabel">チェックイン</div>
+    <div class="drumLabel">チェックイン日</div>
     <div class="drumRow">
-      <div class="drumWrap"><div class="drum" id="drumY"><div class="drumInner" id="innerY"></div><div class="drumHighlight"></div><div class="drumFadeTop"></div><div class="drumFadeBot"></div></div></div>
+      <div class="drumWrap">
+        <div class="drum" id="drumY">
+          <div class="drumViewport">
+            <div class="drumInner" id="innerY"></div>
+          </div>
+          <div class="drumHL"></div><div class="drumFT"></div><div class="drumFB"></div>
+        </div>
+      </div>
       <div class="sep">年</div>
-      <div class="drumWrap sm"><div class="drum" id="drumM"><div class="drumInner" id="innerM"></div><div class="drumHighlight"></div><div class="drumFadeTop"></div><div class="drumFadeBot"></div></div></div>
+      <div class="drumWrap sm">
+        <div class="drum" id="drumM">
+          <div class="drumViewport">
+            <div class="drumInner" id="innerM"></div>
+          </div>
+          <div class="drumHL"></div><div class="drumFT"></div><div class="drumFB"></div>
+        </div>
+      </div>
       <div class="sep">月</div>
-      <div class="drumWrap sm"><div class="drum" id="drumD"><div class="drumInner" id="innerD"></div><div class="drumHighlight"></div><div class="drumFadeTop"></div><div class="drumFadeBot"></div></div></div>
+      <div class="drumWrap sm">
+        <div class="drum" id="drumD">
+          <div class="drumViewport">
+            <div class="drumInner" id="innerD"></div>
+          </div>
+          <div class="drumHL"></div><div class="drumFT"></div><div class="drumFB"></div>
+        </div>
+      </div>
       <div class="sep">日</div>
     </div>
     <div class="weekday" id="weekday"></div>
   </div>
 
-  <!-- 泊数 + 人数 -->
   <div class="optRow">
     <div class="optBox">
       <div class="optLabel">泊数</div>
@@ -126,7 +143,6 @@ h1{margin:0 0 6px;font-size:clamp(20px,5vw,28px);font-weight:900;background:line
     </div>
   </div>
 
-  <!-- オプション -->
   <div class="optionsBox">
     <div class="optionsTitle">絞り込み</div>
     <div class="checkRow">
@@ -139,20 +155,17 @@ h1{margin:0 0 6px;font-size:clamp(20px,5vw,28px);font-weight:900;background:line
   <button class="searchBtn" onclick="doSearch()">🔍 ホテルを検索する</button>
 </div>
 
-<!-- ===== 結果画面 ===== -->
+<!-- 結果画面 -->
 <div id="pageResult" class="wrapWide hidden">
   <button class="back" onclick="showDatePage()">← 日付を変更</button>
   <div class="badge" id="resultBadge">⛳</div>
   <h1>空室ホテル一覧</h1>
-
   <div id="statusBox" class="status warn">🔍 検索中...</div>
-
   <div class="sortRow" id="sortRow" style="display:none">
     <span class="sortLabel">並び替え:</span>
     <button class="fBtn active" onclick="setSort('price',event)">料金順</button>
     <button class="fBtn" onclick="setSort('rating',event)">評価順</button>
   </div>
-
   <div id="hotelGrid" class="grid"></div>
 </div>
 
@@ -166,294 +179,300 @@ document.getElementById('courseBadge').textContent = '⛳ ' + courseName;
 document.getElementById('courseSub').textContent   = `「${courseName}」周辺のホテルを楽天トラベルで検索します`;
 document.getElementById('resultBadge').textContent = '⛳ ' + courseName;
 
-// ========= ドラムロール =========
-const ITEM_H = 60;
-const DAYS_IN_MONTH = (y,m) => new Date(y, m, 0).getDate();
-const WEEKDAYS_JA = ['日','月','火','水','木','金','土'];
+// ======= ドラムロール =======
+const IH = 60; // item height px
+const PAD = 2; // padding items top/bottom
+const WD  = ['日','月','火','水','木','金','土'];
+const WC  = ['#f87171','#eef2ff','#eef2ff','#eef2ff','#eef2ff','#eef2ff','#60a5fa'];
+const daysInMonth = (y,m) => new Date(y,m,0).getDate();
 
 const now = new Date();
-let selYear  = now.getFullYear();
-let selMonth = now.getMonth() + 1;
-let selDay   = now.getDate();
-let nights   = 1;
-let adults   = 1;
+let selY = now.getFullYear(), selM = now.getMonth()+1, selD = now.getDate();
+let nights = 1, adults = 1;
 
-// 年リスト: 今年〜来年
-const years  = [now.getFullYear(), now.getFullYear() + 1];
-const months = Array.from({length:12}, (_,i) => i+1);
+function pad2(n){ return String(n).padStart(2,'0'); }
+function toDateStr(y,m,d){ return `${y}-${pad2(m)}-${pad2(d)}`; }
 
-function getDays(y, m) { return Array.from({length: DAYS_IN_MONTH(y,m)}, (_,i) => i+1); }
+function updateWeekday(){
+  const d = new Date(selY, selM-1, selD);
+  const w = d.getDay();
+  document.getElementById('weekday').textContent = `（${WD[w]}曜日）`;
+  document.getElementById('weekday').style.color = WC[w];
+}
 
-function makeDrum(innerId, items, selectedIdx, formatter) {
-  const inner = document.getElementById(innerId);
-  inner.innerHTML = '';
-  // パディング2アイテム分上下
-  for (let i = 0; i < 2; i++) {
-    const d = document.createElement('div');
-    d.className = 'drumItem';
-    inner.appendChild(d);
+// --- Drum class ---
+class Drum {
+  constructor(drumId, innerId, getItems, fmt, onChange){
+    this.drum    = document.getElementById(drumId);
+    this.inner   = document.getElementById(innerId);
+    this.getItems= getItems;
+    this.fmt     = fmt || (v=>String(v));
+    this.onChange= onChange;
+    this.idx     = 0;
+    this.y       = 0;       // current translateY (pixels, negative = scroll down)
+    this.velY    = 0;
+    this.lastY   = 0;
+    this.lastT   = 0;
+    this.dragging= false;
+    this.rafId   = null;
+    this._bind();
   }
-  items.forEach((v, i) => {
-    const d = document.createElement('div');
-    d.className = 'drumItem' + (i === selectedIdx ? ' selected' : '');
-    d.textContent = formatter ? formatter(v) : String(v);
-    inner.appendChild(d);
-  });
-  for (let i = 0; i < 2; i++) {
-    const d = document.createElement('div');
-    d.className = 'drumItem';
-    inner.appendChild(d);
+
+  build(selectedIdx){
+    const items = this.getItems();
+    this.inner.innerHTML = '';
+    // top padding
+    for(let i=0;i<PAD;i++) this._addItem('');
+    items.forEach((v,i)=>{
+      const el = document.createElement('div');
+      el.className = 'drumItem' + (i===selectedIdx?' sel':'');
+      el.textContent = this.fmt(v);
+      this.inner.appendChild(el);
+    });
+    // bottom padding
+    for(let i=0;i<PAD;i++) this._addItem('');
+    this.setIdx(selectedIdx, false);
   }
-  setDrumPos(inner, selectedIdx);
-}
 
-function setDrumPos(inner, idx) {
-  inner.style.transition = 'transform .2s ease';
-  inner.style.transform  = `translateY(${-idx * ITEM_H}px)`;
-  // selected クラス更新
-  inner.querySelectorAll('.drumItem').forEach((el, i) => {
-    el.classList.toggle('selected', i - 2 === idx);
-  });
-}
-
-function updateWeekday() {
-  const d = new Date(selYear, selMonth - 1, selDay);
-  const w = WEEKDAYS_JA[d.getDay()];
-  const colors = ['#f87171','#eef2ff','#eef2ff','#eef2ff','#eef2ff','#eef2ff','#60a5fa'];
-  document.getElementById('weekday').textContent = `（${w}曜日）`;
-  document.getElementById('weekday').style.color = colors[d.getDay()];
-}
-
-function clampDay() {
-  const max = DAYS_IN_MONTH(selYear, selMonth);
-  if (selDay > max) selDay = max;
-}
-
-function rebuildDays() {
-  clampDay();
-  const days   = getDays(selYear, selMonth);
-  const dayIdx = selDay - 1;
-  makeDrum('innerD', days, dayIdx, v => String(v).padStart(2,'0'));
-  updateWeekday();
-}
-
-// ドラムをセットアップ
-function initDrums() {
-  const yIdx = years.indexOf(selYear);
-  const mIdx = selMonth - 1;
-  const dIdx = selDay - 1;
-  makeDrum('innerY', years,  yIdx, v => String(v));
-  makeDrum('innerM', months, mIdx, v => String(v).padStart(2,'0'));
-  makeDrum('innerD', getDays(selYear, selMonth), dIdx, v => String(v).padStart(2,'0'));
-  updateWeekday();
-}
-
-// タッチ・マウスドラッグ
-function addDrumEvents(drumId, innerId, getItems, onSelect) {
-  const drum  = document.getElementById(drumId);
-  const inner = document.getElementById(innerId);
-  let startY = 0, startIdx = 0, currentIdx = 0;
-
-  function getIdx() { return currentIdx; }
-
-  function clampIdx(idx, items) { return Math.max(0, Math.min(items.length - 1, idx)); }
-
-  function onStart(y) {
-    startY   = y;
-    startIdx = currentIdx;
-    inner.style.transition = 'none';
+  _addItem(text){
+    const el = document.createElement('div');
+    el.className = 'drumItem';
+    el.textContent = text;
+    this.inner.appendChild(el);
   }
-  function onMove(y) {
-    const diff = y - startY;
-    const items = getItems();
-    const newIdx = clampIdx(Math.round(startIdx - diff / ITEM_H), items);
-    if (newIdx !== currentIdx) {
-      currentIdx = newIdx;
-      inner.style.transform = `translateY(${-currentIdx * ITEM_H}px)`;
-      inner.querySelectorAll('.drumItem').forEach((el, i) => {
-        el.classList.toggle('selected', i - 2 === currentIdx);
-      });
-      onSelect(items[currentIdx]);
+
+  setIdx(idx, animate=true){
+    const items = this.getItems();
+    this.idx = Math.max(0, Math.min(items.length-1, idx));
+    this.y   = -(this.idx * IH);
+    this.inner.style.transition = animate ? 'transform .15s cubic-bezier(.25,.46,.45,.94)' : 'none';
+    this.inner.style.transform  = `translateY(${60 + this.y}px)`; // 60 = 1 item offset for center
+    this._updateClasses();
+    this.onChange(items[this.idx]);
+  }
+
+  _updateClasses(){
+    const allItems = this.inner.querySelectorAll('.drumItem');
+    allItems.forEach((el,i) => {
+      el.classList.toggle('sel', i-PAD === this.idx);
+    });
+  }
+
+  _clamp(idx){
+    return Math.max(0, Math.min(this.getItems().length-1, idx));
+  }
+
+  _applyY(rawY, animate=false){
+    const items = this.getItems();
+    const minY  = -((items.length-1)*IH);
+    const maxY  = 0;
+    // rubber band outside
+    let y = rawY;
+    if(y > maxY) y = maxY + (y-maxY)*0.3;
+    if(y < minY) y = minY + (y-minY)*0.3;
+    this.y = y;
+    this.inner.style.transition = animate ? 'transform .2s ease' : 'none';
+    this.inner.style.transform  = `translateY(${60 + this.y}px)`;
+    // update selected
+    const nearIdx = this._clamp(Math.round(-this.y / IH));
+    if(nearIdx !== this.idx){
+      this.idx = nearIdx;
+      this._updateClasses();
+      this.onChange(this.getItems()[this.idx]);
     }
   }
-  function onEnd() {
-    const items = getItems();
-    inner.style.transition = 'transform .2s ease';
-    inner.style.transform  = `translateY(${-currentIdx * ITEM_H}px)`;
-    onSelect(items[currentIdx]);
+
+  _snap(){
+    const items  = this.getItems();
+    const target = this._clamp(Math.round(-this.y / IH));
+    this.idx = target;
+    this.y   = -(target * IH);
+    this.inner.style.transition = 'transform .2s cubic-bezier(.25,.46,.45,.94)';
+    this.inner.style.transform  = `translateY(${60 + this.y}px)`;
+    this._updateClasses();
+    this.onChange(items[this.idx]);
   }
 
-  // mouse
-  drum.addEventListener('mousedown', e => { onStart(e.clientY); e.preventDefault(); });
-  window.addEventListener('mousemove', e => { if (e.buttons === 1 && document.activeElement !== drum) return; });
-  drum.addEventListener('mousemove', e => { if (e.buttons) onMove(e.clientY); });
-  drum.addEventListener('mouseup', () => onEnd());
-  // touch
-  drum.addEventListener('touchstart', e => { onStart(e.touches[0].clientY); }, {passive:true});
-  drum.addEventListener('touchmove',  e => { onMove(e.touches[0].clientY); e.preventDefault(); }, {passive:false});
-  drum.addEventListener('touchend',   () => onEnd());
+  _inertia(){
+    if(Math.abs(this.velY) < 0.5){ this._snap(); return; }
+    this.velY *= 0.92;
+    this._applyY(this.y + this.velY);
+    this.rafId = requestAnimationFrame(()=>this._inertia());
+  }
 
-  // 初期index同期
-  const syncIdx = () => {
-    const items = getItems();
-    currentIdx = clampIdx(currentIdx, items);
-  };
-  drum._syncIdx = (idx) => { currentIdx = idx; };
+  _bind(){
+    const onStart = (clientY) => {
+      if(this.rafId){ cancelAnimationFrame(this.rafId); this.rafId=null; }
+      this.dragging = true;
+      this.lastY    = clientY;
+      this.lastT    = performance.now();
+      this.velY     = 0;
+      this.inner.style.transition = 'none';
+    };
+    const onMove = (clientY) => {
+      if(!this.dragging) return;
+      const now  = performance.now();
+      const dt   = Math.max(1, now - this.lastT);
+      const dy   = clientY - this.lastY;
+      this.velY  = dy / dt * 16; // px per frame @60fps
+      this._applyY(this.y + dy);
+      this.lastY = clientY;
+      this.lastT = now;
+    };
+    const onEnd = () => {
+      if(!this.dragging) return;
+      this.dragging = false;
+      this._inertia();
+    };
+
+    // touch
+    this.drum.addEventListener('touchstart', e=>{
+      onStart(e.touches[0].clientY);
+    }, {passive:true});
+    this.drum.addEventListener('touchmove', e=>{
+      onMove(e.touches[0].clientY);
+      e.preventDefault();
+    }, {passive:false});
+    this.drum.addEventListener('touchend',  ()=>onEnd());
+    this.drum.addEventListener('touchcancel',()=>onEnd());
+
+    // mouse
+    this.drum.addEventListener('mousedown', e=>{
+      onStart(e.clientY); e.preventDefault();
+    });
+    window.addEventListener('mousemove', e=>{
+      if(this.dragging) onMove(e.clientY);
+    });
+    window.addEventListener('mouseup', ()=>{ if(this.dragging) onEnd(); });
+  }
 }
 
-// Year drum
-addDrumEvents('drumY', 'innerY',
-  () => years,
-  val => { selYear = val; clampDay(); rebuildDays(); }
+// 年ドラム
+const years = [now.getFullYear(), now.getFullYear()+1];
+const drumY = new Drum('drumY','innerY',
+  ()=>years, v=>String(v),
+  val=>{ selY=val; rebuildDays(); }
 );
-document.getElementById('drumY')._syncIdx(years.indexOf(selYear));
+drumY.build(years.indexOf(selY));
 
-// Month drum
-addDrumEvents('drumM', 'innerM',
-  () => months,
-  val => { selMonth = val; clampDay(); rebuildDays(); }
+// 月ドラム
+const months = Array.from({length:12},(_,i)=>i+1);
+const drumM = new Drum('drumM','innerM',
+  ()=>months, v=>pad2(v),
+  val=>{ selM=val; rebuildDays(); }
 );
-document.getElementById('drumM')._syncIdx(selMonth - 1);
+drumM.build(selM-1);
 
-// Day drum
-addDrumEvents('drumD', 'innerD',
-  () => getDays(selYear, selMonth),
-  val => { selDay = val; updateWeekday(); }
-);
-document.getElementById('drumD')._syncIdx(selDay - 1);
-
-initDrums();
-
-// ========= ステッパー =========
-function changeNights(d) {
-  nights = Math.max(1, Math.min(7, nights + d));
-  document.getElementById('nightsVal').textContent = nights;
-}
-function changeAdults(d) {
-  adults = Math.max(1, Math.min(10, adults + d));
-  document.getElementById('adultsVal').textContent = adults;
+// 日ドラム
+let drumD;
+function buildDrumD(){
+  const days = Array.from({length:daysInMonth(selY,selM)},(_,i)=>i+1);
+  if(!drumD){
+    drumD = new Drum('drumD','innerD',
+      ()=>Array.from({length:daysInMonth(selY,selM)},(_,i)=>i+1),
+      v=>pad2(v),
+      val=>{ selD=val; updateWeekday(); }
+    );
+  }
+  const maxD = daysInMonth(selY,selM);
+  if(selD > maxD) selD = maxD;
+  drumD.build(selD-1);
 }
 
-// ========= 画面切り替え =========
-function showDatePage() {
-  document.getElementById('pageDate').classList.remove('hidden');
-  document.getElementById('pageResult').classList.add('hidden');
-}
-function showResultPage() {
-  document.getElementById('pageDate').classList.add('hidden');
-  document.getElementById('pageResult').classList.remove('hidden');
+function rebuildDays(){
+  buildDrumD();
+  updateWeekday();
 }
 
-// ========= 検索 =========
-function toDateStr(y, m, d) {
-  return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-}
+buildDrumD();
+updateWeekday();
 
-let allHotels    = [];
-let currentSort  = 'price';
-let checkinStr   = '';
-let checkoutStr  = '';
+// ステッパー
+function changeNights(d){ nights=Math.max(1,Math.min(14,nights+d)); document.getElementById('nightsVal').textContent=nights; }
+function changeAdults(d){ adults=Math.max(1,Math.min(10,adults+d)); document.getElementById('adultsVal').textContent=adults; }
 
-function setSort(key, e) {
-  currentSort = key;
-  document.querySelectorAll('.sortRow .fBtn').forEach(b => b.classList.remove('active'));
+// 画面切り替え
+function showDatePage(){ document.getElementById('pageDate').classList.remove('hidden'); document.getElementById('pageResult').classList.add('hidden'); }
+function showResultPage(){ document.getElementById('pageDate').classList.add('hidden'); document.getElementById('pageResult').classList.remove('hidden'); }
+
+// ソート
+let allHotels=[], currentSort='price', checkinStr='', checkoutStr='';
+function setSort(key,e){
+  currentSort=key;
+  document.querySelectorAll('.sortRow .fBtn').forEach(b=>b.classList.remove('active'));
   e.target.classList.add('active');
   renderHotels();
 }
 
-function starStr(n) {
-  const v = Math.round((n || 0) * 2) / 2;
-  return '★'.repeat(Math.floor(v)) + (v % 1 ? '☆' : '') + '☆'.repeat(Math.max(0, 5 - Math.ceil(v)));
+function starStr(n){
+  const v=Math.round((n||0)*2)/2;
+  return '★'.repeat(Math.floor(v))+(v%1?'☆':'')+('☆'.repeat(Math.max(0,5-Math.ceil(v))));
 }
 
-function renderHotels() {
-  const sorted = [...allHotels].sort((a, b) =>
-    currentSort === 'rating'
-      ? (b.reviewAverage || 0) - (a.reviewAverage || 0)
-      : (a.minCharge || 99999999) - (b.minCharge || 99999999)
+function renderHotels(){
+  const sorted=[...allHotels].sort((a,b)=>
+    currentSort==='rating'?(b.reviewAverage||0)-(a.reviewAverage||0)
+    :(a.minCharge||99999999)-(b.minCharge||99999999)
   );
-
-  const grid = document.getElementById('hotelGrid');
-  grid.innerHTML = '';
-  sorted.forEach(h => {
-    const card = document.createElement('div');
-    card.className = 'card';
-    const price   = h.minCharge ? `¥${Number(h.minCharge).toLocaleString()}〜` : '要確認';
-    const review  = h.reviewAverage ? `${Number(h.reviewAverage).toFixed(1)} (${h.reviewCount || 0}件)` : '-';
-    const ratingRows = [
-      ['サービス', h.serviceAverage],
-      ['立地',     h.locationAverage],
-      ['部屋',     h.roomAverage],
-      ['風呂',     h.bathAverage],
-      ['食事',     h.mealAverage],
-    ].filter(([,v]) => v)
-     .map(([k,v]) => `<div class="rItem"><span>${k}</span><span class="rVal">${Number(v).toFixed(1)}</span></div>`)
-     .join('');
-
-    const baseUrl   = h.planListUrl || h.hotelInformationUrl || '#';
-    const reserveUrl = baseUrl !== '#'
-      ? `${baseUrl}&checkinDate=${checkinStr}&checkoutDate=${checkoutStr}&adultNum=${adults}&roomNum=1`
-      : '#';
-
-    card.innerHTML = `
-      ${h.hotelImageUrl ? `<img src="${h.hotelImageUrl}" alt="${h.hotelName}" loading="lazy" onerror="this.style.display='none'">` : ''}
+  const grid=document.getElementById('hotelGrid');
+  grid.innerHTML='';
+  sorted.forEach(h=>{
+    const card=document.createElement('div');
+    card.className='card';
+    const price  = h.minCharge?`¥${Number(h.minCharge).toLocaleString()}〜`:'要確認';
+    const review = h.reviewAverage?`${Number(h.reviewAverage).toFixed(1)} (${h.reviewCount||0}件)`:'-';
+    const rRows  = [['サービス',h.serviceAverage],['立地',h.locationAverage],['部屋',h.roomAverage],['風呂',h.bathAverage],['食事',h.mealAverage]]
+      .filter(([,v])=>v).map(([k,v])=>`<div class="rItem"><span>${k}</span><span class="rVal">${Number(v).toFixed(1)}</span></div>`).join('');
+    const baseUrl=h.planListUrl||h.hotelInformationUrl||'#';
+    const rUrl=baseUrl!=='#'?`${baseUrl}&checkinDate=${checkinStr}&checkoutDate=${checkoutStr}&adultNum=${adults}&roomNum=1`:'#';
+    card.innerHTML=`
+      ${h.hotelImageUrl?`<img src="${h.hotelImageUrl}" alt="${h.hotelName}" loading="lazy" onerror="this.style.display='none'">`:'' }
       <div class="hName">${h.hotelName}</div>
-      <div class="hAddr">${h.address1 || ''}${h.address2 || ''}</div>
+      <div class="hAddr">${h.address1||''}${h.address2||''}</div>
       <div class="stars">${starStr(h.reviewAverage)} <span style="color:var(--muted);font-size:11px">${review}</span></div>
-      <div class="pills">
-        ${h.checkinTime  ? `<span class="pill">IN ${h.checkinTime}</span>`  : ''}
-        ${h.checkoutTime ? `<span class="pill">OUT ${h.checkoutTime}</span>` : ''}
-      </div>
-      ${ratingRows ? `<div class="ratingGrid">${ratingRows}</div>` : ''}
+      <div class="pills">${h.checkinTime?`<span class="pill">IN ${h.checkinTime}</span>`:''}${h.checkoutTime?`<span class="pill">OUT ${h.checkoutTime}</span>`:''}</div>
+      ${rRows?`<div class="ratingGrid">${rRows}</div>`:''}
       <div class="price">${price} <span class="priceNote">/ 1室 ${nights}泊</span></div>
       <div class="checkinInfo">${checkinStr} 〜 ${checkoutStr}（${nights}泊）</div>
-      <a class="reserveBtn" href="${reserveUrl}" target="_blank" rel="noopener noreferrer">楽天トラベルで予約</a>
-    `;
+      <a class="reserveBtn" href="${rUrl}" target="_blank" rel="noopener noreferrer">楽天トラベルで予約</a>`;
     grid.appendChild(card);
   });
 }
 
-async function doSearch() {
-  // チェックアウト = チェックイン + 泊数
-  const ci = new Date(selYear, selMonth - 1, selDay);
-  const co = new Date(ci);
-  co.setDate(co.getDate() + nights);
-  checkinStr  = toDateStr(selYear, selMonth, selDay);
-  checkoutStr = toDateStr(co.getFullYear(), co.getMonth() + 1, co.getDate());
-
-  const squeeze = [];
-  if (document.getElementById('onsen').checked)    squeeze.push('onsen');
-  if (document.getElementById('daiyoku').checked)  squeeze.push('daiyoku');
-  if (document.getElementById('internet').checked) squeeze.push('internet');
+async function doSearch(){
+  const co=new Date(selY,selM-1,selD); co.setDate(co.getDate()+nights);
+  checkinStr =toDateStr(selY,selM,selD);
+  checkoutStr=toDateStr(co.getFullYear(),co.getMonth()+1,co.getDate());
+  const squeeze=[];
+  if(document.getElementById('onsen').checked)    squeeze.push('onsen');
+  if(document.getElementById('daiyoku').checked)  squeeze.push('daiyoku');
+  if(document.getElementById('internet').checked) squeeze.push('internet');
 
   showResultPage();
-  document.getElementById('statusBox').className   = 'status warn';
-  document.getElementById('statusBox').textContent = '🔍 空室を検索中...';
-  document.getElementById('sortRow').style.display = 'none';
-  document.getElementById('hotelGrid').innerHTML   = '';
+  document.getElementById('statusBox').className='status warn';
+  document.getElementById('statusBox').textContent='🔍 空室を検索中...';
+  document.getElementById('sortRow').style.display='none';
+  document.getElementById('hotelGrid').innerHTML='';
 
-  try {
-    let url = `/api/hotels?name=${encodeURIComponent(courseName)}&address=${encodeURIComponent(address)}&pref=${encodeURIComponent(pref)}&checkin=${checkinStr}&checkout=${checkoutStr}&adults=${adults}&rooms=1`;
-    if (squeeze.length) url += `&squeeze=${squeeze.join(',')}`;
-
-    const res  = await fetch(url);
-    if (!res.ok) throw new Error(await res.text() || 'API error');
-    const data = await res.json();
-    allHotels  = data.hotels || [];
-
-    if (!allHotels.length) {
-      document.getElementById('statusBox').className   = 'status warn';
-      document.getElementById('statusBox').innerHTML   = `⚠️「${data.keyword}」周辺に空室のある宿泊施設が見つかりませんでした。<br>日付や人数を変えてお試しください。`;
+  try{
+    let url=`/api/hotels?name=${encodeURIComponent(courseName)}&address=${encodeURIComponent(address)}&pref=${encodeURIComponent(pref)}&checkin=${checkinStr}&checkout=${checkoutStr}&adults=${adults}&rooms=1`;
+    if(squeeze.length) url+=`&squeeze=${squeeze.join(',')}`;
+    const res=await fetch(url);
+    if(!res.ok) throw new Error(await res.text()||'API error');
+    const data=await res.json();
+    allHotels=data.hotels||[];
+    if(!allHotels.length){
+      document.getElementById('statusBox').className='status warn';
+      document.getElementById('statusBox').innerHTML=`⚠️「${data.keyword||address}」周辺に空室が見つかりませんでした。<br>日付や人数を変えてお試しください。`;
       return;
     }
-
-    document.getElementById('statusBox').className   = 'status ok';
-    document.getElementById('statusBox').textContent = `✅ ${allHotels.length}件の空室が見つかりました（${data.keyword} / ${checkinStr}〜${checkoutStr} ${nights}泊）`;
-    document.getElementById('sortRow').style.display = 'flex';
+    document.getElementById('statusBox').className='status ok';
+    document.getElementById('statusBox').textContent=`✅ ${allHotels.length}件の空室（${data.keyword} / ${checkinStr}〜${checkoutStr} ${nights}泊）`;
+    document.getElementById('sortRow').style.display='flex';
     renderHotels();
-  } catch (e) {
-    document.getElementById('statusBox').className   = 'status err';
-    document.getElementById('statusBox').textContent = '❌ エラー: ' + (e.message || '取得失敗');
+  }catch(e){
+    document.getElementById('statusBox').className='status err';
+    document.getElementById('statusBox').textContent='❌ エラー: '+(e.message||'取得失敗');
   }
 }
 </script>
