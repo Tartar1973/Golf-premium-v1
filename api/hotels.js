@@ -302,7 +302,7 @@ export default async function handler(req, res) {
     async function fetchJSON(url) {
       for (let i=0; i<=2; i++) {
         const r = await fetch(url, { headers: hdrs });
-        if (r.status===429) { await new Promise(r=>setTimeout(r,1200)); continue; }
+        if (r.status===429) { await new Promise(r=>setTimeout(r,2000)); continue; }
         if (!r.ok) return null;
         return await r.json();
       }
@@ -385,11 +385,25 @@ export default async function handler(req, res) {
       usedKeyword = cityName || prefName;
     }
 
-    // ② 結果が少なければ都道府県全体
+    // ② 結果が少なければ都道府県全体（squeezeConditionなしで再試行）
     if (hotels.length < 5 && middleCode) {
-      const d = await fetchJSON(buildUrl({
-        largeClassCode:'japan', middleClassCode:middleCode
-      }));
+      const u = new URL('https://openapi.rakuten.co.jp/engine/api/Travel/SimpleHotelSearch/20170426');
+      u.searchParams.set('format','json');
+      u.searchParams.set('formatVersion','2');
+      u.searchParams.set('applicationId', applicationId);
+      u.searchParams.set('accessKey', accessKey);
+      if (affiliateId) u.searchParams.set('affiliateId', affiliateId);
+      u.searchParams.set('checkinDate',  checkinDate);
+      u.searchParams.set('checkoutDate', checkoutDate);
+      u.searchParams.set('adultNum', String(Math.min(10,Math.max(1,parseInt(adults)||1))));
+      u.searchParams.set('roomNum',  String(Math.min(10,Math.max(1,parseInt(rooms)||1))));
+      u.searchParams.set('hits',     '30');
+      u.searchParams.set('page',     '1');
+      u.searchParams.set('sort',     '+roomCharge');
+      u.searchParams.set('responseType', 'large');
+      u.searchParams.set('largeClassCode',  'japan');
+      u.searchParams.set('middleClassCode', middleCode);
+      const d = await fetchJSON(u.toString());
       hotels = merge(hotels, parseHotels(d));
       usedKeyword = prefName;
     }
