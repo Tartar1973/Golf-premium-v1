@@ -333,7 +333,9 @@ export default async function handler(req, res) {
     function parseHotels(data) {
       if (!data) return [];
       return (data.hotels||[]).map(h => {
-        const arr    = Array.isArray(h.hotel) ? h.hotel : [];
+        // formatVersion=2: h は配列 [{hotelBasicInfo}, {roomInfo:[...]}]
+        // formatVersion=1: h は {hotel: [{hotelBasicInfo}, {roomInfo:[...]}]}
+        const arr    = Array.isArray(h) ? h : (Array.isArray(h.hotel) ? h.hotel : []);
         const basic  = (arr.find(x=>x.hotelBasicInfo) ||{}).hotelBasicInfo  ||{};
         const rating = (arr.find(x=>x.hotelRatingInfo)||{}).hotelRatingInfo ||{};
         const roomArr= arr.find(x=>x.roomInfo);
