@@ -48,6 +48,7 @@ select{width:100%;padding:12px 14px;border-radius:14px;background:#111827;color:
 .list{max-height:560px;overflow:auto} .row{padding:12px 0;border-bottom:1px solid rgba(255,255,255,.06)} .row:last-child{border-bottom:none}
 .links a{display:inline-block;margin:8px 8px 0 0;padding:10px 12px;border-radius:12px;text-decoration:none;color:var(--text);border:1px solid var(--line);background:rgba(255,255,255,.08)}
 .links a.primaryLink{background:linear-gradient(135deg,#1f6feb,#60a5fa);border:none}
+.links a.hotelLink{background:linear-gradient(135deg,#065f46,#34d399);border:none;color:#fff}
 .small{font-size:12px;color:var(--muted)}
 .hidden{display:none}
 @media(max-width:900px){.grid,.result,.heroGrid{grid-template-columns:1fr}}
@@ -310,7 +311,7 @@ const T = {
     noCandidates:"候補がありません", checkFilters:"環境変数やブランド選択を確認してください。", golfDetail:"ゴルフ場詳細",
     spinning:"ルーレット中", spinningStatus:"県ルーレットを回しています。", prefDecided:"県決定", loadingCourses:"選ばれた県の候補を取得しています。",
     decided:"決定", okFetched:"候補名・評価・詳細URL・予約カレンダーは楽天GORAの実データです。", rerolled:"再抽選", error:"エラー",
-    noArea:"エリア候補がありません。", notFound:"候補が見つかりませんでした。"
+    noArea:"エリア候補がありません。", notFound:"候補が見つかりませんでした。", hotelSearch:"🏨 近隣ホテルを探す"
   },
   en: {
     htmlLang:"en", gateEyebrow:"WELCOME", gateTitle:"Golf Journey Roulette", gateSub:"Choose your language first. Then spin the roulette to pick a prefecture and get real golf course candidates from Rakuten GORA.", gateNote:"You can switch between Japanese and English anytime after entering.",
@@ -324,7 +325,7 @@ const T = {
     noCandidates:"No candidates found", checkFilters:"Please check your environment variables or selected brands.", golfDetail:"Course Details",
     spinning:"Spinning", spinningStatus:"Spinning the prefecture roulette.", prefDecided:"Prefecture picked", loadingCourses:"Fetching candidates for the selected prefecture.",
     decided:"Selected", okFetched:"Course name, rating, detail URL, and booking calendar are pulled from live Rakuten GORA data.", rerolled:"Rerolled", error:"Error",
-    noArea:"No prefectures are available in this area.", notFound:"No matching candidates were found."
+    noArea:"No prefectures are available in this area.", notFound:"No matching candidates were found.", hotelSearch:"🏨 Find Nearby Hotels"
   }
 };
 
@@ -489,6 +490,8 @@ async function fetchCourses(pref) {
       name: item.golfCourseName || '',
       evaluation: Number(item.evaluation || 0),
       address: item.address || '',
+      lat: item.latitude || '',
+      lng: item.longitude || '',
       detailUrl: item.golfCourseDetailUrl || '',
       reserveUrl: item.reserveCalUrl || item.golfCourseDetailUrl || '',
       brand,
@@ -506,6 +509,8 @@ async function fetchCourses(pref) {
       name: item.golfCourseName || '',
       evaluation: Number(item.evaluation || 0),
       address: item.address || '',
+      lat: item.latitude || '',
+      lng: item.longitude || '',
       detailUrl: item.golfCourseDetailUrl || '',
       reserveUrl: item.reserveCalUrl || item.golfCourseDetailUrl || '',
       brand: 'その他',
@@ -613,6 +618,7 @@ function drawWinner(pref, picked, list) {
   document.getElementById('winLinks').innerHTML = `
     <a class="primaryLink" href="${picked.detailUrl}" target="_blank" rel="noopener noreferrer">${esc(tr('golfDetail'))}</a>
     <a href="${picked.reserveUrl}" target="_blank" rel="noopener noreferrer">${esc(tr('reserve'))}</a>
+    <a class="hotelLink" href="/hotels.html?name=${encodeURIComponent(picked.name)}&address=${encodeURIComponent(picked.address)}&pref=${encodeURIComponent(picked.pref)}" target="_blank" rel="noopener noreferrer">${esc(tr('hotelSearch'))}</a>
   `;
   drawCandidates(list, picked.golfCourseId);
 }

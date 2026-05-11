@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ホテル検索 - Golf Journey Roulette</title>
+<style>
+:root{--bg:#0b1220;--panel:rgba(17,24,39,.92);--line:rgba(255,255,255,.12);--text:#eef2ff;--muted:#a5b4cc;--gold:#d4af37;--gold2:#f6e27a;--green:#34d399;--green2:#065f46}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans JP",sans-serif;background:radial-gradient(circle at top,rgba(52,211,153,.08),transparent 30%),linear-gradient(180deg,#08101d 0%,#0b1220 48%,#111827 100%);min-height:100vh}
+.wrap{max-width:480px;margin:0 auto;padding:20px 16px}
+.wrapWide{max-width:960px;margin:0 auto;padding:20px 16px}
+.back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:14px;cursor:pointer;background:none;border:none;padding:0;margin-bottom:16px}
+.badge{display:inline-block;background:rgba(52,211,153,.15);border:1px solid rgba(52,211,153,.35);color:var(--green);border-radius:999px;padding:4px 12px;font-size:12px;font-weight:700;margin-bottom:10px}
+h1{margin:0 0 6px;font-size:clamp(20px,5vw,28px);font-weight:900;background:linear-gradient(90deg,#fff,var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sub{color:var(--muted);font-size:13px;margin-bottom:24px}
+
+/* ドラムロール */
+.drumSection{background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:20px;margin-bottom:16px;backdrop-filter:blur(10px)}
+.drumLabel{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px}
+.drumRow{display:flex;gap:6px;align-items:center;justify-content:center}
+.drumWrap{position:relative}
+.drumWrap.lg{width:100px}
+.drumWrap.sm{width:72px}
+.drum{
+  height:210px;
+  overflow:hidden;
+  border-radius:14px;
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--line);
+  position:relative;
+  cursor:grab;
+  touch-action:none;
+  user-select:none;
+}
+.drum:active{cursor:grabbing}
+.drumTrack{
+  position:absolute;
+  top:0; left:0; right:0;
+  /* will be moved via transform */
+}
+.drumCell{
+  height:70px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  font-weight:700;
+  color:rgba(255,255,255,.28);
+}
+.drumCell.active{
+  color:#fff;
+  font-size:28px;
+}
+/* ハイライト枠 */
+.drumHL{
+  position:absolute;
+  top:50%;
+  left:0; right:0;
+  height:70px;
+  transform:translateY(-50%);
+  border-top:2px solid rgba(212,175,55,.75);
+  border-bottom:2px solid rgba(212,175,55,.75);
+  pointer-events:none;
+}
+/* フェード */
+.drumFade{
+  position:absolute;
+  left:0; right:0;
+  height:70px;
+  pointer-events:none;
+}
+.drumFade.top{top:0;background:linear-gradient(to bottom,rgba(11,18,32,.96),transparent)}
+.drumFade.bot{bottom:0;background:linear-gradient(to top,rgba(11,18,32,.96),transparent)}
+.sep{font-size:18px;font-weight:900;color:var(--muted);padding:0 2px}
+.weekday{text-align:center;font-size:17px;font-weight:900;margin-top:14px;min-height:26px}
+
+/* ステッパー */
+.optRow{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.optBox{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px;backdrop-filter:blur(10px)}
+.optLabel{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+.stepper{display:flex;align-items:center;justify-content:space-between}
+.stepBtn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.08);color:var(--text);font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.stepBtn:active{background:rgba(255,255,255,.2)}
+.stepVal{font-size:24px;font-weight:900;text-align:center;min-width:36px}
+
+/* オプション */
+.optBox2{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px;backdrop-filter:blur(10px);margin-bottom:16px}
+.checkRow{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+.checkItem{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:15px}
+.checkItem input{width:20px;height:20px;accent-color:var(--green);cursor:pointer}
+.searchBtn{width:100%;padding:16px;border-radius:16px;border:none;background:linear-gradient(135deg,var(--green2),var(--green));color:#fff;font:inherit;font-size:18px;font-weight:900;cursor:pointer}
+.searchBtn:active{opacity:.85}
+
+/* 結果 */
+.status{padding:14px;border-radius:14px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);line-height:1.6;margin-bottom:16px;font-size:14px}
+.warn{background:rgba(96,165,250,.08);border-color:rgba(96,165,250,.25)}
+.err{background:rgba(248,113,113,.10);border-color:rgba(248,113,113,.28)}
+.ok{background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.28)}
+.sortRow{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.sortLabel{color:var(--muted);font-size:13px}
+.fBtn{padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--text);cursor:pointer;font:inherit;font-size:13px}
+.fBtn.active{background:rgba(52,211,153,.15);border-color:rgba(52,211,153,.4);color:var(--green)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:16px;backdrop-filter:blur(10px);display:flex;flex-direction:column;gap:8px}
+.card img{width:100%;height:150px;object-fit:cover;border-radius:12px;background:#1a2435}
+.hName{font-weight:800;font-size:15px;line-height:1.4}
+.hAddr{color:var(--muted);font-size:12px}
+.stars{color:var(--gold);font-size:13px}
+.price{font-weight:900;font-size:20px;color:var(--green)}
+.priceNote{color:var(--muted);font-size:11px;font-weight:400}
+.pills{display:flex;flex-wrap:wrap;gap:5px}
+.pill{padding:3px 9px;border:1px solid var(--line);border-radius:999px;font-size:11px;color:var(--muted)}
+.rGrid{display:grid;grid-template-columns:1fr 1fr;gap:3px;font-size:11px;color:var(--muted)}
+.rItem{display:flex;justify-content:space-between}
+.rVal{color:var(--gold)}
+.reserveBtn{display:block;text-align:center;padding:11px;border-radius:12px;background:linear-gradient(135deg,var(--green2),var(--green));color:#fff;text-decoration:none;font-weight:800;font-size:14px;margin-top:auto}
+.ciInfo{font-size:12px;color:var(--muted);text-align:center}
+.hidden{display:none}
+@media(max-width:600px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- 日付選択 -->
+<div id="pageDate" class="wrap">
+  <button class="back" onclick="window.close()">← 閉じる</button>
+  <div class="badge" id="courseBadge">⛳</div>
+  <h1>宿泊日を選ぶ</h1>
+  <div class="sub" id="courseSub"></div>
+
+  <div class="drumSection">
+    <div class="drumLabel">チェックイン日</div>
+    <div class="drumRow">
+      <div class="drumWrap lg">
+        <div class="drum" id="drumY">
+          <div class="drumTrack" id="trackY"></div>
+          <div class="drumHL"></div>
+          <div class="drumFade top"></div>
+          <div class="drumFade bot"></div>
+        </div>
+      </div>
+      <div class="sep">年</div>
+      <div class="drumWrap sm">
+        <div class="drum" id="drumM">
+          <div class="drumTrack" id="trackM"></div>
+          <div class="drumHL"></div>
+          <div class="drumFade top"></div>
+          <div class="drumFade bot"></div>
+        </div>
+      </div>
+      <div class="sep">月</div>
+      <div class="drumWrap sm">
+        <div class="drum" id="drumD">
+          <div class="drumTrack" id="trackD"></div>
+          <div class="drumHL"></div>
+          <div class="drumFade top"></div>
+          <div class="drumFade bot"></div>
+        </div>
+      </div>
+      <div class="sep">日</div>
+    </div>
+    <div class="weekday" id="weekday"></div>
+  </div>
+
+  <div class="optRow">
+    <div class="optBox">
+      <div class="optLabel">泊数</div>
+      <div class="stepper">
+        <button class="stepBtn" onclick="adj('nights',-1)">−</button>
+        <div class="stepVal" id="vNights">1</div>
+        <button class="stepBtn" onclick="adj('nights',1)">＋</button>
+      </div>
+    </div>
+    <div class="optBox">
+      <div class="optLabel">大人人数</div>
+      <div class="stepper">
+        <button class="stepBtn" onclick="adj('adults',-1)">−</button>
+        <div class="stepVal" id="vAdults">1</div>
+        <button class="stepBtn" onclick="adj('adults',1)">＋</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="optBox2">
+    <div class="optLabel">絞り込み</div>
+    <div class="checkRow">
+      <label class="checkItem"><input type="checkbox" id="onsen"><span>♨️ 温泉あり</span></label>
+      <label class="checkItem"><input type="checkbox" id="daiyoku"><span>🛁 大浴場あり</span></label>
+      <label class="checkItem"><input type="checkbox" id="internet"><span>📶 インターネット可</span></label>
+    </div>
+  </div>
+
+  <button class="searchBtn" onclick="doSearch()">🔍 ホテルを検索する</button>
+</div>
+
+<!-- 結果 -->
+<div id="pageResult" class="wrapWide hidden">
+  <button class="back" onclick="showDate()">← 日付を変更</button>
+  <div class="badge" id="resBadge">⛳</div>
+  <h1>空室ホテル一覧</h1>
+  <div id="statusBox" class="status warn">検索中...</div>
+  <div class="sortRow" id="sortRow" style="display:none">
+    <span class="sortLabel">並び替え:</span>
+    <button class="fBtn active" onclick="setSort('price',event)">料金順</button>
+    <button class="fBtn" onclick="setSort('rating',event)">評価順</button>
+  </div>
+  <div id="hotelGrid" class="grid"></div>
+</div>
+
+<script>
+// ======================================================
+// URLパラメータ
+// ======================================================
+const P = new URLSearchParams(location.search);
+const courseName = P.get('name')    || 'ゴルフ場';
+const address    = P.get('address') || '';
+const pref       = P.get('pref')    || '';
+
+document.getElementById('courseBadge').textContent = '⛳ ' + courseName;
+document.getElementById('courseSub').textContent   = `「${courseName}」周辺のホテルを楽天トラベルで検索します`;
+document.getElementById('resBadge').textContent    = '⛳ ' + courseName;
+
+// ======================================================
+// ドラムロール
+// ======================================================
+const CELL = 70;   // セル高さ(px)
+const VISIBLE = 3; // 表示セル数（奇数）
+const DRUM_H = CELL * VISIBLE; // = 210px
+
+const WD = ['日','月','火','水','木','金','土'];
+const WC = ['#f87171','#eef2ff','#eef2ff','#eef2ff','#eef2ff','#eef2ff','#60a5fa'];
+
+const now = new Date();
+let selY = now.getFullYear();
+let selM = now.getMonth() + 1;
+let selD = now.getDate();
+let nights = 1, adults = 1;
+let ciStr = '', coStr = '';
+
+function daysInMonth(y, m) { return new Date(y, m, 0).getDate(); }
+function p2(n) { return String(n).padStart(2, '0'); }
+function ymd(y, m, d) { return `${y}-${p2(m)}-${p2(d)}`; }
+
+function updateWeekday() {
+  const d = new Date(selY, selM - 1, selD);
+  const w = d.getDay();
+  const el = document.getElementById('weekday');
+  el.textContent = `（${WD[w]}曜日）`;
+  el.style.color = WC[w];
+}
+
+// ---- Drum クラス ----
+class Drum {
+  constructor(drumEl, trackEl, items, initIdx, onchange) {
+    this.el      = drumEl;
+    this.track   = trackEl;
+    this.items   = items;
+    this.idx     = initIdx;
+    this.onchange= onchange;
+    this.py      = 0;   // pointer start Y
+    this.ty      = 0;   // track translateY at drag start
+    this.cur     = 0;   // current translateY
+    this.vel     = 0;
+    this.t0      = 0;
+    this.y0      = 0;
+    this.raf     = null;
+    this.active  = false;
+
+    this.render(false);
+    this._bind();
+  }
+
+  // translateY for index i → center = DRUM_H/2 - CELL/2 - i*CELL
+  _yForIdx(i) {
+    return DRUM_H / 2 - CELL / 2 - i * CELL;
+  }
+
+  render(animate) {
+    // build cells
+    this.track.innerHTML = '';
+    this.items.forEach((v, i) => {
+      const el = document.createElement('div');
+      el.className = 'drumCell' + (i === this.idx ? ' active' : '');
+      el.textContent = typeof v === 'number' && v < 100 ? p2(v) : String(v);
+      this.track.appendChild(el);
+    });
+    this._moveTo(this._yForIdx(this.idx), animate);
+  }
+
+  _moveTo(y, animate) {
+    this.cur = y;
+    this.track.style.transition = animate ? 'transform .18s cubic-bezier(.25,.46,.45,.94)' : 'none';
+    this.track.style.transform  = `translateY(${y}px)`;
+  }
+
+  _nearestIdx(y) {
+    // y = DRUM_H/2 - CELL/2 - idx*CELL  →  idx = (DRUM_H/2 - CELL/2 - y) / CELL
+    const raw = (DRUM_H / 2 - CELL / 2 - y) / CELL;
+    return Math.max(0, Math.min(this.items.length - 1, Math.round(raw)));
+  }
+
+  _updateActive(idx) {
+    this.track.querySelectorAll('.drumCell').forEach((el, i) => {
+      el.classList.toggle('active', i === idx);
+    });
+  }
+
+  _snap() {
+    this.idx = this._nearestIdx(this.cur);
+    this._moveTo(this._yForIdx(this.idx), true);
+    this._updateActive(this.idx);
+    this.onchange(this.items[this.idx]);
+  }
+
+  _inertia() {
+    if (Math.abs(this.vel) < 0.3) { this._snap(); return; }
+    this.vel *= 0.90;
+    let next = this.cur + this.vel;
+    // soft clamp
+    const minY = this._yForIdx(this.items.length - 1);
+    const maxY = this._yForIdx(0);
+    if (next < minY) { next = minY; this.vel = 0; }
+    if (next > maxY) { next = maxY; this.vel = 0; }
+    this.cur = next;
+    this.track.style.transition = 'none';
+    this.track.style.transform  = `translateY(${this.cur}px)`;
+    const ni = this._nearestIdx(this.cur);
+    if (ni !== this.idx) { this.idx = ni; this._updateActive(ni); this.onchange(this.items[ni]); }
+    this.raf = requestAnimationFrame(() => this._inertia());
+  }
+
+  _onStart(clientY) {
+    if (this.raf) { cancelAnimationFrame(this.raf); this.raf = null; }
+    this.active = true;
+    this.py = clientY;
+    this.ty = this.cur;
+    this.y0 = clientY;
+    this.t0 = performance.now();
+    this.vel = 0;
+    this.track.style.transition = 'none';
+  }
+
+  _onMove(clientY) {
+    if (!this.active) return;
+    const dy  = clientY - this.py;
+    const now = performance.now();
+    const dt  = Math.max(1, now - this.t0);
+    this.vel  = (clientY - this.y0) / dt * 16;
+    this.y0   = clientY;
+    this.t0   = now;
+    let next  = this.ty + dy;
+    // soft rubber-band
+    const minY = this._yForIdx(this.items.length - 1);
+    const maxY = this._yForIdx(0);
+    if (next < minY) next = minY + (next - minY) * 0.25;
+    if (next > maxY) next = maxY + (next - maxY) * 0.25;
+    this.cur = next;
+    this.track.style.transform = `translateY(${this.cur}px)`;
+    const ni = this._nearestIdx(this.cur);
+    if (ni !== this.idx) { this.idx = ni; this._updateActive(ni); this.onchange(this.items[ni]); }
+  }
+
+  _onEnd() {
+    if (!this.active) return;
+    this.active = false;
+    this._inertia();
+  }
+
+  _bind() {
+    this.el.addEventListener('touchstart', e => this._onStart(e.touches[0].clientY), {passive:true});
+    this.el.addEventListener('touchmove',  e => { this._onMove(e.touches[0].clientY); e.preventDefault(); }, {passive:false});
+    this.el.addEventListener('touchend',   () => this._onEnd());
+    this.el.addEventListener('touchcancel',() => this._onEnd());
+    this.el.addEventListener('mousedown',  e => { this._onStart(e.clientY); e.preventDefault(); });
+    window.addEventListener('mousemove',   e => { if (this.active) this._onMove(e.clientY); });
+    window.addEventListener('mouseup',     () => { if (this.active) this._onEnd(); });
+  }
+
+  rebuild(items, newIdx) {
+    if (this.raf) { cancelAnimationFrame(this.raf); this.raf = null; }
+    this.items = items;
+    this.idx   = Math.max(0, Math.min(items.length - 1, newIdx));
+    this.render(false);
+    this.onchange(this.items[this.idx]);
+  }
+}
+
+// 年
+const yearItems = [now.getFullYear(), now.getFullYear() + 1];
+const drumY = new Drum(
+  document.getElementById('drumY'),
+  document.getElementById('trackY'),
+  yearItems,
+  yearItems.indexOf(selY),
+  val => { selY = val; rebuildDayDrum(); }
+);
+
+// 月
+const monthItems = Array.from({length:12}, (_,i) => i+1);
+const drumM = new Drum(
+  document.getElementById('drumM'),
+  document.getElementById('trackM'),
+  monthItems,
+  selM - 1,
+  val => { selM = val; rebuildDayDrum(); }
+);
+
+// 日
+let drumD;
+function buildDayItems() {
+  return Array.from({length: daysInMonth(selY, selM)}, (_,i) => i+1);
+}
+drumD = new Drum(
+  document.getElementById('drumD'),
+  document.getElementById('trackD'),
+  buildDayItems(),
+  selD - 1,
+  val => { selD = val; updateWeekday(); }
+);
+
+function rebuildDayDrum() {
+  const items  = buildDayItems();
+  const newIdx = Math.min(selD - 1, items.length - 1);
+  selD = items[newIdx];
+  drumD.rebuild(items, newIdx);
+  updateWeekday();
+}
+
+updateWeekday();
+
+// ======================================================
+// ステッパー
+// ======================================================
+function adj(key, d) {
+  if (key === 'nights') {
+    nights = Math.max(1, Math.min(14, nights + d));
+    document.getElementById('vNights').textContent = nights;
+  } else {
+    adults = Math.max(1, Math.min(10, adults + d));
+    document.getElementById('vAdults').textContent = adults;
+  }
+}
+
+// ======================================================
+// 画面切り替え
+// ======================================================
+function showDate() {
+  document.getElementById('pageDate').classList.remove('hidden');
+  document.getElementById('pageResult').classList.add('hidden');
+}
+function showResult() {
+  document.getElementById('pageDate').classList.add('hidden');
+  document.getElementById('pageResult').classList.remove('hidden');
+}
+
+// ======================================================
+// 検索・表示
+// ======================================================
+let allHotels = [], currentSort = 'price';
+
+function setSort(key, e) {
+  currentSort = key;
+  document.querySelectorAll('.sortRow .fBtn').forEach(b => b.classList.remove('active'));
+  e.target.classList.add('active');
+  renderHotels();
+}
+
+function starStr(n) {
+  const v = Math.round((n || 0) * 2) / 2;
+  return '★'.repeat(Math.floor(v)) + (v % 1 ? '☆' : '') + '☆'.repeat(Math.max(0, 5 - Math.ceil(v)));
+}
+
+function renderHotels() {
+  const sorted = [...allHotels].sort((a, b) =>
+    currentSort === 'rating'
+      ? (b.reviewAverage || 0) - (a.reviewAverage || 0)
+      : (a.minCharge || 99999999) - (b.minCharge || 99999999)
+  );
+  const grid = document.getElementById('hotelGrid');
+  grid.innerHTML = '';
+  sorted.forEach(h => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    const price  = h.minCharge ? `¥${Number(h.minCharge).toLocaleString()}〜` : '要確認';
+    const review = h.reviewAverage ? `${Number(h.reviewAverage).toFixed(1)} (${h.reviewCount || 0}件)` : '-';
+    const rRows  = [['サービス',h.serviceAverage],['立地',h.locationAverage],['部屋',h.roomAverage],['風呂',h.bathAverage],['食事',h.mealAverage]]
+      .filter(([,v]) => v)
+      .map(([k,v]) => `<div class="rItem"><span>${k}</span><span class="rVal">${Number(v).toFixed(1)}</span></div>`)
+      .join('');
+    const base = h.planListUrl || h.hotelInformationUrl || '#';
+    const rUrl = base !== '#' ? `${base}&checkinDate=${ciStr}&checkoutDate=${coStr}&adultNum=${adults}&roomNum=1` : '#';
+    card.innerHTML = `
+      ${h.hotelImageUrl ? `<img src="${h.hotelImageUrl}" alt="${h.hotelName}" loading="lazy" onerror="this.style.display='none'">` : ''}
+      <div class="hName">${h.hotelName}</div>
+      <div class="hAddr">${h.address1||''}${h.address2||''}</div>
+      <div class="stars">${starStr(h.reviewAverage)} <span style="color:var(--muted);font-size:11px">${review}</span></div>
+      <div class="pills">
+        ${h.checkinTime  ? `<span class="pill">IN ${h.checkinTime}</span>`  : ''}
+        ${h.checkoutTime ? `<span class="pill">OUT ${h.checkoutTime}</span>` : ''}
+      </div>
+      ${rRows ? `<div class="rGrid">${rRows}</div>` : ''}
+      <div class="price">${price} <span class="priceNote">/ 1室 ${nights}泊</span></div>
+      <div class="ciInfo">${ciStr} 〜 ${coStr}（${nights}泊）</div>
+      <a class="reserveBtn" href="${rUrl}" target="_blank" rel="noopener noreferrer">楽天トラベルで予約</a>`;
+    grid.appendChild(card);
+  });
+}
+
+async function doSearch() {
+  const co = new Date(selY, selM - 1, selD);
+  co.setDate(co.getDate() + nights);
+  ciStr = ymd(selY, selM, selD);
+  coStr = ymd(co.getFullYear(), co.getMonth() + 1, co.getDate());
+
+  const sq = [];
+  if (document.getElementById('onsen').checked)    sq.push('onsen');
+  if (document.getElementById('daiyoku').checked)  sq.push('daiyoku');
+  if (document.getElementById('internet').checked) sq.push('internet');
+
+  showResult();
+  const sb = document.getElementById('statusBox');
+  sb.className = 'status warn';
+  sb.textContent = '🔍 空室を検索中...';
+  document.getElementById('sortRow').style.display = 'none';
+  document.getElementById('hotelGrid').innerHTML = '';
+
+  try {
+    let url = `/api/hotels?name=${encodeURIComponent(courseName)}&address=${encodeURIComponent(address)}&pref=${encodeURIComponent(pref)}&checkin=${ciStr}&checkout=${coStr}&adults=${adults}&rooms=1`;
+    if (sq.length) url += `&squeeze=${sq.join(',')}`;
+    const res  = await fetch(url);
+    if (!res.ok) throw new Error(await res.text() || 'API error');
+    const data = await res.json();
+    allHotels  = data.hotels || [];
+
+    if (!allHotels.length) {
+      sb.className = 'status warn';
+      sb.innerHTML = `⚠️「${data.keyword || address}」周辺に空室が見つかりませんでした。<br>日付や条件を変えてお試しください。`;
+      return;
+    }
+    sb.className = 'status ok';
+    sb.textContent = `✅ ${allHotels.length}件（${data.keyword} / ${ciStr}〜${coStr} ${nights}泊）`;
+    document.getElementById('sortRow').style.display = 'flex';
+    renderHotels();
+  } catch(e) {
+    sb.className = 'status err';
+    sb.textContent = '❌ エラー: ' + (e.message || '取得失敗');
+  }
+}
+</script>
+</body>
+</html>
