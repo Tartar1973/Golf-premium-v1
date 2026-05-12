@@ -500,7 +500,7 @@ function renderHotels() {
         ${h.checkoutTime ? `<span class="pill">OUT ${h.checkoutTime}</span>` : ''}
       </div>
       ${rRows ? `<div class="rGrid">${rRows}</div>` : ''}
-      <div class="price">${price} <span class="priceNote">/ 1室 ${nights}泊</span></div>
+      <div class="price">${price} <span class="priceNote">/ 1室 1泊（税別・最安値）</span></div>
       <div class="ciInfo">${ciStr} 〜 ${coStr}（${nights}泊）</div>
       <a class="reserveBtn" href="${rUrl}" target="_blank" rel="noopener noreferrer">楽天トラベルで予約</a>`;
     grid.appendChild(card);
