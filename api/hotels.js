@@ -182,7 +182,8 @@ const AREA_MAP = [
   ['城崎','hyogo','kita'],['豊岡','hyogo','kita'],
   ['香住','hyogo','kasumi'],['浜坂','hyogo','kasumi'],['湯村','hyogo','kasumi'],
   ['淡路','hyogo','awaji'],
-  ['橿原','nara','hokubu'],['大和郡山','nara','hokubu'],['天理','nara','hokubu'],
+  ['奈良市','nara','nara'],['奈良','nara','nara'],['生駒','nara','nara'],
+  ['橿原','nara','hokubu'],['大和郡山','nara','hokubu'],['天理','nara','hokubu'],['桜井','nara','hokubu'],
   ['吉野','nara','nanbu'],['十津川','nara','nanbu'],
   ['高野山','wakayama','Kihoku'],
   ['御坊','wakayama','gobo'],['有田','wakayama','gobo'],
@@ -267,6 +268,58 @@ function findSmallCode(address, cityName, middleCode) {
   }
   return '';
 }
+
+
+// 都道府県ごとの全smallClassCode一覧（フォールバック用）
+const PREF_SMALLS = {
+  'hokkaido':['sapporo','jozankei','wakkanai','abashiri','kushiro','obihiro','hidaka','furano','asahikawa','chitose','otaru','niseko','hakodate','noboribetsu'],
+  'aomori':['aomori','tsugaru','ntsugaru','hirosaki','towadako','hachinohe','shimokita'],
+  'iwate':['morioka','shizukuishi','appi','kuji','ofunato','kitakami','ichinoseki'],
+  'miyagi':['sendai','akiu','naruko','matsushima','shiroishi'],
+  'akita':['akita','noshiro','odate','tazawa','yuzawa','honjo'],
+  'yamagata':['yamagata','yonezawa','sagae','mogami','shonai'],
+  'hukushima':['fukushima','aizu','bandai','urabandai','koriyama','minami','nakadori','hamadori'],
+  'ibaragi':['mito','oarai','hitachi','tsukuba','yuki','kashima'],
+  'tochigi':['utsunomiya','nikko','kinugawa','nasu','shiobara','mashiko','koyama'],
+  'gunma':['maebashi','ikaho','manza','kusatsu','shimaonsen','numata','oze','kiryu','takasaki','fujioka'],
+  'saitama':['saitama','kasukabe','kumagaya','kawagoe','tokorozawa','chichibu'],
+  'tiba':['chiba','keiyo','kashiwa','narita','choshi','sotobo','tateyama','uchibo'],
+  'tokyo':['tokyo','nishi','okutama','ritou','oshima','kouzu','miyake','Ogasawara'],
+  'kanagawa':['yokohama','kawasaki','hakone','odawara','yugawara','sagamiko','sagamihara','ebina','shonan','miura'],
+  'niigata':['niigata','kaetsu','kita','minami','yuzawa','joetsu','sado'],
+  'toyama':['toyama','goto','gosei'],
+  'ishikawa':['kanazawa','kaga','noto','nanao'],
+  'hukui':['hukui','awara','katsuyama','echizen','tsuruga','obama'],
+  'yamanasi':['kofu','yamanashi','otsuki','yamanakako','kawaguchiko','minobu','nirasaki','kiyosato'],
+  'nagano':['nagano','madara','nozawa','shiga','ueda','chikuma','sugadaira','karui','yatsu','kirigamine','suwa','ina','kiso','matsumo','kamiko','hotaka','hakuba'],
+  'gihu':['gifu','kamitakara','takayama','gero','tajimi','gujo','shirakawago','ogaki'],
+  'shizuoka':['shizuoka','atami','ito','izukogen','higashi','shimoda','nishi','naka','fuji','numazu','yaizu','hamamatsu','kikugawa'],
+  'aichi':['nagoyashi','mikawawan','okumikawa','mikawa','owari','chita','minamichita'],
+  'mie':['tsu','yunoyama','iga','matsusaka','ise','toba','shima','kumano'],
+  'shiga':['ootsu','kosei','kohoku','kotou','shigaraki'],
+  'kyoto':['shi','nannbu','yunohana','fukuchiyama','hokubu','miyazu'],
+  'osaka':['shi','hokubu','toubu','nantou','nanbu'],
+  'hyogo':['kobe','nantou','minamichu','nannansei','chubu','kita','kasumi','awaji'],
+  'nara':['nara','hokubu','nanbu'],
+  'wakayama':['wakayama','Kihoku','gobo','shirahama','Katsuura','hongu'],
+  'tottori':['tottori','chubu','seibu'],
+  'simane':['matsue','toubu','masuda','ritou'],
+  'okayama':['okayama','bizen','tsuyama','niimi','kurashiki'],
+  'hiroshima':['hiroshima','higashihiroshima','fukuyama','kure','shohara','sandankyo','miyajima'],
+  'yamaguchi':['yamaguchi','shimonoseki','iwakuni','hagi'],
+  'tokushima':['tokushima','hokubu','nanbu'],
+  'kagawa':['takamatsu','sakaide','kotohira','ritou'],
+  'ehime':['chuuyo','touyo','saijo','nanyo'],
+  'kouchi':['kouchi','toubu','seibu'],
+  'hukuoka':['fukuoka','seibu','kitakyusyu','chikuzen','kurume','buzen','chikugo'],
+  'saga':['saga','tosu','ureshino','karatsu'],
+  'nagasaki':['nagasaki','unzen','airport','sasebo','ritou','tsushima','iki'],
+  'kumamoto':['kumamoto','kikuchi','aso','yatsushiro','kuma','amakusa','kurokawa'],
+  'ooita':['oita','beppu','usuki','yufuin','taketa','hita','kunisaki'],
+  'miyazaki':['miyazaki','hokubu','nanbu'],
+  'kagoshima':['kagoshima','oosumi','kanoya','hokusatsu','nansatsu','yakushima','ritou','amami','okinoerabu'],
+  'okinawa':['nahashi','hokubu','chubu','nanbu','kerama','kumejima','Miyako','ritou','yonaguni','daito'],
+};
 
 export default async function handler(req, res) {
   try {
@@ -387,26 +440,19 @@ export default async function handler(req, res) {
       usedKeyword = cityName || prefName;
     }
 
-    // ② 結果が少なければ都道府県全体（squeezeConditionなしで再試行）
+    // ② smallCodeが空、または結果が少なければ全smallClassを順次検索
     if (hotels.length < 5 && middleCode) {
-      const u = new URL('https://openapi.rakuten.co.jp/engine/api/Travel/SimpleHotelSearch/20170426');
-      u.searchParams.set('format','json');
-      u.searchParams.set('formatVersion','2');
-      u.searchParams.set('applicationId', applicationId);
-      u.searchParams.set('accessKey', accessKey);
-      if (affiliateId) u.searchParams.set('affiliateId', affiliateId);
-      u.searchParams.set('checkinDate',  checkinDate);
-      u.searchParams.set('checkoutDate', checkoutDate);
-      u.searchParams.set('adultNum', String(Math.min(10,Math.max(1,parseInt(adults)||1))));
-      u.searchParams.set('roomNum',  String(Math.min(10,Math.max(1,parseInt(rooms)||1))));
-      u.searchParams.set('hits',     '30');
-      u.searchParams.set('page',     '1');
-      u.searchParams.set('sort',     '+roomCharge');
-      u.searchParams.set('responseType', 'large');
-      u.searchParams.set('largeClassCode',  'japan');
-      u.searchParams.set('middleClassCode', middleCode);
-      const d = await fetchJSON(u.toString());
-      hotels = merge(hotels, parseHotels(d));
+      const smalls = PREF_SMALLS[middleCode] || [];
+      // smallCodeが取れていた場合は除外して残りを検索
+      const targets = smallCode ? smalls.filter(s => s !== smallCode) : smalls;
+      for (const sc of targets) {
+        if (hotels.length >= 20) break;
+        const d = await fetchJSON(buildUrl({
+          largeClassCode:'japan', middleClassCode:middleCode, smallClassCode:sc
+        }));
+        hotels = merge(hotels, parseHotels(d));
+        if (hotels.length >= 5) break; // 十分出たら止める
+      }
       usedKeyword = prefName;
     }
 
