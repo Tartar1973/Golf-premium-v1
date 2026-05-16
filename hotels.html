@@ -216,6 +216,8 @@ const P = new URLSearchParams(location.search);
 const courseName = P.get('name')    || 'ゴルフ場';
 const address    = P.get('address') || '';
 const pref       = P.get('pref')    || '';
+const lat        = P.get('lat')     || '';
+const lng        = P.get('lng')     || '';
 
 document.getElementById('courseBadge').textContent = '⛳ ' + courseName;
 document.getElementById('courseSub').textContent   = `「${courseName}」周辺のホテルを楽天トラベルで検索します`;
