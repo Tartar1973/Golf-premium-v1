@@ -473,24 +473,20 @@ function setSort(key, e) {
   renderHotels();
 }
 
-// 日本測地系秒単位 → 世界測地系度単位に変換
-function secToDeg(sec) {
-  // 秒単位（例: 139435.7）→ 度単位（例: 38.732...）
-  // 秒 / 3600 = 度
-  return sec / 3600;
-}
-
+// 楽天トラベルAPIは度単位（小数）で返ってくるのでそのまま使う
 function makeFoodSearchUrl(hotelLat, hotelLng, keyword) {
   if (!hotelLat || !hotelLng) return null;
-  const hLat = secToDeg(parseFloat(hotelLat));
-  const hLng = secToDeg(parseFloat(hotelLng));
+  const hLat = parseFloat(hotelLat);
+  const hLng = parseFloat(hotelLng);
+  if (isNaN(hLat) || isNaN(hLng)) return null;
   return `https://www.google.com/maps/search/${encodeURIComponent(keyword)}/@${hLat},${hLng},15z`;
 }
 
 function makeGoogleMapUrl(hotelLat, hotelLng, golfLat, golfLng) {
   if (!hotelLat || !hotelLng || !golfLat || !golfLng) return null;
-  const hLat = secToDeg(parseFloat(hotelLat));
-  const hLng = secToDeg(parseFloat(hotelLng));
+  const hLat = parseFloat(hotelLat);
+  const hLng = parseFloat(hotelLng);
+  if (isNaN(hLat) || isNaN(hLng)) return null;
   return `https://www.google.com/maps/dir/${hLat},${hLng}/${golfLat},${golfLng}/`;
 }
 
