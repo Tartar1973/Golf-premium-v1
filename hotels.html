@@ -216,6 +216,8 @@ const P = new URLSearchParams(location.search);
 const courseName = P.get('name')    || 'ゴルフ場';
 const address    = P.get('address') || '';
 const pref       = P.get('pref')    || '';
+const lat        = P.get('lat')     || '';
+const lng        = P.get('lng')     || '';
 
 document.getElementById('courseBadge').textContent = '⛳ ' + courseName;
 document.getElementById('courseSub').textContent   = `「${courseName}」周辺のホテルを楽天トラベルで検索します`;
@@ -466,6 +468,27 @@ function setSort(key, e) {
   renderHotels();
 }
 
+// 日本測地系秒単位 → 世界測地系度単位に変換
+function secToDeg(sec) {
+  // 秒単位（例: 139435.7）→ 度単位（例: 38.732...）
+  // 秒 / 3600 = 度
+  return sec / 3600;
+}
+
+function makeFoodSearchUrl(hotelLat, hotelLng, keyword) {
+  if (!hotelLat || !hotelLng) return null;
+  const hLat = secToDeg(parseFloat(hotelLat));
+  const hLng = secToDeg(parseFloat(hotelLng));
+  return `https://www.google.com/maps/search/${encodeURIComponent(keyword)}/@${hLat},${hLng},15z`;
+}
+
+function makeGoogleMapUrl(hotelLat, hotelLng, golfLat, golfLng) {
+  if (!hotelLat || !hotelLng || !golfLat || !golfLng) return null;
+  const hLat = secToDeg(parseFloat(hotelLat));
+  const hLng = secToDeg(parseFloat(hotelLng));
+  return `https://www.google.com/maps/dir/${hLat},${hLng}/${golfLat},${golfLng}/`;
+}
+
 function starStr(n) {
   const v = Math.round((n || 0) * 2) / 2;
   return '★'.repeat(Math.floor(v)) + (v % 1 ? '☆' : '') + '☆'.repeat(Math.max(0, 5 - Math.ceil(v)));
@@ -500,8 +523,14 @@ function renderHotels() {
         ${h.checkoutTime ? `<span class="pill">OUT ${h.checkoutTime}</span>` : ''}
       </div>
       ${rRows ? `<div class="rGrid">${rRows}</div>` : ''}
-      <div class="price">${price} <span class="priceNote">/ 1室 ${nights}泊</span></div>
+      <div class="price">${price} <span class="priceNote">/ 1室 1泊（税別・最安値）</span></div>
       <div class="ciInfo">${ciStr} 〜 ${coStr}（${nights}泊）</div>
+      ${makeGoogleMapUrl(h.latitude, h.longitude, lat, lng) ? `<a class="mapBtn" href="${makeGoogleMapUrl(h.latitude, h.longitude, lat, lng)}" target="_blank" rel="noopener noreferrer">🚗 ゴルフ場へのルートを見る</a>` : ''}
+      <div class="foodBtns">
+        ${makeFoodSearchUrl(h.latitude, h.longitude, '居酒屋') ? `<a class="foodBtn" href="${makeFoodSearchUrl(h.latitude, h.longitude, '居酒屋')}" target="_blank" rel="noopener noreferrer">🍺 居酒屋</a>` : ''}
+        ${makeFoodSearchUrl(h.latitude, h.longitude, 'レストラン') ? `<a class="foodBtn" href="${makeFoodSearchUrl(h.latitude, h.longitude, 'レストラン')}" target="_blank" rel="noopener noreferrer">🍽️ レストラン</a>` : ''}
+        ${makeFoodSearchUrl(h.latitude, h.longitude, '地元料理') ? `<a class="foodBtn" href="${makeFoodSearchUrl(h.latitude, h.longitude, '地元料理')}" target="_blank" rel="noopener noreferrer">🥢 地元料理</a>` : ''}
+      </div>
       <a class="reserveBtn" href="${rUrl}" target="_blank" rel="noopener noreferrer">楽天トラベルで予約</a>`;
     grid.appendChild(card);
   });
