@@ -214,7 +214,6 @@ select{width:100%;padding:12px 14px;border-radius:14px;background:#111827;color:
       <select id="area"></select>
 <label class="ttl" id="hokkaidoAreaTtl" style="margin-top:16px">Hokkaido Area</label>
 <select id="hokkaidoArea"></select>
-<div id="prefSelectWrap" style="display:none;margin-top:8px"><select id="prefSelect"></select></div>
       <label class="ttl" id="brandTtl" style="margin-top:16px">Brand</label>
       <div id="brandChips" class="chips"></div>
 
@@ -261,7 +260,7 @@ select{width:100%;padding:12px 14px;border-radius:14px;background:#111827;color:
 
 <script>
 const PREF_CODES = {'北海道':1,'青森県':2,'岩手県':3,'宮城県':4,'秋田県':5,'山形県':6,'福島県':7,'茨城県':8,'栃木県':9,'群馬県':10,'埼玉県':11,'千葉県':12,'東京都':13,'神奈川県':14,'新潟県':15,'富山県':16,'石川県':17,'福井県':18,'山梨県':19,'長野県':20,'岐阜県':21,'静岡県':22,'愛知県':23,'三重県':24,'滋賀県':25,'京都府':26,'大阪府':27,'兵庫県':28,'奈良県':29,'和歌山県':30,'鳥取県':31,'島根県':32,'岡山県':33,'広島県':34,'山口県':35,'徳島県':36,'香川県':37,'愛媛県':38,'高知県':39,'福岡県':40,'佐賀県':41,'長崎県':42,'熊本県':43,'大分県':44,'宮崎県':45,'鹿児島県':46,'沖縄県':47};
-const AREAS = {all:Object.keys(PREF_CODES),hokkaido:['北海道'],tohoku:['青森県','岩手県','宮城県','秋田県','山形県','福島県'],kanto:['茨城県','栃木県','群馬県','埼玉県','千葉県','東京都','神奈川県'],chubu:['新潟県','富山県','石川県','福井県','山梨県','長野県','岐阜県','静岡県','愛知県','三重県'],kinki:['滋賀県','京都府','大阪府','兵庫県','奈良県','和歌山県'],chugoku:['鳥取県','島根県','岡山県','広島県','山口県'],shikoku:['徳島県','香川県','愛媛県','高知県'],kyushu:['福岡県','佐賀県','長崎県','熊本県','大分県','宮崎県','鹿児島県'],okinawa:['沖縄県'],pref:[]};
+const AREAS = {all:Object.keys(PREF_CODES),hokkaido:['北海道'],tohoku:['青森県','岩手県','宮城県','秋田県','山形県','福島県'],kanto:['茨城県','栃木県','群馬県','埼玉県','千葉県','東京都','神奈川県'],chubu:['新潟県','富山県','石川県','福井県','山梨県','長野県','岐阜県','静岡県','愛知県','三重県'],kinki:['滋賀県','京都府','大阪府','兵庫県','奈良県','和歌山県'],chugoku:['鳥取県','島根県','岡山県','広島県','山口県'],shikoku:['徳島県','香川県','愛媛県','高知県'],kyushu:['福岡県','佐賀県','長崎県','熊本県','大分県','宮崎県','鹿児島県'],okinawa:['沖縄県']};
 const BRANDS = ['GRAND PGM','PGM','アコーディア','その他'];
 const REGION_SCORE = {"北海道": {"cool": 10, "warm": -6, "snow": 10}, "青森県": {"cool": 8, "warm": -4, "snow": 8}, "岩手県": {"cool": 8, "warm": -4, "snow": 7}, "宮城県": {"cool": 5, "warm": 0, "snow": 3}, "秋田県": {"cool": 8, "warm": -4, "snow": 8}, "山形県": {"cool": 8, "warm": -3, "snow": 8}, "福島県": {"cool": 6, "warm": -1, "snow": 5}, "茨城県": {"cool": 2, "warm": 4, "snow": 0}, "栃木県": {"cool": 5, "warm": 2, "snow": 4}, "群馬県": {"cool": 5, "warm": 2, "snow": 4}, "埼玉県": {"cool": 0, "warm": 3, "snow": 0}, "千葉県": {"cool": 1, "warm": 8, "snow": 0}, "東京都": {"cool": 0, "warm": 4, "snow": 0}, "神奈川県": {"cool": 1, "warm": 6, "snow": 0}, "新潟県": {"cool": 6, "warm": -2, "snow": 9}, "富山県": {"cool": 5, "warm": -1, "snow": 6}, "石川県": {"cool": 4, "warm": 1, "snow": 5}, "福井県": {"cool": 4, "warm": 2, "snow": 4}, "山梨県": {"cool": 6, "warm": 1, "snow": 4}, "長野県": {"cool": 10, "warm": -3, "snow": 8}, "岐阜県": {"cool": 5, "warm": 0, "snow": 5}, "静岡県": {"cool": 3, "warm": 8, "snow": 0}, "愛知県": {"cool": 1, "warm": 5, "snow": 0}, "三重県": {"cool": 1, "warm": 7, "snow": 0}, "滋賀県": {"cool": 2, "warm": 3, "snow": 2}, "京都府": {"cool": 1, "warm": 4, "snow": 1}, "大阪府": {"cool": 0, "warm": 5, "snow": 0}, "兵庫県": {"cool": 2, "warm": 5, "snow": 1}, "奈良県": {"cool": 2, "warm": 4, "snow": 1}, "和歌山県": {"cool": 1, "warm": 9, "snow": 0}, "鳥取県": {"cool": 3, "warm": 4, "snow": 2}, "島根県": {"cool": 3, "warm": 5, "snow": 2}, "岡山県": {"cool": 1, "warm": 7, "snow": 0}, "広島県": {"cool": 1, "warm": 6, "snow": 0}, "山口県": {"cool": 2, "warm": 7, "snow": 0}, "徳島県": {"cool": 1, "warm": 7, "snow": 0}, "香川県": {"cool": 1, "warm": 8, "snow": 0}, "愛媛県": {"cool": 1, "warm": 8, "snow": 0}, "高知県": {"cool": 2, "warm": 9, "snow": 0}, "福岡県": {"cool": 1, "warm": 7, "snow": 0}, "佐賀県": {"cool": 1, "warm": 7, "snow": 0}, "長崎県": {"cool": 2, "warm": 8, "snow": 0}, "熊本県": {"cool": 3, "warm": 7, "snow": 0}, "大分県": {"cool": 3, "warm": 7, "snow": 0}, "宮崎県": {"cool": 2, "warm": 10, "snow": 0}, "鹿児島県": {"cool": 2, "warm": 10, "snow": 0}, "沖縄県": {"cool": 4, "warm": 10, "snow": 0}};
 
@@ -276,8 +275,8 @@ const BRAND_LABELS = {
   en: {"GRAND PGM":"GRAND PGM","PGM":"PGM","アコーディア":"Accordia","その他":"Others"}
 };
 const AREA_LABELS = {
-  ja: {"all":"全国","hokkaido":"北海道","tohoku":"東北","kanto":"関東","chubu":"中部","kinki":"近畿","chugoku":"中国","shikoku":"四国","kyushu":"九州","okinawa":"沖縄","pref":"都道府県を指定"},
-  en: {"all":"All Japan","hokkaido":"Hokkaido","tohoku":"Tohoku","kanto":"Kanto","chubu":"Chubu","kinki":"Kinki","chugoku":"Chugoku","shikoku":"Shikoku","kyushu":"Kyushu","okinawa":"Okinawa","pref":"Select Prefecture"}
+  ja: {"all":"全国","hokkaido":"北海道","tohoku":"東北","kanto":"関東","chubu":"中部","kinki":"近畿","chugoku":"中国","shikoku":"四国","kyushu":"九州","okinawa":"沖縄"},
+  en: {"all":"All Japan","hokkaido":"Hokkaido","tohoku":"Tohoku","kanto":"Kanto","chubu":"Chubu","kinki":"Kinki","chugoku":"Chugoku","shikoku":"Shikoku","kyushu":"Kyushu","okinawa":"Okinawa"}
 };
 const SEASON_NAMES = {
   ja: {"auto":"自動判定","spring":"春","summer":"夏","autumn":"秋","winter":"冬"},
@@ -403,7 +402,7 @@ function populateAreaOptions() {
   const area = document.getElementById('area');
   const current = area.value || 'all';
   area.innerHTML = '';
-  ['all','hokkaido','tohoku','kanto','chubu','kinki','chugoku','shikoku','kyushu','okinawa','pref'].forEach(v => {
+  ['all','hokkaido','tohoku','kanto','chubu','kinki','chugoku','shikoku','kyushu','okinawa'].forEach(v => {
     const opt = document.createElement('option');
     opt.value = v;
     opt.textContent = AREA_LABELS[currentLang][v];
@@ -429,26 +428,11 @@ function refreshHokkaidoAreaVisibility() {
   const areaValue = document.getElementById('area').value;
   const label = document.getElementById('hokkaidoAreaTtl');
   const select = document.getElementById('hokkaidoArea');
+
   const show = areaValue === 'hokkaido';
+
   label.style.display = show ? 'block' : 'none';
   select.style.display = show ? 'block' : 'none';
-}
-
-function refreshPrefSelectVisibility() {
-  const areaValue = document.getElementById('area').value;
-  const wrap = document.getElementById('prefSelectWrap');
-  wrap.style.display = areaValue === 'pref' ? 'block' : 'none';
-}
-
-function populatePrefSelect() {
-  const sel = document.getElementById('prefSelect');
-  sel.innerHTML = '';
-  Object.keys(PREF_CODES).forEach(p => {
-    const opt = document.createElement('option');
-    opt.value = p;
-    opt.textContent = p;
-    sel.appendChild(opt);
-  });
 }
 function renderBrandChips() {
   brandChips.innerHTML = '';
@@ -538,14 +522,7 @@ async function fetchCourses(pref) {
   cache.set(key, list);
   return list;
 };
-function currentAreaPrefs() {
-  const v = document.getElementById('area').value;
-  if (v === 'pref') {
-    const p = document.getElementById('prefSelect').value;
-    return p ? [p] : Object.keys(PREF_CODES);
-  }
-  return AREAS[v];
-}
+function currentAreaPrefs() { return AREAS[document.getElementById('area').value]; }
 function pickWeightedPref(prefs) {
   const s = seasonKey();
   const scored = prefs.map(pref => {
@@ -641,7 +618,7 @@ function drawWinner(pref, picked, list) {
   document.getElementById('winLinks').innerHTML = `
     <a class="primaryLink" href="${picked.detailUrl}" target="_blank" rel="noopener noreferrer">${esc(tr('golfDetail'))}</a>
     <a href="${picked.reserveUrl}" target="_blank" rel="noopener noreferrer">${esc(tr('reserve'))}</a>
-    <a class="hotelLink" href="/hotels.html?name=${encodeURIComponent(picked.name)}&address=${encodeURIComponent(picked.address)}&pref=${encodeURIComponent(picked.pref)}" target="_blank" rel="noopener noreferrer">${esc(tr('hotelSearch'))}</a>
+    <a class="hotelLink" href="/hotels.html?name=${encodeURIComponent(picked.name)}&address=${encodeURIComponent(picked.address)}&pref=${encodeURIComponent(picked.pref)}&lat=${encodeURIComponent(picked.lat||'')}&lng=${encodeURIComponent(picked.lng||'')}" target="_blank" rel="noopener noreferrer">${esc(tr('hotelSearch'))}</a>
   `;
   drawCandidates(list, picked.golfCourseId);
 }
@@ -686,12 +663,9 @@ function setLanguage(lang, openApp = true) {
   populateSeasonOptions();
   populateAreaOptions();
   populateHokkaidoAreaOptions();
-  populatePrefSelect();
-  refreshPrefSelectVisibility();
   renderBrandChips();
   refreshLabels();
   refreshHokkaidoAreaVisibility();
-  refreshPrefSelectVisibility();
   setStatus('', tr('envNotice'));
   const boot = makeTickerItems(AREAS.all, '東京都');
   renderTicker(boot);
@@ -776,7 +750,6 @@ document.getElementById('season').onchange = () => { refreshLabels(); cache.clea
 document.getElementById('area').onchange = () => {
   refreshLabels();
   refreshHokkaidoAreaVisibility();
-  refreshPrefSelectVisibility();
   lastPref = null;
   cache.clear(); 
 };
@@ -789,12 +762,9 @@ updateStaticTexts();
 populateSeasonOptions();
 populateAreaOptions();
 populateHokkaidoAreaOptions();
-populatePrefSelect();
-refreshPrefSelectVisibility();
 renderBrandChips();
 refreshLabels();
 refreshHokkaidoAreaVisibility();
-  refreshPrefSelectVisibility();
 document.getElementById('winCourse').textContent = tr('noResultYet');
 document.getElementById('winDesc').textContent = tr('pleaseSpin');
 setStatus('', tr('envNotice'));
