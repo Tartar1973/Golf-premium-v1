@@ -625,7 +625,7 @@ async function doSearch() {
   document.getElementById('hotelGrid').innerHTML = '';
 
   try {
-    let url = `/api/hotels?name=${encodeURIComponent(courseName)}&address=${encodeURIComponent(searchAddress)}&pref=${encodeURIComponent(pref)}&checkin=${ciStr}&checkout=${coStr}&adults=${adults}&rooms=1`;
+    let url = `/api/hotels?name=${encodeURIComponent(courseName)}&address=${encodeURIComponent(searchAddress)}&pref=${encodeURIComponent(pref)}&checkin=${ciStr}&checkout=${coStr}&adults=${adults}&rooms=1&mode=${encodeURIComponent(mode)}`;
     if (searchLat && searchLng) url += `&lat=${encodeURIComponent(searchLat)}&lng=${encodeURIComponent(searchLng)}`;
     if (sq.length) url += `&squeeze=${sq.join(',')}`;
     const res  = await fetch(url);
