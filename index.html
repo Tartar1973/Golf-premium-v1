@@ -312,7 +312,7 @@ const T = {
     noCandidates:"候補がありません", checkFilters:"環境変数やブランド選択を確認してください。", golfDetail:"ゴルフ場詳細",
     spinning:"ルーレット中", spinningStatus:"県ルーレットを回しています。", prefDecided:"県決定", loadingCourses:"選ばれた県の候補を取得しています。",
     decided:"決定", okFetched:"候補名・評価・詳細URL・予約カレンダーは楽天GORAの実データです。", rerolled:"再抽選", error:"エラー",
-    noArea:"エリア候補がありません。", notFound:"候補が見つかりませんでした。", hotelSearch:"🏨 近隣ホテルを探す"
+    noArea:"エリア候補がありません。", notFound:"候補が見つかりませんでした。", hotelSearch:"🏨 近隣ホテルを探す", hotelCapital:"🏙️ 県庁所在地周辺のホテルを探す"
   },
   en: {
     htmlLang:"en", gateEyebrow:"WELCOME", gateTitle:"Golf Journey Roulette", gateSub:"Choose your language first. Then spin the roulette to pick a prefecture and get real golf course candidates from Rakuten GORA.", gateNote:"You can switch between Japanese and English anytime after entering.",
@@ -326,7 +326,7 @@ const T = {
     noCandidates:"No candidates found", checkFilters:"Please check your environment variables or selected brands.", golfDetail:"Course Details",
     spinning:"Spinning", spinningStatus:"Spinning the prefecture roulette.", prefDecided:"Prefecture picked", loadingCourses:"Fetching candidates for the selected prefecture.",
     decided:"Selected", okFetched:"Course name, rating, detail URL, and booking calendar are pulled from live Rakuten GORA data.", rerolled:"Rerolled", error:"Error",
-    noArea:"No prefectures are available in this area.", notFound:"No matching candidates were found.", hotelSearch:"🏨 Find Nearby Hotels"
+    noArea:"No prefectures are available in this area.", notFound:"No matching candidates were found.", hotelSearch:"🏨 Find Nearby Hotels", hotelCapital:"🏙️ Hotels Near Prefecture Capital"
   }
 };
 
@@ -641,10 +641,12 @@ function drawWinner(pref, picked, list) {
     <span class="pill">${esc(tr('comfort'))} ${picked.comfort}</span>
     <span class="pill">${esc(tr('rating'))} ${Number(picked.evaluation || 0).toFixed(1)}</span>
   `;
+  const hotelBase = `/hotels.html?name=${encodeURIComponent(picked.name)}&address=${encodeURIComponent(picked.address)}&pref=${encodeURIComponent(picked.pref)}&lat=${encodeURIComponent(picked.lat||'')}&lng=${encodeURIComponent(picked.lng||'')}`;
   document.getElementById('winLinks').innerHTML = `
     <a class="primaryLink" href="${picked.detailUrl}" target="_blank" rel="noopener noreferrer">${esc(tr('golfDetail'))}</a>
     <a href="${picked.reserveUrl}" target="_blank" rel="noopener noreferrer">${esc(tr('reserve'))}</a>
-    <a class="hotelLink" href="/hotels.html?name=${encodeURIComponent(picked.name)}&address=${encodeURIComponent(picked.address)}&pref=${encodeURIComponent(picked.pref)}&lat=${encodeURIComponent(picked.lat||'')}&lng=${encodeURIComponent(picked.lng||'')}" target="_blank" rel="noopener noreferrer">${esc(tr('hotelSearch'))}</a>
+    <a class="hotelLink" href="${hotelBase}" target="_blank" rel="noopener noreferrer">${esc(tr('hotelSearch'))}</a>
+    <a class="hotelLink" style="background:linear-gradient(135deg,#1e40af,#60a5fa);border:none;color:#fff;" href="${hotelBase}&mode=capital" target="_blank" rel="noopener noreferrer">${esc(tr('hotelCapital'))}</a>
   `;
   drawCandidates(list, picked.golfCourseId);
 }

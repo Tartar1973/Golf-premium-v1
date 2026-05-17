@@ -217,16 +217,80 @@ h1{margin:0 0 6px;font-size:clamp(20px,5vw,28px);font-weight:900;background:line
 // ======================================================
 // URLパラメータ
 // ======================================================
+// 県庁所在地の座標マップ
+const CAPITAL_MAP = {
+  '北海道':   {city:'札幌市',    lat:43.0618, lng:141.3545},
+  '青森県':   {city:'青森市',    lat:40.8222, lng:140.7474},
+  '岩手県':   {city:'盛岡市',    lat:39.7036, lng:141.1527},
+  '宮城県':   {city:'仙台市',    lat:38.2688, lng:140.8721},
+  '秋田県':   {city:'秋田市',    lat:39.7186, lng:140.1024},
+  '山形県':   {city:'山形市',    lat:38.2404, lng:140.3634},
+  '福島県':   {city:'福島市',    lat:37.7608, lng:140.4748},
+  '茨城県':   {city:'水戸市',    lat:36.3418, lng:140.4468},
+  '栃木県':   {city:'宇都宮市',  lat:36.5658, lng:139.8836},
+  '群馬県':   {city:'前橋市',    lat:36.3906, lng:139.0603},
+  '埼玉県':   {city:'さいたま市',lat:35.8617, lng:139.6455},
+  '千葉県':   {city:'千葉市',    lat:35.6074, lng:140.1065},
+  '東京都':   {city:'新宿区',    lat:35.6896, lng:139.6917},
+  '神奈川県': {city:'横浜市',    lat:35.4437, lng:139.6380},
+  '新潟県':   {city:'新潟市',    lat:37.9162, lng:139.0364},
+  '富山県':   {city:'富山市',    lat:36.6953, lng:137.2113},
+  '石川県':   {city:'金沢市',    lat:36.5944, lng:136.6256},
+  '福井県':   {city:'福井市',    lat:36.0652, lng:136.2217},
+  '山梨県':   {city:'甲府市',    lat:35.6635, lng:138.5685},
+  '長野県':   {city:'長野市',    lat:36.6513, lng:138.1810},
+  '岐阜県':   {city:'岐阜市',    lat:35.4232, lng:136.7608},
+  '静岡県':   {city:'静岡市',    lat:34.9769, lng:138.3831},
+  '愛知県':   {city:'名古屋市',  lat:35.1802, lng:136.9066},
+  '三重県':   {city:'津市',      lat:34.7303, lng:136.5086},
+  '滋賀県':   {city:'大津市',    lat:35.0045, lng:135.8686},
+  '京都府':   {city:'京都市',    lat:35.0211, lng:135.7556},
+  '大阪府':   {city:'大阪市',    lat:34.6937, lng:135.5023},
+  '兵庫県':   {city:'神戸市',    lat:34.6913, lng:135.1830},
+  '奈良県':   {city:'奈良市',    lat:34.6851, lng:135.8048},
+  '和歌山県': {city:'和歌山市',  lat:34.2261, lng:135.1675},
+  '鳥取県':   {city:'鳥取市',    lat:35.5014, lng:134.2351},
+  '島根県':   {city:'松江市',    lat:35.4723, lng:133.0505},
+  '岡山県':   {city:'岡山市',    lat:34.6551, lng:133.9195},
+  '広島県':   {city:'広島市',    lat:34.3853, lng:132.4553},
+  '山口県':   {city:'山口市',    lat:34.1859, lng:131.4706},
+  '徳島県':   {city:'徳島市',    lat:34.0658, lng:134.5593},
+  '香川県':   {city:'高松市',    lat:34.3401, lng:134.0434},
+  '愛媛県':   {city:'松山市',    lat:33.8416, lng:132.7657},
+  '高知県':   {city:'高知市',    lat:33.5597, lng:133.5311},
+  '福岡県':   {city:'福岡市',    lat:33.5904, lng:130.4017},
+  '佐賀県':   {city:'佐賀市',    lat:33.2635, lng:130.3008},
+  '長崎県':   {city:'長崎市',    lat:32.7503, lng:129.8777},
+  '熊本県':   {city:'熊本市',    lat:32.8031, lng:130.7079},
+  '大分県':   {city:'大分市',    lat:33.2382, lng:131.6126},
+  '宮崎県':   {city:'宮崎市',    lat:31.9111, lng:131.4239},
+  '鹿児島県': {city:'鹿児島市',  lat:31.5602, lng:130.5581},
+  '沖縄県':   {city:'那覇市',    lat:26.2124, lng:127.6809},
+};
+
 const P = new URLSearchParams(location.search);
 const courseName = P.get('name')    || 'ゴルフ場';
 const address    = P.get('address') || '';
 const pref       = P.get('pref')    || '';
 const lat        = P.get('lat')     || '';
 const lng        = P.get('lng')     || '';
+const mode       = P.get('mode')    || 'nearby'; // 'nearby' or 'capital'
 
-document.getElementById('courseBadge').textContent = '⛳ ' + courseName;
-document.getElementById('courseSub').textContent   = `「${courseName}」周辺のホテルを楽天トラベルで検索します`;
-document.getElementById('resBadge').textContent    = '⛳ ' + courseName;
+// 県庁所在地モードの場合、住所・座標を上書き
+const capitalInfo = CAPITAL_MAP[pref] || null;
+const searchAddress = (mode === 'capital' && capitalInfo) ? (pref + capitalInfo.city) : address;
+const searchLat     = (mode === 'capital' && capitalInfo) ? String(capitalInfo.lat) : lat;
+const searchLng     = (mode === 'capital' && capitalInfo) ? String(capitalInfo.lng) : lng;
+
+const modeLabel = (mode === 'capital' && capitalInfo)
+  ? `🏙️ ${pref} ${capitalInfo.city}周辺`
+  : `⛳ ${courseName}`;
+
+document.getElementById('courseBadge').textContent = modeLabel;
+document.getElementById('courseSub').textContent   = mode === 'capital' && capitalInfo
+  ? `${pref}の県庁所在地「${capitalInfo.city}」周辺のホテルを検索します。ゴルフ場へのルート・グルメ情報もご確認いただけます。`
+  : `「${courseName}」周辺のホテルを楽天トラベルで検索します`;
+document.getElementById('resBadge').textContent    = modeLabel;
 
 // ======================================================
 // ドラムロール
@@ -512,10 +576,17 @@ function renderHotels() {
       .join('');
     const base = h.planListUrl || h.hotelInformationUrl || '#';
     const rUrl = base !== '#' ? `${base}&checkinDate=${ciStr}&checkoutDate=${coStr}&adultNum=${adults}&roomNum=1` : '#';
+    // routeUrl: ホテル→ゴルフ場のルート（出発=ホテル、目的地=ゴルフ場）
+    // グルメリンク: ホテル住所(hAddr)周辺で検索
+    const hAddr   = (h.address1||'') + (h.address2||'');
+    const routeUrl = makeGoogleMapUrl(hAddr, address);
+    const izakayaUrl = makeFoodSearchUrl(hAddr, '居酒屋');
+    const restUrl    = makeFoodSearchUrl(hAddr, 'レストラン');
+    const localUrl   = makeFoodSearchUrl(hAddr, '地元料理');
     card.innerHTML = `
       ${h.hotelImageUrl ? `<img src="${h.hotelImageUrl}" alt="${h.hotelName}" loading="lazy" onerror="this.style.display='none'">` : ''}
       <div class="hName">${h.hotelName}</div>
-      <div class="hAddr">${h.address1||''}${h.address2||''}</div>
+      <div class="hAddr">${hAddr}</div>
       <div class="stars">${starStr(h.reviewAverage)} <span style="color:var(--muted);font-size:11px">${review}</span></div>
       <div class="pills">
         ${h.checkinTime  ? `<span class="pill">IN ${h.checkinTime}</span>`  : ''}
@@ -524,11 +595,11 @@ function renderHotels() {
       ${rRows ? `<div class="rGrid">${rRows}</div>` : ''}
       <div class="price">${price} <span class="priceNote">/ 1室 1泊（税別・最安値）</span></div>
       <div class="ciInfo">${ciStr} 〜 ${coStr}（${nights}泊）</div>
-      ${(()=>{const hAddr=(h.address1||'')+(h.address2||'');const mapUrl=makeGoogleMapUrl(hAddr,address);return mapUrl?`<a class="mapBtn" href="${mapUrl}" target="_blank" rel="noopener noreferrer">🚗 ゴルフ場へのルートを見る</a>`:''})()}
+      ${routeUrl ? `<a class="mapBtn" href="${routeUrl}" target="_blank" rel="noopener noreferrer">🚗 ゴルフ場へのルートを見る</a>` : ''}
       <div class="foodBtns">
-        ${(()=>{const hAddr=(h.address1||'')+(h.address2||'');const u=makeFoodSearchUrl(hAddr,'居酒屋');return u?`<a class="foodBtn" href="${u}" target="_blank" rel="noopener noreferrer">🍺 居酒屋</a>`:''})()}
-        ${(()=>{const hAddr=(h.address1||'')+(h.address2||'');const u=makeFoodSearchUrl(hAddr,'レストラン');return u?`<a class="foodBtn" href="${u}" target="_blank" rel="noopener noreferrer">🍽️ レストラン</a>`:''})()}
-        ${(()=>{const hAddr=(h.address1||'')+(h.address2||'');const u=makeFoodSearchUrl(hAddr,'地元料理');return u?`<a class="foodBtn" href="${u}" target="_blank" rel="noopener noreferrer">🥢 地元料理</a>`:''})()}
+        ${izakayaUrl ? `<a class="foodBtn" href="${izakayaUrl}" target="_blank" rel="noopener noreferrer">🍺 居酒屋</a>` : ''}
+        ${restUrl    ? `<a class="foodBtn" href="${restUrl}"    target="_blank" rel="noopener noreferrer">🍽️ レストラン</a>` : ''}
+        ${localUrl   ? `<a class="foodBtn" href="${localUrl}"   target="_blank" rel="noopener noreferrer">🥢 地元料理</a>` : ''}
       </div>
       <a class="reserveBtn" href="${rUrl}" target="_blank" rel="noopener noreferrer">楽天トラベルで予約</a>`;
     grid.appendChild(card);
@@ -554,7 +625,8 @@ async function doSearch() {
   document.getElementById('hotelGrid').innerHTML = '';
 
   try {
-    let url = `/api/hotels?name=${encodeURIComponent(courseName)}&address=${encodeURIComponent(address)}&pref=${encodeURIComponent(pref)}&checkin=${ciStr}&checkout=${coStr}&adults=${adults}&rooms=1`;
+    let url = `/api/hotels?name=${encodeURIComponent(courseName)}&address=${encodeURIComponent(searchAddress)}&pref=${encodeURIComponent(pref)}&checkin=${ciStr}&checkout=${coStr}&adults=${adults}&rooms=1`;
+    if (searchLat && searchLng) url += `&lat=${encodeURIComponent(searchLat)}&lng=${encodeURIComponent(searchLng)}`;
     if (sq.length) url += `&squeeze=${sq.join(',')}`;
     const res  = await fetch(url);
     if (!res.ok) throw new Error(await res.text() || 'API error');
@@ -563,11 +635,13 @@ async function doSearch() {
 
     if (!allHotels.length) {
       sb.className = 'status warn';
-      sb.innerHTML = `⚠️「${data.keyword || address}」周辺に空室が見つかりませんでした。<br>日付や条件を変えてお試しください。`;
+      const areaLabel = mode === 'capital' && capitalInfo ? capitalInfo.city : (data.keyword || searchAddress);
+      sb.innerHTML = `⚠️「${areaLabel}」周辺に空室が見つかりませんでした。<br>日付や条件を変えてお試しください。`;
       return;
     }
     sb.className = 'status ok';
-    sb.textContent = `✅ ${allHotels.length}件（${data.keyword} / ${ciStr}〜${coStr} ${nights}泊）`;
+    const successLabel = mode === 'capital' && capitalInfo ? capitalInfo.city : data.keyword;
+    sb.textContent = `✅ ${allHotels.length}件（${successLabel} / ${ciStr}〜${coStr} ${nights}泊）`;
     document.getElementById('sortRow').style.display = 'flex';
     renderHotels();
   } catch(e) {
