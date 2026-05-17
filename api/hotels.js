@@ -275,7 +275,8 @@ export default async function handler(req, res) {
       address = '', pref = '', name = '',
       checkin = '', checkout = '',
       adults = '1', rooms = '1',
-      squeeze = ''
+      squeeze = '',
+      lat = '', lng = ''
     } = req.query;
 
     const applicationId = process.env.RAKUTEN_APPLICATION_ID;
@@ -287,6 +288,11 @@ export default async function handler(req, res) {
     const cityName   = (address.match(/[都道府県](.+?[市区町村郡])/)||[])[1] || '';
     const middleCode = PREF_MIDDLE[prefName] || '';
     const smallCode  = middleCode ? findSmallCode(address, cityName, middleCode) : '';
+
+    // 座標が有効かチェック
+    const latF = parseFloat(lat);
+    const lngF = parseFloat(lng);
+    const hasCoord = !isNaN(latF) && !isNaN(lngF) && latF !== 0 && lngF !== 0;
 
     function toDateStr(d) { return d.toISOString().slice(0,10); }
     const today    = new Date();
@@ -379,16 +385,28 @@ export default async function handler(req, res) {
 
     let hotels=[], usedKeyword=prefName;
 
-    // ① smallClassCode で検索
-    if (middleCode && smallCode) {
+    // ① 座標がある場合は半塉10kmの座標検索を優先（県庁所在地モード等）
+    if (hasCoord) {
       const d = await fetchJSON(buildUrl({
-        largeClassCode:'japan', middleClassCode:middleCode, smallClassCode:smallCode
+        latitude:     String(latF),
+        longitude:    String(lngF),
+        searchRadius: '10',
+        datumType:    '1',
       }));
       hotels = parseHotels(d);
       usedKeyword = cityName || prefName;
     }
 
-    // ② 結果が少なければ都道府県全体（squeezeConditionなしで再試行）
+    // ② 座標検索で不足 or 座標なし → smallClassCode で検索
+    if (hotels.length < 5 && middleCode && smallCode) {
+      const d = await fetchJSON(buildUrl({
+        largeClassCode:'japan', middleClassCode:middleCode, smallClassCode:smallCode
+      }));
+      hotels = merge(hotels, parseHotels(d));
+      usedKeyword = cityName || prefName;
+    }
+
+    // ③ まだ少なければ都道府県全体で再試行
     if (hotels.length < 5 && middleCode) {
       const u = new URL('https://openapi.rakuten.co.jp/engine/api/Travel/SimpleHotelSearch/20170426');
       u.searchParams.set('format','json');
