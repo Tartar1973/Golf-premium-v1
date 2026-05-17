@@ -333,7 +333,7 @@ export default async function handler(req, res) {
       u.searchParams.set('page',     '1');
       u.searchParams.set('sort',     '+roomCharge');
       u.searchParams.set('responseType', 'large');
-      if (squeeze) u.searchParams.set('squeezeCondition', squeeze);
+      if (squeeze && !extra.latitude) u.searchParams.set('squeezeCondition', squeeze);
       Object.entries(extra).forEach(([k,v])=>u.searchParams.set(k,v));
       return u.toString();
     }
