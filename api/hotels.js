@@ -390,13 +390,17 @@ export default async function handler(req, res) {
     const isCapitalMode = hasCoord && req.query.mode === 'capital';
 
     if (hasCoord) {
-      const d = await fetchJSON(buildUrl({
+      const coordUrl = buildUrl({
         latitude:     String(latF),
         longitude:    String(lngF),
         searchRadius: '10',
         datumType:    '1',
-      }));
+      });
+      console.log('[capital] coord search URL:', coordUrl);
+      const d = await fetchJSON(coordUrl);
+      console.log('[capital] API response:', JSON.stringify(d)?.slice(0,300));
       hotels = parseHotels(d);
+      console.log('[capital] hotels found:', hotels.length);
       usedKeyword = cityName || prefName;
     }
 
