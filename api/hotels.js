@@ -244,6 +244,7 @@ const AREA_MAP = [
   ['久住','ooita','taketa'],['竹田','ooita','taketa'],
   ['九重','ooita','hita'],['日田','ooita','hita'],
   ['中津','ooita','kunisaki'],['宇佐','ooita','kunisaki'],['国東','ooita','kunisaki'],
+  ['宮崎市','miyazaki','miyazaki'],['宮崎','miyazaki','miyazaki'],['清武','miyazaki','miyazaki'],
   ['延岡','miyazaki','hokubu'],['日向','miyazaki','hokubu'],['高千穂','miyazaki','hokubu'],
   ['都城','miyazaki','nanbu'],['日南','miyazaki','nanbu'],['えびの','miyazaki','nanbu'],
   ['桜島','kagoshima','kagoshima'],
