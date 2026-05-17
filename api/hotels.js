@@ -311,7 +311,11 @@ export default async function handler(req, res) {
       for (let i=0; i<=2; i++) {
         const r = await fetch(url, { headers: hdrs });
         if (r.status===429) { await new Promise(r=>setTimeout(r,2000)); continue; }
-        if (!r.ok) return null;
+        if (!r.ok) {
+          const errText = await r.text();
+          console.log('[fetchJSON] error status:', r.status, 'body:', errText.slice(0,300));
+          return null;
+        }
         return await r.json();
       }
       return null;
