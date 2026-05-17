@@ -185,9 +185,9 @@ h1{margin:0 0 6px;font-size:clamp(20px,5vw,28px);font-weight:900;background:line
   <div class="optBox2">
     <div class="optLabel">絞り込み</div>
     <div class="checkRow">
-      <label class="checkItem"><input type="checkbox" id="onsen"><span>♨️ 温泉あり</span></label>
-      <label class="checkItem"><input type="checkbox" id="daiyoku"><span>🛁 大浴場あり</span></label>
-      <label class="checkItem"><input type="checkbox" id="internet"><span>📶 インターネット可</span></label>
+      <label class="checkItem"><input type="checkbox" id="onsen" checked><span>♨️ 温泉あり</span></label>
+      <label class="checkItem"><input type="checkbox" id="daiyoku" checked><span>🛁 大浴場あり</span></label>
+      <label class="checkItem"><input type="checkbox" id="internet" checked><span>📶 インターネット可</span></label>
     </div>
   </div>
 
@@ -202,8 +202,8 @@ h1{margin:0 0 6px;font-size:clamp(20px,5vw,28px);font-weight:900;background:line
   <div id="statusBox" class="status warn">検索中...</div>
   <div class="sortRow" id="sortRow" style="display:none">
     <span class="sortLabel">並び替え:</span>
-    <button class="fBtn active" onclick="setSort('price',event)">料金順</button>
-    <button class="fBtn" onclick="setSort('rating',event)">評価順</button>
+    <button class="fBtn" onclick="setSort('price',event)">料金順</button>
+    <button class="fBtn active" onclick="setSort('rating',event)">評価順</button>
   </div>
   <div id="hotelGrid" class="grid"></div>
 </div>
@@ -459,7 +459,7 @@ function showResult() {
 // ======================================================
 // 検索・表示
 // ======================================================
-let allHotels = [], currentSort = 'price';
+let allHotels = [], currentSort = 'rating';
 
 function setSort(key, e) {
   currentSort = key;
