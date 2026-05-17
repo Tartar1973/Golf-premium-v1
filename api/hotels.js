@@ -382,34 +382,43 @@ export default async function handler(req, res) {
     const golfLng = parseFloat(req.query.lng || '');
     const hasLatLng = !isNaN(golfLat) && !isNaN(golfLng);
 
-    // ① 緯度経度＋都道府県コードで検索（SimpleHotelSearchはlatitude/longitudeを無視するため
-    //    middleClassCode＋全件取得→距離フィルタ方式に変更）
-    // まずmiddleClassCodeで都道府県全体を取得
-    if (hasLatLng && middleCode) {
-      const d = await fetchJSON(buildUrl({
-        largeClassCode:'japan', middleClassCode:middleCode
-      }));
-      const all = parseHotels(d);
-      // ホテルの座標とゴルフ場座標の距離でフィルタ（30km以内）
-      function distKm(lat1, lng1, lat2, lng2) {
-        const R = 6371;
-        const dLat = (lat2 - lat1) * Math.PI / 180;
-        const dLng = (lng2 - lng1) * Math.PI / 180;
-        const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
-        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-      }
-      // 距離でソートして近い順に返す
+    function distKm(lat1, lng1, lat2, lng2) {
+      const R = 6371;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLng = (lng2 - lng1) * Math.PI / 180;
+      const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+
+    function filterByDist(all) {
       const withDist = all
         .filter(h => h.latitude && h.longitude)
         .map(h => ({ ...h, _dist: distKm(golfLat, golfLng, parseFloat(h.latitude), parseFloat(h.longitude)) }))
         .sort((a,b) => a._dist - b._dist);
-      // 30km以内 or 近い順で最低5件
-      hotels = withDist.filter(h => h._dist <= 30);
-      if (hotels.length < 3) hotels = withDist.slice(0, 5);
+      const within30 = withDist.filter(h => h._dist <= 30);
+      return within30.length >= 3 ? within30 : withDist.slice(0, 5);
+    }
+
+    // ① 座標あり → 都道府県全体取得＋距離フィルタ（squeeze付き）
+    if (hasLatLng && middleCode) {
+      const d = await fetchJSON(buildUrl({
+        largeClassCode:'japan', middleClassCode:middleCode
+      }));
+      hotels = filterByDist(parseHotels(d));
       usedKeyword = prefName + '（近隣順）';
     }
 
-    // ② 座標がない場合 → smallClassCode検索
+    // ② squeeze条件が厳しくて0件 → squeezeなしで再検索
+    if (hotels.length < 3 && hasLatLng && middleCode && squeeze) {
+      const d = await fetchJSON(buildUrl({
+        largeClassCode:'japan', middleClassCode:middleCode,
+        squeezeCondition: ''
+      }));
+      hotels = filterByDist(parseHotels(d));
+      usedKeyword = prefName + '（近隣順・条件緩和）';
+    }
+
+    // ③ 座標なし → smallClassCode検索
     if (hotels.length < 3 && middleCode && smallCode) {
       const d = await fetchJSON(buildUrl({
         largeClassCode:'japan', middleClassCode:middleCode, smallClassCode:smallCode
@@ -418,7 +427,7 @@ export default async function handler(req, res) {
       usedKeyword = cityName || prefName;
     }
 
-    // ③ それでも少なければ都道府県全体
+    // ④ それでも少なければ都道府県全体
     if (hotels.length < 3 && middleCode) {
       const d = await fetchJSON(buildUrl({
         largeClassCode:'japan', middleClassCode:middleCode
