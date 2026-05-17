@@ -776,6 +776,7 @@ document.getElementById('season').onchange = () => { refreshLabels(); cache.clea
 document.getElementById('area').onchange = () => {
   refreshLabels();
   refreshHokkaidoAreaVisibility();
+  refreshPrefSelectVisibility();
   lastPref = null;
   cache.clear(); 
 };
