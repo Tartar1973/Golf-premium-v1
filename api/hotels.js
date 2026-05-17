@@ -404,16 +404,27 @@ export default async function handler(req, res) {
       return within30.length >= 3 ? within30 : withDist.slice(0, 5);
     }
 
-    // ① 座標あり → 都道府県全体取得＋距離フィルタ
+    // 都道府県の全smallCodeを取得
+    function getAllSmallCodes(mid) {
+      const codes = [...new Set(AREA_MAP.filter(([,m]) => m === mid).map(([,,s]) => s))];
+      return codes;
+    }
+
+    // ① 座標あり → 全smallCodeを順次検索してmerge → 距離フィルタ
     if (hasLatLng && middleCode) {
-      const d = await fetchJSON(buildUrl({
-        largeClassCode:'japan', middleClassCode:middleCode
-      }));
-      hotels = filterByDist(parseHotels(d));
+      const allSmallCodes = getAllSmallCodes(middleCode);
+      let allResults = [];
+      for (const sc of allSmallCodes) {
+        const d = await fetchJSON(buildUrl({
+          largeClassCode:'japan', middleClassCode:middleCode, smallClassCode:sc
+        }));
+        allResults = merge(allResults, parseHotels(d));
+      }
+      hotels = filterByDist(allResults);
       usedKeyword = prefName + '（近隣順）';
     }
 
-    // ② 3件未満 → smallClassCode検索
+    // ② 3件未満 → smallClassCode単体検索
     if (hotels.length < 3 && middleCode && smallCode) {
       const d = await fetchJSON(buildUrl({
         largeClassCode:'japan', middleClassCode:middleCode, smallClassCode:smallCode
@@ -422,12 +433,16 @@ export default async function handler(req, res) {
       usedKeyword = cityName || prefName;
     }
 
-    // ③ それでも少なければ都道府県全体
+    // ③ それでも少なければ最近傍smallCodeで検索
     if (hotels.length < 3 && middleCode) {
-      const d = await fetchJSON(buildUrl({
-        largeClassCode:'japan', middleClassCode:middleCode
-      }));
-      hotels = merge(hotels, parseHotels(d));
+      const allSmallCodes = getAllSmallCodes(middleCode);
+      for (const sc of allSmallCodes) {
+        const d = await fetchJSON(buildUrl({
+          largeClassCode:'japan', middleClassCode:middleCode, smallClassCode:sc
+        }));
+        hotels = merge(hotels, parseHotels(d));
+        if (hotels.length >= 5) break;
+      }
       usedKeyword = prefName;
     }
 
