@@ -382,7 +382,12 @@ export default async function handler(req, res) {
     const golfLng = parseFloat(req.query.lng || '');
     const hasLatLng = !isNaN(golfLat) && !isNaN(golfLng);
 
-    function distKm(lat1, lng1, lat2, lng2) {
+    // 楽天APIの座標は秒単位なので度単位に変換
+    function secToDeg(sec) { return parseFloat(sec) / 3600; }
+
+    function distKm(lat1, lng1, lat2Sec, lng2Sec) {
+      const lat2 = secToDeg(lat2Sec);
+      const lng2 = secToDeg(lng2Sec);
       const R = 6371;
       const dLat = (lat2 - lat1) * Math.PI / 180;
       const dLng = (lng2 - lng1) * Math.PI / 180;
@@ -393,13 +398,13 @@ export default async function handler(req, res) {
     function filterByDist(all) {
       const withDist = all
         .filter(h => h.latitude && h.longitude)
-        .map(h => ({ ...h, _dist: distKm(golfLat, golfLng, parseFloat(h.latitude), parseFloat(h.longitude)) }))
+        .map(h => ({ ...h, _dist: distKm(golfLat, golfLng, h.latitude, h.longitude) }))
         .sort((a,b) => a._dist - b._dist);
       const within30 = withDist.filter(h => h._dist <= 30);
       return within30.length >= 3 ? within30 : withDist.slice(0, 5);
     }
 
-    // ① 座標あり → 都道府県全体取得＋距離フィルタ（squeeze付き）
+    // ① 座標あり → 都道府県全体取得＋距離フィルタ
     if (hasLatLng && middleCode) {
       const d = await fetchJSON(buildUrl({
         largeClassCode:'japan', middleClassCode:middleCode
@@ -408,17 +413,7 @@ export default async function handler(req, res) {
       usedKeyword = prefName + '（近隣順）';
     }
 
-    // ② squeeze条件が厳しくて0件 → squeezeなしで再検索
-    if (hotels.length < 3 && hasLatLng && middleCode && squeeze) {
-      const d = await fetchJSON(buildUrl({
-        largeClassCode:'japan', middleClassCode:middleCode,
-        squeezeCondition: ''
-      }));
-      hotels = filterByDist(parseHotels(d));
-      usedKeyword = prefName + '（近隣順・条件緩和）';
-    }
-
-    // ③ 座標なし → smallClassCode検索
+    // ② 3件未満 → smallClassCode検索
     if (hotels.length < 3 && middleCode && smallCode) {
       const d = await fetchJSON(buildUrl({
         largeClassCode:'japan', middleClassCode:middleCode, smallClassCode:smallCode
@@ -427,7 +422,7 @@ export default async function handler(req, res) {
       usedKeyword = cityName || prefName;
     }
 
-    // ④ それでも少なければ都道府県全体
+    // ③ それでも少なければ都道府県全体
     if (hotels.length < 3 && middleCode) {
       const d = await fetchJSON(buildUrl({
         largeClassCode:'japan', middleClassCode:middleCode
