@@ -322,7 +322,7 @@ export default async function handler(req, res) {
       u.searchParams.set('checkoutDate', checkoutDate);
       u.searchParams.set('adultNum', String(Math.min(10,Math.max(1,parseInt(adults)||1))));
       u.searchParams.set('roomNum',  String(Math.min(10,Math.max(1,parseInt(rooms) ||1))));
-      u.searchParams.set('hits',     '30');
+      u.searchParams.set('hits',     '50');
       u.searchParams.set('page',     '1');
       u.searchParams.set('sort',     '+roomCharge');
       u.searchParams.set('responseType', 'large');
@@ -400,7 +400,7 @@ export default async function handler(req, res) {
       u.searchParams.set('checkoutDate', checkoutDate);
       u.searchParams.set('adultNum', String(Math.min(10,Math.max(1,parseInt(adults)||1))));
       u.searchParams.set('roomNum',  String(Math.min(10,Math.max(1,parseInt(rooms)||1))));
-      u.searchParams.set('hits',     '30');
+      u.searchParams.set('hits',     '50');
       u.searchParams.set('page',     '1');
       u.searchParams.set('sort',     '+roomCharge');
       u.searchParams.set('responseType', 'large');
