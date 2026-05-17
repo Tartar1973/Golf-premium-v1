@@ -473,21 +473,26 @@ function setSort(key, e) {
   renderHotels();
 }
 
-// 楽天トラベルAPIは度単位（小数）で返ってくるのでそのまま使う
-function makeFoodSearchUrl(hotelLat, hotelLng, keyword) {
-  if (!hotelLat || !hotelLng) return null;
-  const hLat = parseFloat(hotelLat);
-  const hLng = parseFloat(hotelLng);
-  if (isNaN(hLat) || isNaN(hLng)) return null;
-  return `https://www.google.com/maps/search/${encodeURIComponent(keyword)}/@${hLat},${hLng},15z`;
+// 日本測地系秒単位 → 世界測地系度単位に変換
+function secToDeg(sec) {
+  // 秒単位（例: 139435.7）→ 度単位（例: 38.732...）
+  // 秒 / 3600 = 度
+  return sec / 3600;
 }
 
-function makeGoogleMapUrl(hotelLat, hotelLng, golfLat, golfLng) {
-  if (!hotelLat || !hotelLng || !golfLat || !golfLng) return null;
-  const hLat = parseFloat(hotelLat);
-  const hLng = parseFloat(hotelLng);
-  if (isNaN(hLat) || isNaN(hLng)) return null;
-  return `https://www.google.com/maps/dir/${hLat},${hLng}/${golfLat},${golfLng}/`;
+// ホテル住所周辺のグルメ検索（住所ベース）
+function makeFoodSearchUrl(hotelAddress, keyword) {
+  if (!hotelAddress) return null;
+  const q = encodeURIComponent(hotelAddress + ' ' + keyword);
+  return `https://www.google.com/maps/search/${q}`;
+}
+
+// ホテル→ゴルフ場のルート検索（住所ベース）
+function makeGoogleMapUrl(hotelAddress, golfAddress) {
+  if (!hotelAddress || !golfAddress) return null;
+  const o = encodeURIComponent(hotelAddress);
+  const d = encodeURIComponent(golfAddress);
+  return `https://www.google.com/maps/dir/${o}/${d}/`;
 }
 
 function starStr(n) {
@@ -526,11 +531,11 @@ function renderHotels() {
       ${rRows ? `<div class="rGrid">${rRows}</div>` : ''}
       <div class="price">${price} <span class="priceNote">/ 1室 1泊（税別・最安値）</span></div>
       <div class="ciInfo">${ciStr} 〜 ${coStr}（${nights}泊）</div>
-      ${makeGoogleMapUrl(h.latitude, h.longitude, lat, lng) ? `<a class="mapBtn" href="${makeGoogleMapUrl(h.latitude, h.longitude, lat, lng)}" target="_blank" rel="noopener noreferrer">🚗 ゴルフ場へのルートを見る</a>` : ''}
+      ${(()=>{const hAddr=(h.address1||'')+(h.address2||'');const mapUrl=makeGoogleMapUrl(hAddr,address);return mapUrl?`<a class="mapBtn" href="${mapUrl}" target="_blank" rel="noopener noreferrer">🚗 ゴルフ場へのルートを見る</a>`:''})()}
       <div class="foodBtns">
-        ${makeFoodSearchUrl(h.latitude, h.longitude, '居酒屋') ? `<a class="foodBtn" href="${makeFoodSearchUrl(h.latitude, h.longitude, '居酒屋')}" target="_blank" rel="noopener noreferrer">🍺 居酒屋</a>` : ''}
-        ${makeFoodSearchUrl(h.latitude, h.longitude, 'レストラン') ? `<a class="foodBtn" href="${makeFoodSearchUrl(h.latitude, h.longitude, 'レストラン')}" target="_blank" rel="noopener noreferrer">🍽️ レストラン</a>` : ''}
-        ${makeFoodSearchUrl(h.latitude, h.longitude, '地元料理') ? `<a class="foodBtn" href="${makeFoodSearchUrl(h.latitude, h.longitude, '地元料理')}" target="_blank" rel="noopener noreferrer">🥢 地元料理</a>` : ''}
+        ${(()=>{const hAddr=(h.address1||'')+(h.address2||'');const u=makeFoodSearchUrl(hAddr,'居酒屋');return u?`<a class="foodBtn" href="${u}" target="_blank" rel="noopener noreferrer">🍺 居酒屋</a>`:''})()}
+        ${(()=>{const hAddr=(h.address1||'')+(h.address2||'');const u=makeFoodSearchUrl(hAddr,'レストラン');return u?`<a class="foodBtn" href="${u}" target="_blank" rel="noopener noreferrer">🍽️ レストラン</a>`:''})()}
+        ${(()=>{const hAddr=(h.address1||'')+(h.address2||'');const u=makeFoodSearchUrl(hAddr,'地元料理');return u?`<a class="foodBtn" href="${u}" target="_blank" rel="noopener noreferrer">🥢 地元料理</a>`:''})()}
       </div>
       <a class="reserveBtn" href="${rUrl}" target="_blank" rel="noopener noreferrer">楽天トラベルで予約</a>`;
     grid.appendChild(card);
