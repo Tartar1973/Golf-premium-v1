@@ -378,34 +378,38 @@ export default async function handler(req, res) {
 
     let hotels=[], usedKeyword=prefName;
 
-    // ① smallClassCode で検索
-    if (middleCode && smallCode) {
+    const golfLat = parseFloat(req.query.lat || '');
+    const golfLng = parseFloat(req.query.lng || '');
+    const hasLatLng = !isNaN(golfLat) && !isNaN(golfLng);
+
+    // ① 緯度経度半径検索（ゴルフ場座標がある場合）3km→10km→30km
+    if (hasLatLng) {
+      for (const radius of [3, 10, 30]) {
+        const d = await fetchJSON(buildUrl({
+          latitude:     String(golfLat),
+          longitude:    String(golfLng),
+          searchRadius: String(radius),
+        }));
+        hotels = parseHotels(d);
+        usedKeyword = `${prefName}（半径${radius}km）`;
+        if (hotels.length >= 3) break;
+      }
+    }
+
+    // ② 座標がない or ヒットしない → smallClassCode検索
+    if (hotels.length < 3 && middleCode && smallCode) {
       const d = await fetchJSON(buildUrl({
         largeClassCode:'japan', middleClassCode:middleCode, smallClassCode:smallCode
       }));
-      hotels = parseHotels(d);
+      hotels = merge(hotels, parseHotels(d));
       usedKeyword = cityName || prefName;
     }
 
-    // ② 結果が少なければ都道府県全体（squeezeConditionなしで再試行）
-    if (hotels.length < 5 && middleCode) {
-      const u = new URL('https://openapi.rakuten.co.jp/engine/api/Travel/SimpleHotelSearch/20170426');
-      u.searchParams.set('format','json');
-      u.searchParams.set('formatVersion','2');
-      u.searchParams.set('applicationId', applicationId);
-      u.searchParams.set('accessKey', accessKey);
-      if (affiliateId) u.searchParams.set('affiliateId', affiliateId);
-      u.searchParams.set('checkinDate',  checkinDate);
-      u.searchParams.set('checkoutDate', checkoutDate);
-      u.searchParams.set('adultNum', String(Math.min(10,Math.max(1,parseInt(adults)||1))));
-      u.searchParams.set('roomNum',  String(Math.min(10,Math.max(1,parseInt(rooms)||1))));
-      u.searchParams.set('hits',     '30');
-      u.searchParams.set('page',     '1');
-      u.searchParams.set('sort',     '+roomCharge');
-      u.searchParams.set('responseType', 'large');
-      u.searchParams.set('largeClassCode',  'japan');
-      u.searchParams.set('middleClassCode', middleCode);
-      const d = await fetchJSON(u.toString());
+    // ③ それでも少なければ都道府県全体検索
+    if (hotels.length < 3 && middleCode) {
+      const d = await fetchJSON(buildUrl({
+        largeClassCode:'japan', middleClassCode:middleCode
+      }));
       hotels = merge(hotels, parseHotels(d));
       usedKeyword = prefName;
     }
