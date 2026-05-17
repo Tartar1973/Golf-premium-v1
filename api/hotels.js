@@ -390,27 +390,65 @@ export default async function handler(req, res) {
 
     let hotels=[], usedKeyword=prefName;
 
-    // 県庁所在地モード: 座標検索のみ（フォールバックなし）
-    const isCapitalMode = hasCoord && req.query.mode === 'capital';
+    // 県庁所在地モード: middleCode で都道府県全体を取得し座標で距離フィルタ
+    const isCapitalMode = req.query.mode === 'capital';
 
-    if (hasCoord) {
-      const coordUrl = buildUrl({
-        latitude:     String(latF),
-        longitude:    String(lngF),
-        searchRadius: '10',
-        datumType:    '1',
-      });
-      console.log('[capital] coord search URL:', coordUrl);
-      const d = await fetchJSON(coordUrl);
-      console.log('[capital] API response:', JSON.stringify(d)?.slice(0,300));
-      hotels = parseHotels(d);
-      console.log('[capital] hotels found:', hotels.length);
+    if (isCapitalMode && middleCode) {
+      // 都道府県全体でホテル取得
+      const u = new URL('https://openapi.rakuten.co.jp/engine/api/Travel/SimpleHotelSearch/20170426');
+      u.searchParams.set('format','json');
+      u.searchParams.set('formatVersion','2');
+      u.searchParams.set('applicationId', applicationId);
+      u.searchParams.set('accessKey', accessKey);
+      if (affiliateId) u.searchParams.set('affiliateId', affiliateId);
+      u.searchParams.set('checkinDate',  checkinDate);
+      u.searchParams.set('checkoutDate', checkoutDate);
+      u.searchParams.set('adultNum', String(Math.min(10,Math.max(1,parseInt(adults)||1))));
+      u.searchParams.set('roomNum',  String(Math.min(10,Math.max(1,parseInt(rooms)||1))));
+      u.searchParams.set('hits',     '30');
+      u.searchParams.set('page',     '1');
+      u.searchParams.set('sort',     '+roomCharge');
+      u.searchParams.set('responseType', 'large');
+      u.searchParams.set('largeClassCode',  'japan');
+      u.searchParams.set('middleClassCode', middleCode);
+      const d = await fetchJSON(u.toString());
+      const allPrefHotels = parseHotels(d);
+      console.log('[capital] pref hotels:', allPrefHotels.length, 'lat:', latF, 'lng:', lngF);
+
+      // 座標がある場合は30km以内に絞り込む
+      if (hasCoord && allPrefHotels.length > 0) {
+        function toRad(d){ return d * Math.PI / 180; }
+        function calcDist(lat1,lng1,lat2,lng2){
+          const R=6371;
+          const dLat=toRad(lat2-lat1), dLng=toRad(lng2-lng1);
+          const a=Math.sin(dLat/2)**2+Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLng/2)**2;
+          return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+        }
+        hotels = allPrefHotels.filter(h => {
+          if (!h.latitude || !h.longitude) return true;
+          const dist = calcDist(latF, lngF, parseFloat(h.latitude), parseFloat(h.longitude));
+          return dist <= 30;
+        });
+        console.log('[capital] after 30km filter:', hotels.length);
+      } else {
+        hotels = allPrefHotels;
+      }
       usedKeyword = cityName || prefName;
     }
 
-    // 県庁所在地モードはここで終了（フォールバックしない）
+    // 通常モード（近隣ホテル）
     if (!isCapitalMode) {
-      // フォールバック① smallClassCode で検索
+      if (hasCoord) {
+        const d = await fetchJSON(buildUrl({
+          latitude:     String(latF),
+          longitude:    String(lngF),
+          searchRadius: '10',
+          datumType:    '1',
+        }));
+        hotels = parseHotels(d);
+        usedKeyword = cityName || prefName;
+      }
+      // フォールバック① smallClassCode
       if (hotels.length < 5 && middleCode && smallCode) {
         const d = await fetchJSON(buildUrl({
           largeClassCode:'japan', middleClassCode:middleCode, smallClassCode:smallCode
@@ -418,8 +456,7 @@ export default async function handler(req, res) {
         hotels = merge(hotels, parseHotels(d));
         usedKeyword = cityName || prefName;
       }
-
-      // フォールバック② 都道府県全体で再試行
+      // フォールバック② 都道府県全体
       if (hotels.length < 5 && middleCode) {
         const u = new URL('https://openapi.rakuten.co.jp/engine/api/Travel/SimpleHotelSearch/20170426');
         u.searchParams.set('format','json');
