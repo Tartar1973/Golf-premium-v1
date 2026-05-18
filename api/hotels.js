@@ -445,19 +445,38 @@ export default async function handler(req, res) {
     }
 
     // 通常モード（近隣ホテル）
-    if (!isCapitalMode) {:'札幌駅','青森県':'青森駅','岩手県':'盛岡駅','宮城県':'仙台駅',
-  '秋田県':'秋田駅','山形県':'山形駅','福島県':'福島駅','茨城県':'水戸駅',
-  '栃木県':'宇都宮駅','群馬県':'前橋駅','埼玉県':'さいたま新都心駅','千葉県':'千葉駅',
-  '東京都':'新宿駅','神奈川県':'横浜駅','新潟県':'新潟駅','富山県':'富山駅',
-  '石川県':'金沢駅','福井県':'福井駅','山梨県':'甲府駅','長野県':'長野駅',
-  '岐阜県':'岐阜駅','静岡県':'静岡駅','愛知県':'名古屋駅','三重県':'津駅',
-  '滋賀県':'大津駅','京都府':'京都駅','大阪府':'大阪駅','兵庫県':'三ノ宮駅',
-  '奈良県':'近鉄奈良駅','和歌山県':'和歌山駅','鳥取県':'鳥取駅','島根県':'松江駅',
-  '岡山県':'岡山駅','広島県':'広島駅','山口県':'新山口駅','徳島県':'徳島駅',
-  '香川県':'高松駅','愛媛県':'松山駅','高知県':'高知駅','福岡県':'博多駅',
-  '佐賀県':'佐賀駅','長崎県':'長崎駅','熊本県':'熊本駅','大分県':'大分駅',
-  '宮崎県':'宮崎駅','鹿児島県':'鹿児島中央駅','沖縄県':'那覇空港駅',
-};
+        if (!isCapitalMode) {
+      // フォールバック① smallClassCode で検索
+      if (hotels.length < 5 && middleCode && smallCode) {
+        const d = await fetchJSON(buildUrl({
+          largeClassCode:'japan', middleClassCode:middleCode, smallClassCode:smallCode
+        }));
+        hotels = merge(hotels, parseHotels(d));
+        usedKeyword = cityName || prefName;
+      }
+      // フォールバック② 都道府県全体で再試行
+      if (hotels.length < 5 && middleCode) {
+        const u2 = new URL('https://openapi.rakuten.co.jp/engine/api/Travel/SimpleHotelSearch/20170426');
+        u2.searchParams.set('format','json');
+        u2.searchParams.set('formatVersion','2');
+        u2.searchParams.set('applicationId', applicationId);
+        u2.searchParams.set('accessKey', accessKey);
+        if (affiliateId) u2.searchParams.set('affiliateId', affiliateId);
+        u2.searchParams.set('checkinDate',  checkinDate);
+        u2.searchParams.set('checkoutDate', checkoutDate);
+        u2.searchParams.set('adultNum', String(Math.min(10,Math.max(1,parseInt(adults)||1))));
+        u2.searchParams.set('roomNum',  String(Math.min(10,Math.max(1,parseInt(rooms)||1))));
+        u2.searchParams.set('hits','30');
+        u2.searchParams.set('page','1');
+        u2.searchParams.set('sort','+roomCharge');
+        u2.searchParams.set('responseType','large');
+        u2.searchParams.set('largeClassCode','japan');
+        u2.searchParams.set('middleClassCode', middleCode);
+        const d2 = await fetchJSON(u2.toString());
+        hotels = merge(hotels, parseHotels(d2));
+        usedKeyword = prefName;
+      }
+    }
 
 const PREF_MIDDLE = {
   '北海道':'hokkaido','青森県':'aomori','岩手県':'iwate','宮城県':'miyagi','秋田県':'akita',
