@@ -294,7 +294,8 @@ export default async function handler(req, res) {
       checkin = '', checkout = '',
       adults = '1', rooms = '1',
       squeeze = '',
-      lat = '', lng = ''
+      lat = '', lng = '',
+      mode = ''
     } = req.query;
 
     const applicationId = process.env.RAKUTEN_APPLICATION_ID;
@@ -404,10 +405,10 @@ export default async function handler(req, res) {
     let hotels=[], usedKeyword=prefName;
 
     // 県庁所在地モード: 主要駅名キーワードで検索
-    const isCapitalMode = req.query.mode === 'capital';
+    const isCapitalMode = mode === 'capital';
     const stationName = STATION_MAP[prefName] || '';
 
-    if (isCapitalMode && middleCode) {
+    if (isCapitalMode) {
       const u = new URL('https://openapi.rakuten.co.jp/engine/api/Travel/SimpleHotelSearch/20170426');
       u.searchParams.set('format','json');
       u.searchParams.set('formatVersion','2');
