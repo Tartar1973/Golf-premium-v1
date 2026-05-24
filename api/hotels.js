@@ -423,14 +423,14 @@ export default async function handler(req, res) {
       u.searchParams.set('page',     '1');
       u.searchParams.set('sort',     '+roomCharge');
       u.searchParams.set('responseType', 'large');
-      u.searchParams.set('largeClassCode',  'japan');
-      u.searchParams.set('middleClassCode', middleCode);
-      if (stationName) u.searchParams.set('keyword', stationName);
+      u.searchParams.set('keyword', stationName);
       const d = await fetchJSON(u.toString());
       hotels = parseHotels(d);
-      // 駅名で0件なら都道府県全体にフォールバック
-      if (hotels.length === 0 && stationName) {
+      // 0件なら都道府県全体にフォールバック
+      if (hotels.length === 0 && middleCode) {
         u.searchParams.delete('keyword');
+        u.searchParams.set('largeClassCode',  'japan');
+        u.searchParams.set('middleClassCode', middleCode);
         const d2 = await fetchJSON(u.toString());
         hotels = parseHotels(d2);
       }
