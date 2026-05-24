@@ -440,33 +440,22 @@ export default async function handler(req, res) {
 
     let hotels=[], usedKeyword=prefName;
 
-    // 県庁所在地モード: nearbyと同じ座標検索（squeezeだけ外す）
+    // 県庁所在地モード: buildUrlを使って座標検索（squeezeなし）
     const isCapitalMode = mode === 'capital';
 
     if (isCapitalMode && hasCoord) {
-      // buildUrlと同じロジックだがsqueezeConditionなし
-      const u = new URL('https://openapi.rakuten.co.jp/engine/api/Travel/SimpleHotelSearch/20170426');
-      u.searchParams.set('format','json');
-      u.searchParams.set('formatVersion','2');
-      u.searchParams.set('applicationId', applicationId);
-      u.searchParams.set('accessKey', accessKey);
-      if (affiliateId) u.searchParams.set('affiliateId', affiliateId);
-      u.searchParams.set('checkinDate',  checkinDate);
-      u.searchParams.set('checkoutDate', checkoutDate);
-      u.searchParams.set('adultNum', String(Math.min(10,Math.max(1,parseInt(adults)||1))));
-      u.searchParams.set('roomNum',  String(Math.min(10,Math.max(1,parseInt(rooms)||1))));
-      u.searchParams.set('hits',     '30');
-      u.searchParams.set('page',     '1');
-      u.searchParams.set('sort',     '-reviewAverage');
-      u.searchParams.set('responseType', 'large');
-      u.searchParams.set('latitude',     String(latF));
-      u.searchParams.set('longitude',    String(lngF));
-      u.searchParams.set('searchRadius', '10');
-      u.searchParams.set('datumType',    '1');
-      console.log('[capital] URL:', u.toString().slice(0,200));
-      const d = await fetchJSON(u.toString());
-      console.log('[capital] raw keys:', d ? Object.keys(d) : 'null');
-      console.log('[capital] raw sample:', JSON.stringify(d)?.slice(0,300));
+      const savedSqueeze = squeeze;
+      // squeezeを一時的に空にしてbuildUrlを呼ぶ
+      const capitalUrl = buildUrl({
+        latitude:     String(latF),
+        longitude:    String(lngF),
+        searchRadius: '10',
+        datumType:    '1',
+      }).replace('squeezeCondition=' + encodeURIComponent(savedSqueeze) + '&', '')
+        .replace('&squeezeCondition=' + encodeURIComponent(savedSqueeze), '');
+      console.log('[capital] URL:', capitalUrl.slice(0,200));
+      const d = await fetchJSON(capitalUrl);
+      console.log('[capital] raw:', d ? 'ok' : 'null');
       hotels = parseHotels(d);
       console.log('[capital] hotels:', hotels.length);
       const resData = { hotels, keyword: prefName };
