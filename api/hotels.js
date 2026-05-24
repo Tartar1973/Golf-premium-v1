@@ -270,21 +270,57 @@ function findSmallCode(address, cityName, middleCode) {
   return '';
 }
 
-// 47都道府県の県庁所在地キーワードマップ（シンプルな市名）
-const STATION_MAP = {
-  '北海道':'札幌','青森県':'青森','岩手県':'盛岡','宮城県':'仙台',
-  '秋田県':'秋田','山形県':'山形','福島県':'福島','茨城県':'水戸',
-  '栃木県':'宇都宮','群馬県':'前橋','埼玉県':'さいたま','千葉県':'千葉',
-  '東京都':'新宿','神奈川県':'横浜','新潟県':'新潟','富山県':'富山',
-  '石川県':'金沢','福井県':'福井','山梨県':'甲府','長野県':'長野',
-  '岐阜県':'岐阜','静岡県':'静岡','愛知県':'名古屋','三重県':'津',
-  '滋賀県':'大津','京都府':'京都','大阪府':'大阪','兵庫県':'神戸',
-  '奈良県':'奈良','和歌山県':'和歌山','鳥取県':'鳥取','島根県':'松江',
-  '岡山県':'岡山','広島県':'広島','山口県':'山口','徳島県':'徳島',
-  '香川県':'高松','愛媛県':'松山','高知県':'高知','福岡県':'博多',
-  '佐賀県':'佐賀','長崎県':'長崎','熊本県':'熊本','大分県':'大分',
-  '宮崎県':'宮崎','鹿児島県':'鹿児島','沖縄県':'那覇',
+// 47都道府県の県庁所在地smallCodeマップ
+const CAPITAL_SMALL_MAP = {
+  '北海道':{mid:'hokkaido',small:'sapporo'},
+  '青森県':{mid:'aomori',small:'aomori'},
+  '岩手県':{mid:'iwate',small:'morioka'},
+  '宮城県':{mid:'miyagi',small:'sendai'},
+  '秋田県':{mid:'akita',small:'noshiro'},
+  '山形県':{mid:'yamagata',small:'yamagata'},
+  '福島県':{mid:'hukushima',small:'koriyama'},
+  '茨城県':{mid:'ibaragi',small:'mito'},
+  '栃木県':{mid:'tochigi',small:'utsunomiya'},
+  '群馬県':{mid:'gunma',small:'maebashi'},
+  '埼玉県':{mid:'saitama',small:'saitama'},
+  '千葉県':{mid:'tiba',small:'keiyo'},
+  '東京都':{mid:'tokyo',small:'nishi'},
+  '神奈川県':{mid:'kanagawa',small:'yokohama'},
+  '新潟県':{mid:'niigata',small:'niigata'},
+  '富山県':{mid:'toyama',small:'toyama'},
+  '石川県':{mid:'ishikawa',small:'kanazawa'},
+  '福井県':{mid:'hukui',small:'awara'},
+  '山梨県':{mid:'yamanashi',small:null},
+  '長野県':{mid:'nagano',small:'nagano'},
+  '岐阜県':{mid:'gifu',small:null},
+  '静岡県':{mid:'shizuoka',small:'atami'},
+  '愛知県':{mid:'aichi',small:'nagoya'},
+  '三重県':{mid:'mie',small:'tsu'},
+  '滋賀県':{mid:'shiga',small:'ootsu'},
+  '京都府':{mid:'kyoto',small:'shi'},
+  '大阪府':{mid:'osaka',small:'shi'},
+  '兵庫県':{mid:'hyogo',small:'kobe'},
+  '奈良県':{mid:'nara',small:'hokubu'},
+  '和歌山県':{mid:'wakayama',small:'wakayama'},
+  '鳥取県':{mid:'tottori',small:'tottori'},
+  '島根県':{mid:'shimane',small:null},
+  '岡山県':{mid:'okayama',small:'okayama'},
+  '広島県':{mid:'hiroshima',small:'hiroshima'},
+  '山口県':{mid:'yamaguchi',small:'yamaguchi'},
+  '徳島県':{mid:'tokushima',small:'tokushima'},
+  '香川県':{mid:'kagawa',small:'takamatsu'},
+  '愛媛県':{mid:'ehime',small:'chuuyo'},
+  '高知県':{mid:'kochi',small:null},
+  '福岡県':{mid:'hukuoka',small:'fukuoka'},
+  '佐賀県':{mid:'saga',small:'saga'},
+  '長崎県':{mid:'nagasaki',small:'nagasaki'},
+  '熊本県':{mid:'kumamoto',small:'kumamoto'},
+  '大分県':{mid:'oita',small:'oita'},
+  '宮崎県':{mid:'miyazaki',small:'miyazaki'},
+  '鹿児島県':{mid:'kagoshima',small:'kagoshima'},
+  '沖縄県':{mid:'okinawa',small:'naha'},
 };
+
 
 
 export default async function handler(req, res) {
@@ -404,11 +440,13 @@ export default async function handler(req, res) {
 
     let hotels=[], usedKeyword=prefName;
 
-    // 県庁所在地モード: middleCodeで都道府県全体を取得（squeezeなし）
+    // 県庁所在地モード: smallCode（または都道府県全体）で検索（squeezeなし）
     const isCapitalMode = mode === 'capital';
-    const stationName = STATION_MAP[prefName] || prefName;
+    const capitalInfo = CAPITAL_SMALL_MAP[prefName] || null;
 
-    if (isCapitalMode && middleCode) {
+    if (isCapitalMode && capitalInfo) {
+      const capMid   = capitalInfo.mid;
+      const capSmall = capitalInfo.small;
       const u = new URL('https://openapi.rakuten.co.jp/engine/api/Travel/SimpleHotelSearch/20170426');
       u.searchParams.set('format','json');
       u.searchParams.set('formatVersion','2');
@@ -424,11 +462,17 @@ export default async function handler(req, res) {
       u.searchParams.set('sort',     '-reviewAverage');
       u.searchParams.set('responseType', 'large');
       u.searchParams.set('largeClassCode',  'japan');
-      u.searchParams.set('middleClassCode', middleCode);
+      u.searchParams.set('middleClassCode', capMid);
+      if (capSmall) u.searchParams.set('smallClassCode', capSmall);
       const d = await fetchJSON(u.toString());
       hotels = parseHotels(d);
-      usedKeyword = stationName;
-      const resData = { hotels, keyword: usedKeyword };
+      // smallCodeで0件なら都道府県全体で再試行
+      if (hotels.length === 0 && capSmall) {
+        u.searchParams.delete('smallClassCode');
+        const d2 = await fetchJSON(u.toString());
+        hotels = parseHotels(d2);
+      }
+      const resData = { hotels, keyword: prefName };
       return res.status(200).json(resData);
     }
 
