@@ -440,27 +440,33 @@ export default async function handler(req, res) {
 
     let hotels=[], usedKeyword=prefName;
 
-    // 県庁所在地モード: 県庁座標で近隣検索（squezeなし）
+    // 県庁所在地モード: nearbyと同じ座標検索（squeezeだけ外す）
     const isCapitalMode = mode === 'capital';
 
     if (isCapitalMode && hasCoord) {
-      const d = await fetchJSON(buildUrl({
-        latitude:     String(latF),
-        longitude:    String(lngF),
-        searchRadius: '10',
-        datumType:    '1',
-      }));
+      // buildUrlと同じロジックだがsqueezeConditionなし
+      const u = new URL('https://openapi.rakuten.co.jp/engine/api/Travel/SimpleHotelSearch/20170426');
+      u.searchParams.set('format','json');
+      u.searchParams.set('formatVersion','2');
+      u.searchParams.set('applicationId', applicationId);
+      u.searchParams.set('accessKey', accessKey);
+      if (affiliateId) u.searchParams.set('affiliateId', affiliateId);
+      u.searchParams.set('checkinDate',  checkinDate);
+      u.searchParams.set('checkoutDate', checkoutDate);
+      u.searchParams.set('adultNum', String(Math.min(10,Math.max(1,parseInt(adults)||1))));
+      u.searchParams.set('roomNum',  String(Math.min(10,Math.max(1,parseInt(rooms)||1))));
+      u.searchParams.set('hits',     '30');
+      u.searchParams.set('page',     '1');
+      u.searchParams.set('sort',     '-reviewAverage');
+      u.searchParams.set('responseType', 'large');
+      u.searchParams.set('latitude',     String(latF));
+      u.searchParams.set('longitude',    String(lngF));
+      u.searchParams.set('searchRadius', '10');
+      u.searchParams.set('datumType',    '1');
+      console.log('[capital] URL:', u.toString().slice(0,200));
+      const d = await fetchJSON(u.toString());
+      console.log('[capital] hotels:', parseHotels(d).length);
       hotels = parseHotels(d);
-      // 0件なら半径を広げて再試行
-      if (hotels.length === 0) {
-        const d2 = await fetchJSON(buildUrl({
-          latitude:     String(latF),
-          longitude:    String(lngF),
-          searchRadius: '30',
-          datumType:    '1',
-        }));
-        hotels = parseHotels(d2);
-      }
       const resData = { hotels, keyword: prefName };
       return res.status(200).json(resData);
     }
