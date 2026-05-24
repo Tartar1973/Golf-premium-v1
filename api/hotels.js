@@ -404,11 +404,11 @@ export default async function handler(req, res) {
 
     let hotels=[], usedKeyword=prefName;
 
-    // 県庁所在地モード: 主要駅名キーワードで検索
+    // 県庁所在地モード: middleCodeで都道府県全体を取得（squeezeなし）
     const isCapitalMode = mode === 'capital';
-    const stationName = STATION_MAP[prefName] || '';
+    const stationName = STATION_MAP[prefName] || prefName;
 
-    if (isCapitalMode) {
+    if (isCapitalMode && middleCode) {
       const u = new URL('https://openapi.rakuten.co.jp/engine/api/Travel/SimpleHotelSearch/20170426');
       u.searchParams.set('format','json');
       u.searchParams.set('formatVersion','2');
@@ -421,20 +421,13 @@ export default async function handler(req, res) {
       u.searchParams.set('roomNum',  String(Math.min(10,Math.max(1,parseInt(rooms)||1))));
       u.searchParams.set('hits',     '30');
       u.searchParams.set('page',     '1');
-      u.searchParams.set('sort',     '+roomCharge');
+      u.searchParams.set('sort',     '-reviewAverage');
       u.searchParams.set('responseType', 'large');
-      u.searchParams.set('keyword', stationName);
+      u.searchParams.set('largeClassCode',  'japan');
+      u.searchParams.set('middleClassCode', middleCode);
       const d = await fetchJSON(u.toString());
       hotels = parseHotels(d);
-      // 0件なら都道府県全体にフォールバック
-      if (hotels.length === 0 && middleCode) {
-        u.searchParams.delete('keyword');
-        u.searchParams.set('largeClassCode',  'japan');
-        u.searchParams.set('middleClassCode', middleCode);
-        const d2 = await fetchJSON(u.toString());
-        hotels = parseHotels(d2);
-      }
-      usedKeyword = stationName || prefName;
+      usedKeyword = stationName;
       const resData = { hotels, keyword: usedKeyword };
       return res.status(200).json(resData);
     }
