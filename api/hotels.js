@@ -465,8 +465,10 @@ export default async function handler(req, res) {
       u.searchParams.set('datumType',    '1');
       console.log('[capital] URL:', u.toString().slice(0,200));
       const d = await fetchJSON(u.toString());
-      console.log('[capital] hotels:', parseHotels(d).length);
+      console.log('[capital] raw keys:', d ? Object.keys(d) : 'null');
+      console.log('[capital] raw sample:', JSON.stringify(d)?.slice(0,300));
       hotels = parseHotels(d);
+      console.log('[capital] hotels:', hotels.length);
       const resData = { hotels, keyword: prefName };
       return res.status(200).json(resData);
     }
