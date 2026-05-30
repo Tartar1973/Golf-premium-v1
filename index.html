@@ -438,7 +438,7 @@ function populatePrefSelect() {
   Object.keys(PREF_CODES).forEach(p => {
     const opt = document.createElement('option');
     opt.value = p;
-    opt.textContent = p;
+    opt.textContent = displayPref(p);
     sel.appendChild(opt);
   });
 }
@@ -691,8 +691,8 @@ function setLanguage(lang, openApp = true) {
   populateSeasonOptions();
   populateAreaOptions();
   populateHokkaidoAreaOptions();
-populatePrefSelect();
-  renderBrandChips();
+renderBrandChips();
+  populatePrefSelect();
   refreshLabels();
   refreshHokkaidoAreaVisibility();
   setStatus('', tr('envNotice'));
@@ -788,11 +788,13 @@ document.getElementById('hokkaidoArea').onchange = () => {
   lastPref = null;
 };
 const savedLang = localStorage.getItem('golfJourneyLang');
+if (savedLang) currentLang = savedLang;
 updateStaticTexts();
 populateSeasonOptions();
 populateAreaOptions();
 populateHokkaidoAreaOptions();
 renderBrandChips();
+populatePrefSelect();
 refreshLabels();
 refreshHokkaidoAreaVisibility();
 document.getElementById('winCourse').textContent = tr('noResultYet');
