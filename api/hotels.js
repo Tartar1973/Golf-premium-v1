@@ -271,56 +271,56 @@ function findSmallCode(address, cityName, middleCode) {
 }
 
 // 47都道府県の県庁所在地 middleCode + smallCode マップ
-// small:null の県は AREA_MAP に県庁所在地に対応するエリアがないため
+// small:null の県は楽天APIにsmallCodeが存在しないため
 // middleClassCode のみで都道府県全体を検索する
 const CAPITAL_SMALL_MAP = {
   '北海道':  {mid:'hokkaido',  small:'sapporo'},   // 札幌市 ✅
   '青森県':  {mid:'aomori',    small:'aomori'},    // 青森市 ✅
   '岩手県':  {mid:'iwate',     small:'morioka'},   // 盛岡市 ✅
   '宮城県':  {mid:'miyagi',    small:'sendai'},    // 仙台市 ✅
-  '秋田県':  {mid:'akita',     small:null},        // 秋田市 → AREA_MAPに秋田市なし
-  '山形県':  {mid:'yamagata',  small:'yamagata'},  // 山形市 ✅（天童・上山エリア）
-  '福島県':  {mid:'hukushima', small:'koriyama'},  // 福島市は郡山エリアに近い △
+  '秋田県':  {mid:'akita',     small:'akita'},     // 秋田市 ✅ 確認済み43件
+  '山形県':  {mid:'yamagata',  small:'yamagata'},  // 山形市 ✅
+  '福島県':  {mid:'hukushima', small:'koriyama'},  // 福島市（郡山エリア）
   '茨城県':  {mid:'ibaragi',   small:'mito'},      // 水戸市 ✅
   '栃木県':  {mid:'tochigi',   small:'utsunomiya'},// 宇都宮市 ✅
   '群馬県':  {mid:'gunma',     small:'maebashi'},  // 前橋市 ✅
   '埼玉県':  {mid:'saitama',   small:'saitama'},   // さいたま市 ✅
-  '千葉県':  {mid:'tiba',      small:'keiyo'},     // 千葉市（京葉エリア）✅
-  '東京都':  {mid:'tokyo',     small:'nishi'},     // 新宿区（西東京エリア）✅
+  '千葉県':  {mid:'tiba',      small:'keiyo'},     // 千葉市 ✅
+  '東京都':  {mid:'tokyo',     small:'nishi'},     // 新宿区 ✅
   '神奈川県':{mid:'kanagawa',  small:'yokohama'},  // 横浜市 ✅
-  '新潟県':  {mid:'niigata',   small:null},        // 新潟市 → AREA_MAPに新潟市なし
+  '新潟県':  {mid:'niigata',   small:'niigata'},   // 新潟市 ✅ 確認済み69件
   '富山県':  {mid:'toyama',    small:'toyama'},    // 富山市 ✅
   '石川県':  {mid:'ishikawa',  small:'kanazawa'},  // 金沢市 ✅
-  '福井県':  {mid:'hukui',     small:null},        // 福井市 → AREA_MAPに福井市なし
+  '福井県':  {mid:'hukui',     small:null},        // 福井市 → smallCode存在せずmiddleのみ
   '山梨県':  {mid:'yamanasi',  small:'kofu'},      // 甲府市 ✅
-  '長野県':  {mid:'nagano',    small:'nagano'},    // 長野市 ✅（戸隠エリア）
-  '岐阜県':  {mid:'gihu',      small:null},        // 岐阜市 → AREA_MAPに岐阜市なし
-  '静岡県':  {mid:'shizuoka',  small:null},        // 静岡市 → AREA_MAPに静岡市なし
-  '愛知県':  {mid:'aichi',     small:null},        // 名古屋市 → AREA_MAPに名古屋なし
+  '長野県':  {mid:'nagano',    small:'nagano'},    // 長野市 ✅
+  '岐阜県':  {mid:'gihu',      small:'gifu'},      // 岐阜市 ✅ 確認済み51件
+  '静岡県':  {mid:'shizuoka',  small:'shizuoka'},  // 静岡市 ✅ 確認済み108件
+  '愛知県':  {mid:'aichi',     small:null},        // 名古屋市 → smallCode存在せずmiddleのみ
   '三重県':  {mid:'mie',       small:'tsu'},       // 津市 ✅
   '滋賀県':  {mid:'shiga',     small:'ootsu'},     // 大津市 ✅
   '京都府':  {mid:'kyoto',     small:'shi'},       // 京都市 ✅
   '大阪府':  {mid:'osaka',     small:'shi'},       // 大阪市 ✅
   '兵庫県':  {mid:'hyogo',     small:'kobe'},      // 神戸市 ✅
-  '奈良県':  {mid:'nara',      small:'hokubu'},    // 奈良市（北部エリア）✅
-  '和歌山県':{mid:'wakayama',  small:null},        // 和歌山市 → AREA_MAPに和歌山市なし
-  '鳥取県':  {mid:'tottori',   small:null},        // 鳥取市 → AREA_MAPに鳥取市なし（chubuは倉吉）
+  '奈良県':  {mid:'nara',      small:'hokubu'},    // 奈良市 ✅
+  '和歌山県':{mid:'wakayama',  small:'wakayama'},  // 和歌山市 ✅ 確認済み73件
+  '鳥取県':  {mid:'tottori',   small:'tottori'},   // 鳥取市 ✅ 確認済み69件
   '島根県':  {mid:'simane',    small:'matsue'},    // 松江市 ✅
-  '岡山県':  {mid:'okayama',   small:null},        // 岡山市 → AREA_MAPに岡山市なし（kurashikiは倉敷）
-  '広島県':  {mid:'hiroshima', small:null},        // 広島市 → AREA_MAPに広島市なし（miyajimaは宮島）
-  '山口県':  {mid:'yamaguchi', small:null},        // 山口市 → AREA_MAPに山口市なし
+  '岡山県':  {mid:'okayama',   small:'okayama'},   // 岡山市 ✅ 確認済み101件
+  '広島県':  {mid:'hiroshima', small:null},        // 広島市 → smallCode存在せずmiddleのみ
+  '山口県':  {mid:'yamaguchi', small:'yamaguchi'}, // 山口市 ✅ 確認済み51件
   '徳島県':  {mid:'tokushima', small:'tokushima'}, // 徳島市 ✅
   '香川県':  {mid:'kagawa',    small:'takamatsu'}, // 高松市 ✅
   '愛媛県':  {mid:'ehime',     small:'chuuyo'},    // 松山市 ✅
   '高知県':  {mid:'kouchi',    small:'kouchi'},    // 高知市 ✅
   '福岡県':  {mid:'hukuoka',   small:'fukuoka'},   // 福岡市 ✅
-  '佐賀県':  {mid:'saga',      small:null},        // 佐賀市 → AREA_MAPに佐賀市なし
-  '長崎県':  {mid:'nagasaki',  small:null},        // 長崎市 → AREA_MAPに長崎市なし
-  '熊本県':  {mid:'kumamoto',  small:null},        // 熊本市 → AREA_MAPに熊本市なし
+  '佐賀県':  {mid:'saga',      small:null},        // 佐賀市 → smallCode存在せずmiddleのみ
+  '長崎県':  {mid:'nagasaki',  small:'nagasaki'},  // 長崎市 ✅ 確認済み156件
+  '熊本県':  {mid:'kumamoto',  small:'kumamoto'},  // 熊本市 ✅ 確認済み206件
   '大分県':  {mid:'ooita',     small:'oita'},      // 大分市 ✅
   '宮崎県':  {mid:'miyazaki',  small:'miyazaki'},  // 宮崎市 ✅
   '鹿児島県':{mid:'kagoshima', small:'kagoshima'}, // 鹿児島市 ✅
-  '沖縄県':  {mid:'okinawa',   small:'nanbu'},     // 那覇市（南部エリア）✅
+  '沖縄県':  {mid:'okinawa',   small:'nahashi'},   // 那覇市 ✅ 確認済み409件
 };
 
 
