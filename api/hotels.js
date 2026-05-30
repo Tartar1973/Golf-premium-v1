@@ -308,14 +308,14 @@ const CAPITAL_SMALL_MAP = {
   '鳥取県':  {mid:'tottori',   small:'tottori'},   // 鳥取市 ✅ 確認済み69件
   '島根県':  {mid:'simane',    small:'matsue'},    // 松江市 ✅
   '岡山県':  {mid:'okayama',   small:'okayama'},   // 岡山市 ✅ 確認済み101件
-  '広島県':  {mid:'hiroshima', small:'miyajima'},  // 広島市 ✅ 確認済み80件（宮島エリア）
+  '広島県':  {mid:'hiroshima', small:'higashihiroshima'}, // 広島市 ✅ 確認済み64件（東広島エリア）
   '山口県':  {mid:'yamaguchi', small:'yamaguchi'}, // 山口市 ✅ 確認済み51件
   '徳島県':  {mid:'tokushima', small:'tokushima'}, // 徳島市 ✅
   '香川県':  {mid:'kagawa',    small:'takamatsu'}, // 高松市 ✅
   '愛媛県':  {mid:'ehime',     small:'chuuyo'},    // 松山市 ✅
   '高知県':  {mid:'kouchi',    small:'kouchi'},    // 高知市 ✅
   '福岡県':  {mid:'hukuoka',   small:'fukuoka'},   // 福岡市 ✅
-  '佐賀県':  {mid:'saga',      small:'ureshino'},  // 佐賀市 ✅ 確認済み107件（嬉野エリア）
+  '佐賀県':  {mid:'saga',      small:'saga'},      // 佐賀市 ✅ 確認済み57件
   '長崎県':  {mid:'nagasaki',  small:'nagasaki'},  // 長崎市 ✅ 確認済み156件
   '熊本県':  {mid:'kumamoto',  small:'kumamoto'},  // 熊本市 ✅ 確認済み206件
   '大分県':  {mid:'ooita',     small:'oita'},      // 大分市 ✅
