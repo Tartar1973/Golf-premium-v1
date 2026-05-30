@@ -275,7 +275,7 @@ function findSmallCode(address, cityName, middleCode) {
 // small:null の県は楽天APIにsmallCodeが存在しないため
 // middleClassCode のみで都道府県全体を検索する
 const CAPITAL_SMALL_MAP = {
-  '北海道':  {mid:'hokkaido',  small:'sapporo'},   // 札幌市 ✅
+  '北海道':  {mid:'hokkaido',  small:null, lat:43.0618, lng:141.3545}, // 札幌市 ✅ 座標検索528件
   '青森県':  {mid:'aomori',    small:'aomori'},    // 青森市 ✅
   '岩手県':  {mid:'iwate',     small:'morioka'},   // 盛岡市 ✅
   '宮城県':  {mid:'miyagi',    small:'sendai'},    // 仙台市 ✅
