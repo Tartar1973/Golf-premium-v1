@@ -505,7 +505,7 @@ export default async function handler(req, res) {
       const d = await fetchJSON(buildUrl({
         latitude:     String(latF),
         longitude:    String(lngF),
-        searchRadius: '10',
+        searchRadius: '3',
         datumType:    '1',
       }));
       hotels = parseHotels(d);
