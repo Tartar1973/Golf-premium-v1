@@ -292,7 +292,7 @@ const CAPITAL_SMALL_MAP = {
   '新潟県':  {mid:'niigata',   small:'niigata'},   // 新潟市 ✅ 確認済み69件
   '富山県':  {mid:'toyama',    small:'toyama'},    // 富山市 ✅
   '石川県':  {mid:'ishikawa',  small:'kanazawa'},  // 金沢市 ✅
-  '福井県':  {mid:'hukui',     small:'echizen'},   // 福井市 ✅ 確認済み72件（越前エリア）
+  '福井県':  {mid:'hukui',     small:null, lat:36.0652, lng:136.2217}, // 福井市 ✅ 座標検索35件
   '山梨県':  {mid:'yamanasi',  small:'kofu'},      // 甲府市 ✅
   '長野県':  {mid:'nagano',    small:'nagano'},    // 長野市 ✅
   '岐阜県':  {mid:'gihu',      small:'gifu'},      // 岐阜市 ✅ 確認済み51件
@@ -308,7 +308,7 @@ const CAPITAL_SMALL_MAP = {
   '鳥取県':  {mid:'tottori',   small:'tottori'},   // 鳥取市 ✅ 確認済み69件
   '島根県':  {mid:'simane',    small:'matsue'},    // 松江市 ✅
   '岡山県':  {mid:'okayama',   small:'okayama'},   // 岡山市 ✅ 確認済み101件
-  '広島県':  {mid:'hiroshima', small:'higashihiroshima'}, // 広島市 ✅ 確認済み64件（東広島エリア）
+  '広島県':  {mid:'hiroshima', small:null, lat:34.3853, lng:132.4553}, // 広島市 ✅ 座標検索232件
   '山口県':  {mid:'yamaguchi', small:'yamaguchi'}, // 山口市 ✅ 確認済み51件
   '徳島県':  {mid:'tokushima', small:'tokushima'}, // 徳島市 ✅
   '香川県':  {mid:'kagawa',    small:'takamatsu'}, // 高松市 ✅
@@ -482,8 +482,18 @@ export default async function handler(req, res) {
             hotels = parseHotels(d2);
             console.log(`[capital fallback] ${prefName} ${cap.mid} only: ${hotels.length}件`);
           }
+        } else if (cap.lat && cap.lng) {
+          // small:null かつ座標あり → 県庁所在地の座標で検索（福井・広島など）
+          const d = await fetchJSON(buildUrl({
+            latitude:     String(cap.lat),
+            longitude:    String(cap.lng),
+            searchRadius: '3',
+            datumType:    '1',
+          }));
+          hotels = parseHotels(d);
+          console.log(`[capital coord] ${prefName} ${cap.lat}/${cap.lng}: ${hotels.length}件`);
         } else {
-          // small:null → 最初から middleClassCode のみで検索
+          // small:null 座標なし → middleClassCode のみで検索（動作しない可能性あり）
           const d = await fetchByMiddleOnly();
           hotels = parseHotels(d);
           console.log(`[capital middle-only] ${prefName} ${cap.mid}: ${hotels.length}件`);
