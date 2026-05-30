@@ -271,55 +271,56 @@ function findSmallCode(address, cityName, middleCode) {
 }
 
 // 47都道府県の県庁所在地 middleCode + smallCode マップ
-// PREF_MIDDLE と AREA_MAP の実際のコードに合わせて修正済み
+// small:null の県は AREA_MAP に県庁所在地に対応するエリアがないため
+// middleClassCode のみで都道府県全体を検索する
 const CAPITAL_SMALL_MAP = {
-  '北海道':  {mid:'hokkaido',  small:'sapporo'},
-  '青森県':  {mid:'aomori',    small:'aomori'},
-  '岩手県':  {mid:'iwate',     small:'morioka'},
-  '宮城県':  {mid:'miyagi',    small:'sendai'},
-  '秋田県':  {mid:'akita',     small:'honjo'},      // 秋田市は由利本荘エリア寄り → honjo が最近傍
-  '山形県':  {mid:'yamagata',  small:'yamagata'},
-  '福島県':  {mid:'hukushima', small:'koriyama'},
-  '茨城県':  {mid:'ibaragi',   small:'mito'},
-  '栃木県':  {mid:'tochigi',   small:'utsunomiya'},
-  '群馬県':  {mid:'gunma',     small:'maebashi'},
-  '埼玉県':  {mid:'saitama',   small:'saitama'},
-  '千葉県':  {mid:'tiba',      small:'keiyo'},
-  '東京都':  {mid:'tokyo',     small:'nishi'},
-  '神奈川県':{mid:'kanagawa',  small:'yokohama'},
-  '新潟県':  {mid:'niigata',   small:'kita'},       // 新潟市は長岡・三条エリア(kita)
-  '富山県':  {mid:'toyama',    small:'toyama'},
-  '石川県':  {mid:'ishikawa',  small:'kanazawa'},
-  '福井県':  {mid:'hukui',     small:'echizen'},    // 福井市は越前エリア
-  '山梨県':  {mid:'yamanasi',  small:'kofu'},
-  '長野県':  {mid:'nagano',    small:'nagano'},
-  '岐阜県':  {mid:'gihu',      small:'tajimi'},     // 岐阜市は多治見エリア
-  '静岡県':  {mid:'shizuoka',  small:'numazu'},     // 静岡市は沼津エリア寄り
-  '愛知県':  {mid:'aichi',     small:'mikawa'},     // 名古屋は岡崎・豊田エリア
-  '三重県':  {mid:'mie',       small:'tsu'},
-  '滋賀県':  {mid:'shiga',     small:'ootsu'},
-  '京都府':  {mid:'kyoto',     small:'shi'},
-  '大阪府':  {mid:'osaka',     small:'shi'},
-  '兵庫県':  {mid:'hyogo',     small:'kobe'},
-  '奈良県':  {mid:'nara',      small:'hokubu'},
-  '和歌山県':{mid:'wakayama',  small:'gobo'},       // 和歌山市は御坊エリア寄り
-  '鳥取県':  {mid:'tottori',   small:'chubu'},      // 鳥取市は中部
-  '島根県':  {mid:'simane',    small:'matsue'},
-  '岡山県':  {mid:'okayama',   small:'kurashiki'},  // 岡山市は倉敷エリア
-  '広島県':  {mid:'hiroshima', small:'miyajima'},   // 広島市は宮島エリア
-  '山口県':  {mid:'yamaguchi', small:'hagi'},       // 山口市は萩エリア
-  '徳島県':  {mid:'tokushima', small:'tokushima'},
-  '香川県':  {mid:'kagawa',    small:'takamatsu'},
-  '愛媛県':  {mid:'ehime',     small:'chuuyo'},
-  '高知県':  {mid:'kouchi',    small:'kouchi'},
-  '福岡県':  {mid:'hukuoka',   small:'fukuoka'},
-  '佐賀県':  {mid:'saga',      small:'karatsu'},    // 佐賀市は唐津エリア寄り
-  '長崎県':  {mid:'nagasaki',  small:'airport'},    // 長崎市は諫早・大村エリア
-  '熊本県':  {mid:'kumamoto',  small:'kikuchi'},    // 熊本市は玉名・山鹿エリア
-  '大分県':  {mid:'ooita',     small:'oita'},
-  '宮崎県':  {mid:'miyazaki',  small:'miyazaki'},
-  '鹿児島県':{mid:'kagoshima', small:'kagoshima'},
-  '沖縄県':  {mid:'okinawa',   small:'chubu'},      // 那覇市は宜野湾・北谷エリア
+  '北海道':  {mid:'hokkaido',  small:'sapporo'},   // 札幌市 ✅
+  '青森県':  {mid:'aomori',    small:'aomori'},    // 青森市 ✅
+  '岩手県':  {mid:'iwate',     small:'morioka'},   // 盛岡市 ✅
+  '宮城県':  {mid:'miyagi',    small:'sendai'},    // 仙台市 ✅
+  '秋田県':  {mid:'akita',     small:null},        // 秋田市 → AREA_MAPに秋田市なし
+  '山形県':  {mid:'yamagata',  small:'yamagata'},  // 山形市 ✅（天童・上山エリア）
+  '福島県':  {mid:'hukushima', small:'koriyama'},  // 福島市は郡山エリアに近い △
+  '茨城県':  {mid:'ibaragi',   small:'mito'},      // 水戸市 ✅
+  '栃木県':  {mid:'tochigi',   small:'utsunomiya'},// 宇都宮市 ✅
+  '群馬県':  {mid:'gunma',     small:'maebashi'},  // 前橋市 ✅
+  '埼玉県':  {mid:'saitama',   small:'saitama'},   // さいたま市 ✅
+  '千葉県':  {mid:'tiba',      small:'keiyo'},     // 千葉市（京葉エリア）✅
+  '東京都':  {mid:'tokyo',     small:'nishi'},     // 新宿区（西東京エリア）✅
+  '神奈川県':{mid:'kanagawa',  small:'yokohama'},  // 横浜市 ✅
+  '新潟県':  {mid:'niigata',   small:null},        // 新潟市 → AREA_MAPに新潟市なし
+  '富山県':  {mid:'toyama',    small:'toyama'},    // 富山市 ✅
+  '石川県':  {mid:'ishikawa',  small:'kanazawa'},  // 金沢市 ✅
+  '福井県':  {mid:'hukui',     small:null},        // 福井市 → AREA_MAPに福井市なし
+  '山梨県':  {mid:'yamanasi',  small:'kofu'},      // 甲府市 ✅
+  '長野県':  {mid:'nagano',    small:'nagano'},    // 長野市 ✅（戸隠エリア）
+  '岐阜県':  {mid:'gihu',      small:null},        // 岐阜市 → AREA_MAPに岐阜市なし
+  '静岡県':  {mid:'shizuoka',  small:null},        // 静岡市 → AREA_MAPに静岡市なし
+  '愛知県':  {mid:'aichi',     small:null},        // 名古屋市 → AREA_MAPに名古屋なし
+  '三重県':  {mid:'mie',       small:'tsu'},       // 津市 ✅
+  '滋賀県':  {mid:'shiga',     small:'ootsu'},     // 大津市 ✅
+  '京都府':  {mid:'kyoto',     small:'shi'},       // 京都市 ✅
+  '大阪府':  {mid:'osaka',     small:'shi'},       // 大阪市 ✅
+  '兵庫県':  {mid:'hyogo',     small:'kobe'},      // 神戸市 ✅
+  '奈良県':  {mid:'nara',      small:'hokubu'},    // 奈良市（北部エリア）✅
+  '和歌山県':{mid:'wakayama',  small:null},        // 和歌山市 → AREA_MAPに和歌山市なし
+  '鳥取県':  {mid:'tottori',   small:null},        // 鳥取市 → AREA_MAPに鳥取市なし（chubuは倉吉）
+  '島根県':  {mid:'simane',    small:'matsue'},    // 松江市 ✅
+  '岡山県':  {mid:'okayama',   small:null},        // 岡山市 → AREA_MAPに岡山市なし（kurashikiは倉敷）
+  '広島県':  {mid:'hiroshima', small:null},        // 広島市 → AREA_MAPに広島市なし（miyajimaは宮島）
+  '山口県':  {mid:'yamaguchi', small:null},        // 山口市 → AREA_MAPに山口市なし
+  '徳島県':  {mid:'tokushima', small:'tokushima'}, // 徳島市 ✅
+  '香川県':  {mid:'kagawa',    small:'takamatsu'}, // 高松市 ✅
+  '愛媛県':  {mid:'ehime',     small:'chuuyo'},    // 松山市 ✅
+  '高知県':  {mid:'kouchi',    small:'kouchi'},    // 高知市 ✅
+  '福岡県':  {mid:'hukuoka',   small:'fukuoka'},   // 福岡市 ✅
+  '佐賀県':  {mid:'saga',      small:null},        // 佐賀市 → AREA_MAPに佐賀市なし
+  '長崎県':  {mid:'nagasaki',  small:null},        // 長崎市 → AREA_MAPに長崎市なし
+  '熊本県':  {mid:'kumamoto',  small:null},        // 熊本市 → AREA_MAPに熊本市なし
+  '大分県':  {mid:'ooita',     small:'oita'},      // 大分市 ✅
+  '宮崎県':  {mid:'miyazaki',  small:'miyazaki'},  // 宮崎市 ✅
+  '鹿児島県':{mid:'kagoshima', small:'kagoshima'}, // 鹿児島市 ✅
+  '沖縄県':  {mid:'okinawa',   small:'nanbu'},     // 那覇市（南部エリア）✅
 };
 
 
@@ -443,36 +444,48 @@ export default async function handler(req, res) {
     if (mode === 'capital') {
       const cap = CAPITAL_SMALL_MAP[prefName];
       if (cap) {
-        // ① smallClassCode で検索
-        const d1 = await fetchJSON(buildUrl({
-          largeClassCode: 'japan',
-          middleClassCode: cap.mid,
-          smallClassCode:  cap.small,
-        }));
-        hotels = parseHotels(d1);
-        console.log(`[capital] ${prefName} ${cap.mid}/${cap.small}: ${hotels.length}件`);
+        // middleCodeのみで検索するヘルパー（squeezeなし）
+        async function fetchByMiddleOnly() {
+          const u = new URL('https://openapi.rakuten.co.jp/engine/api/Travel/SimpleHotelSearch/20170426');
+          u.searchParams.set('format','json');
+          u.searchParams.set('formatVersion','2');
+          u.searchParams.set('applicationId', applicationId);
+          u.searchParams.set('accessKey', accessKey);
+          if (affiliateId) u.searchParams.set('affiliateId', affiliateId);
+          u.searchParams.set('checkinDate',  checkinDate);
+          u.searchParams.set('checkoutDate', checkoutDate);
+          u.searchParams.set('adultNum', String(Math.min(10,Math.max(1,parseInt(adults)||1))));
+          u.searchParams.set('roomNum',  String(Math.min(10,Math.max(1,parseInt(rooms)||1))));
+          u.searchParams.set('hits',     '30');
+          u.searchParams.set('page',     '1');
+          u.searchParams.set('sort',     '+roomCharge');
+          u.searchParams.set('responseType', 'large');
+          u.searchParams.set('largeClassCode',  'japan');
+          u.searchParams.set('middleClassCode', cap.mid);
+          return fetchJSON(u.toString());
+        }
 
-        // ② 0件なら middleClassCode のみで再試行（squeezeなし）
-        if (hotels.length === 0) {
-          const u2 = new URL('https://openapi.rakuten.co.jp/engine/api/Travel/SimpleHotelSearch/20170426');
-          u2.searchParams.set('format','json');
-          u2.searchParams.set('formatVersion','2');
-          u2.searchParams.set('applicationId', applicationId);
-          u2.searchParams.set('accessKey', accessKey);
-          if (affiliateId) u2.searchParams.set('affiliateId', affiliateId);
-          u2.searchParams.set('checkinDate',  checkinDate);
-          u2.searchParams.set('checkoutDate', checkoutDate);
-          u2.searchParams.set('adultNum', String(Math.min(10,Math.max(1,parseInt(adults)||1))));
-          u2.searchParams.set('roomNum',  String(Math.min(10,Math.max(1,parseInt(rooms)||1))));
-          u2.searchParams.set('hits',     '30');
-          u2.searchParams.set('page',     '1');
-          u2.searchParams.set('sort',     '+roomCharge');
-          u2.searchParams.set('responseType', 'large');
-          u2.searchParams.set('largeClassCode',  'japan');
-          u2.searchParams.set('middleClassCode', cap.mid);
-          const d2 = await fetchJSON(u2.toString());
-          hotels = parseHotels(d2);
-          console.log(`[capital fallback] ${prefName} ${cap.mid} only: ${hotels.length}件`);
+        if (cap.small) {
+          // ① smallClassCode で検索
+          const d1 = await fetchJSON(buildUrl({
+            largeClassCode:  'japan',
+            middleClassCode: cap.mid,
+            smallClassCode:  cap.small,
+          }));
+          hotels = parseHotels(d1);
+          console.log(`[capital] ${prefName} ${cap.mid}/${cap.small}: ${hotels.length}件`);
+
+          // ② 0件なら middleClassCode のみで再試行
+          if (hotels.length === 0) {
+            const d2 = await fetchByMiddleOnly();
+            hotels = parseHotels(d2);
+            console.log(`[capital fallback] ${prefName} ${cap.mid} only: ${hotels.length}件`);
+          }
+        } else {
+          // small:null → 最初から middleClassCode のみで検索
+          const d = await fetchByMiddleOnly();
+          hotels = parseHotels(d);
+          console.log(`[capital middle-only] ${prefName} ${cap.mid}: ${hotels.length}件`);
         }
       }
       usedKeyword = prefName;
