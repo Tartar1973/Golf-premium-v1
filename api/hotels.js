@@ -440,11 +440,6 @@ export default async function handler(req, res) {
 
     let hotels=[], usedKeyword=prefName;
 
-<<<<<<< HEAD
-    // 県庁所在地モード: 座標検索のみ（フォールバックなし）
-    const isCapitalMode = hasCoord && req.query.mode === 'capital';
-
-=======
     // ===== 県庁所在地モード =====
     // 座標検索は楽天APIで信頼できないため、CAPITAL_SMALL_MAPのエリアコードで検索する
     if (mode === 'capital') {
@@ -517,7 +512,6 @@ export default async function handler(req, res) {
     // ===== 通常モード（近隣ホテル検索） =====
 
     // ① 座標がある場合は半径10kmの座標検索を優先
->>>>>>> dev
     if (hasCoord) {
       const d = await fetchJSON(buildUrl({
         latitude:     String(latF),
@@ -529,38 +523,15 @@ export default async function handler(req, res) {
       usedKeyword = cityName || prefName;
     }
 
-    // 県庁所在地モードはここで終了（フォールバックしない）
-    if (!isCapitalMode) {
-      // フォールバック① smallClassCode で検索
-      if (hotels.length < 5 && middleCode && smallCode) {
-        const d = await fetchJSON(buildUrl({
-          largeClassCode:'japan', middleClassCode:middleCode, smallClassCode:smallCode
-        }));
-        hotels = merge(hotels, parseHotels(d));
-        usedKeyword = cityName || prefName;
-      }
+    // ② 座標検索で不足 or 座標なし → smallClassCode で検索
+    if (hotels.length < 5 && middleCode && smallCode) {
+      const d = await fetchJSON(buildUrl({
+        largeClassCode:'japan', middleClassCode:middleCode, smallClassCode:smallCode
+      }));
+      hotels = merge(hotels, parseHotels(d));
+      usedKeyword = cityName || prefName;
+    }
 
-<<<<<<< HEAD
-      // フォールバック② 都道府県全体で再試行
-      if (hotels.length < 5 && middleCode) {
-        const u = new URL('https://openapi.rakuten.co.jp/engine/api/Travel/SimpleHotelSearch/20170426');
-        u.searchParams.set('format','json');
-        u.searchParams.set('formatVersion','2');
-        u.searchParams.set('applicationId', applicationId);
-        u.searchParams.set('accessKey', accessKey);
-        if (affiliateId) u.searchParams.set('affiliateId', affiliateId);
-        u.searchParams.set('checkinDate',  checkinDate);
-        u.searchParams.set('checkoutDate', checkoutDate);
-        u.searchParams.set('adultNum', String(Math.min(10,Math.max(1,parseInt(adults)||1))));
-        u.searchParams.set('roomNum',  String(Math.min(10,Math.max(1,parseInt(rooms)||1))));
-        u.searchParams.set('hits',     '30');
-        u.searchParams.set('page',     '1');
-        u.searchParams.set('sort',     '+roomCharge');
-        u.searchParams.set('responseType', 'large');
-        u.searchParams.set('largeClassCode',  'japan');
-        u.searchParams.set('middleClassCode', middleCode);
-        const d = await fetchJSON(u.toString());
-=======
     // ③ まだ少なければ CAPITAL_SMALL_MAP の smallCode でフォールバック
     // （middleCodeのみ検索はAPIが許可しないため）
     if (hotels.length < 5 && middleCode) {
@@ -569,7 +540,6 @@ export default async function handler(req, res) {
         const d = await fetchJSON(buildUrl({
           largeClassCode:'japan', middleClassCode:cap.mid, smallClassCode:cap.small
         }));
->>>>>>> dev
         hotels = merge(hotels, parseHotels(d));
         usedKeyword = prefName;
       }
