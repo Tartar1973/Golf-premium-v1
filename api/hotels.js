@@ -184,6 +184,7 @@ const AREA_MAP = [
   ['淡路','hyogo','awaji'],
   ['橿原','nara','hokubu'],['大和郡山','nara','hokubu'],['天理','nara','hokubu'],
   ['吉野','nara','nanbu'],['十津川','nara','nanbu'],
+  ['海南','wakayama','wakayama'],['紀の川','wakayama','wakayama'],
   ['高野山','wakayama','Kihoku'],
   ['御坊','wakayama','gobo'],['有田','wakayama','gobo'],
   ['白浜','wakayama','shirahama'],['田辺','wakayama','shirahama'],['龍神','wakayama','shirahama'],
@@ -521,27 +522,17 @@ export default async function handler(req, res) {
       usedKeyword = cityName || prefName;
     }
 
-    // ③ まだ少なければ都道府県全体で再試行
+    // ③ まだ少なければ CAPITAL_SMALL_MAP の smallCode でフォールバック
+    // （middleCodeのみ検索はAPIが許可しないため）
     if (hotels.length < 5 && middleCode) {
-      const u = new URL('https://openapi.rakuten.co.jp/engine/api/Travel/SimpleHotelSearch/20170426');
-      u.searchParams.set('format','json');
-      u.searchParams.set('formatVersion','2');
-      u.searchParams.set('applicationId', applicationId);
-      u.searchParams.set('accessKey', accessKey);
-      if (affiliateId) u.searchParams.set('affiliateId', affiliateId);
-      u.searchParams.set('checkinDate',  checkinDate);
-      u.searchParams.set('checkoutDate', checkoutDate);
-      u.searchParams.set('adultNum', String(Math.min(10,Math.max(1,parseInt(adults)||1))));
-      u.searchParams.set('roomNum',  String(Math.min(10,Math.max(1,parseInt(rooms)||1))));
-      u.searchParams.set('hits',     '30');
-      u.searchParams.set('page',     '1');
-      u.searchParams.set('sort',     '+roomCharge');
-      u.searchParams.set('responseType', 'large');
-      u.searchParams.set('largeClassCode',  'japan');
-      u.searchParams.set('middleClassCode', middleCode);
-      const d = await fetchJSON(u.toString());
-      hotels = merge(hotels, parseHotels(d));
-      usedKeyword = prefName;
+      const cap = CAPITAL_SMALL_MAP[prefName];
+      if (cap && cap.small && cap.small !== smallCode) {
+        const d = await fetchJSON(buildUrl({
+          largeClassCode:'japan', middleClassCode:cap.mid, smallClassCode:cap.small
+        }));
+        hotels = merge(hotels, parseHotels(d));
+        usedKeyword = prefName;
+      }
     }
 
     res.setHeader('Cache-Control','s-maxage=600,stale-while-revalidate=1800');
