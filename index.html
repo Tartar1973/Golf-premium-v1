@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8" />
@@ -184,7 +184,7 @@ select{width:100%;padding:12px 14px;border-radius:14px;background:#111827;color:
       </div>
       <div>
         <div class="heroActions">
-          <button id="chooseJa" class="langBtn primary">譌･譛ｬ隱槭〒蟋九ａ繧・/button>
+          <button id="chooseJa" class="langBtn primary">日本語で始める</button>
           <button id="chooseEn" class="langBtn secondary">Start in English</button>
         </div>
         <div class="small" id="gateNote" style="margin-top:12px">You can switch between Japanese and English anytime after entering.</div>
@@ -197,10 +197,10 @@ select{width:100%;padding:12px 14px;border-radius:14px;background:#111827;color:
   <div class="topbar">
     <div>
       <h1 id="appTitle">Golf Journey Roulette</h1>
-      <div class="sub" id="appSub">逵後Ν繝ｼ繝ｬ繝・ヨ繧貞・縺ｫ蝗槭＠縺ｦ縲√◎縺ｮ逵後・讌ｽ螟ｩGORA蛟呵｣懊ｒ蜿門ｾ励＠縺ｾ縺吶・/div>
+      <div class="sub" id="appSub">県ルーレットを先に回して、その県の楽天GORA候補を取得します。</div>
     </div>
     <div class="langSwitch">
-      <button id="langJa" class="miniBtn">譌･譛ｬ隱・/button>
+      <button id="langJa" class="miniBtn">日本語</button>
       <button id="langEn" class="miniBtn">English</button>
     </div>
   </div>
@@ -219,8 +219,8 @@ select{width:100%;padding:12px 14px;border-radius:14px;background:#111827;color:
       <div id="brandChips" class="chips"></div>
 
       <div class="actions">
-        <button id="spinBtn" class="btn primary">繝ｫ繝ｼ繝ｬ繝・ヨ髢句ｧ・/button>
-        <button id="rerollBtn" class="btn secondary">蜷後§逵後〒蜀肴歓驕ｸ</button>
+        <button id="spinBtn" class="btn primary">ルーレット開始</button>
+        <button id="rerollBtn" class="btn secondary">同じ県で再抽選</button>
       </div>
 
       <div id="statusBox" class="status warn"></div>
@@ -248,8 +248,8 @@ select{width:100%;padding:12px 14px;border-radius:14px;background:#111827;color:
           <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px">
             <h3 id="candidateTitle" style="margin:0"></h3>
             <div id="sortBtns" style="display:flex;gap:6px">
-              <button id="sortComfort" class="miniBtn active" style="font-size:12px;padding:6px 10px" onclick="setSortKey('comfort')">蠢ｫ驕ｩ蠎ｦ鬆・/button>
-              <button id="sortRating" class="miniBtn" style="font-size:12px;padding:6px 10px" onclick="setSortKey('rating')">隧穂ｾ｡鬆・/button>
+              <button id="sortComfort" class="miniBtn active" style="font-size:12px;padding:6px 10px" onclick="setSortKey('comfort')">快適度順</button>
+              <button id="sortRating" class="miniBtn" style="font-size:12px;padding:6px 10px" onclick="setSortKey('rating')">評価順</button>
             </div>
           </div>
           <div id="candidateList" class="list"></div>
@@ -260,36 +260,36 @@ select{width:100%;padding:12px 14px;border-radius:14px;background:#111827;color:
 </div>
 
 <script>
-const PREF_CODES = {'蛹玲ｵｷ驕・:1,'髱呈｣ｮ逵・:2,'蟯ｩ謇狗恁':3,'螳ｮ蝓守恁':4,'遘狗伐逵・:5,'螻ｱ蠖｢逵・:6,'遖丞ｳｶ逵・:7,'闌ｨ蝓守恁':8,'譬・惠逵・:9,'鄒､鬥ｬ逵・:10,'蝓ｼ邇臥恁':11,'蜊・痩逵・:12,'譚ｱ莠ｬ驛ｽ':13,'逾槫･亥ｷ晉恁':14,'譁ｰ貎溽恁':15,'蟇悟ｱｱ逵・:16,'遏ｳ蟾晉恁':17,'遖丈ｺ慕恁':18,'螻ｱ譴ｨ逵・:19,'髟ｷ驥守恁':20,'蟯宣・逵・:21,'髱吝ｲ｡逵・:22,'諢帷衍逵・:23,'荳蛾㍾逵・:24,'貊玖ｳ逵・:25,'莠ｬ驛ｽ蠎・:26,'螟ｧ髦ｪ蠎・:27,'蜈ｵ蠎ｫ逵・:28,'螂郁憶逵・:29,'蜥梧ｭ悟ｱｱ逵・:30,'魑･蜿也恁':31,'蟲ｶ譬ｹ逵・:32,'蟯｡螻ｱ逵・:33,'蠎・ｳｶ逵・:34,'螻ｱ蜿｣逵・:35,'蠕ｳ蟲ｶ逵・:36,'鬥吝ｷ晉恁':37,'諢帛ｪ帷恁':38,'鬮倡衍逵・:39,'遖丞ｲ｡逵・:40,'菴占ｳ逵・:41,'髟ｷ蟠守恁':42,'辭頑悽逵・:43,'螟ｧ蛻・恁':44,'螳ｮ蟠守恁':45,'鮖ｿ蜈仙ｳｶ逵・:46,'豐也ｸ・恁':47};
-const AREAS = {all:Object.keys(PREF_CODES),hokkaido:['蛹玲ｵｷ驕・],tohoku:['髱呈｣ｮ逵・,'蟯ｩ謇狗恁','螳ｮ蝓守恁','遘狗伐逵・,'螻ｱ蠖｢逵・,'遖丞ｳｶ逵・],kanto:['闌ｨ蝓守恁','譬・惠逵・,'鄒､鬥ｬ逵・,'蝓ｼ邇臥恁','蜊・痩逵・,'譚ｱ莠ｬ驛ｽ','逾槫･亥ｷ晉恁'],chubu:['譁ｰ貎溽恁','蟇悟ｱｱ逵・,'遏ｳ蟾晉恁','遖丈ｺ慕恁','螻ｱ譴ｨ逵・,'髟ｷ驥守恁','蟯宣・逵・,'髱吝ｲ｡逵・,'諢帷衍逵・,'荳蛾㍾逵・],kinki:['貊玖ｳ逵・,'莠ｬ驛ｽ蠎・,'螟ｧ髦ｪ蠎・,'蜈ｵ蠎ｫ逵・,'螂郁憶逵・,'蜥梧ｭ悟ｱｱ逵・],chugoku:['魑･蜿也恁','蟲ｶ譬ｹ逵・,'蟯｡螻ｱ逵・,'蠎・ｳｶ逵・,'螻ｱ蜿｣逵・],shikoku:['蠕ｳ蟲ｶ逵・,'鬥吝ｷ晉恁','諢帛ｪ帷恁','鬮倡衍逵・],kyushu:['遖丞ｲ｡逵・,'菴占ｳ逵・,'髟ｷ蟠守恁','辭頑悽逵・,'螟ｧ蛻・恁','螳ｮ蟠守恁','鮖ｿ蜈仙ｳｶ逵・],okinawa:['豐也ｸ・恁'],pref:[]};
-const BRANDS = ['GRAND PGM','PGM','繧｢繧ｳ繝ｼ繝・ぅ繧｢','縺昴・莉・];
-const REGION_SCORE = {"蛹玲ｵｷ驕・: {"cool": 10, "warm": -6, "snow": 10}, "髱呈｣ｮ逵・: {"cool": 8, "warm": -4, "snow": 8}, "蟯ｩ謇狗恁": {"cool": 8, "warm": -4, "snow": 7}, "螳ｮ蝓守恁": {"cool": 5, "warm": 0, "snow": 3}, "遘狗伐逵・: {"cool": 8, "warm": -4, "snow": 8}, "螻ｱ蠖｢逵・: {"cool": 8, "warm": -3, "snow": 8}, "遖丞ｳｶ逵・: {"cool": 6, "warm": -1, "snow": 5}, "闌ｨ蝓守恁": {"cool": 2, "warm": 4, "snow": 0}, "譬・惠逵・: {"cool": 5, "warm": 2, "snow": 4}, "鄒､鬥ｬ逵・: {"cool": 5, "warm": 2, "snow": 4}, "蝓ｼ邇臥恁": {"cool": 0, "warm": 3, "snow": 0}, "蜊・痩逵・: {"cool": 1, "warm": 8, "snow": 0}, "譚ｱ莠ｬ驛ｽ": {"cool": 0, "warm": 4, "snow": 0}, "逾槫･亥ｷ晉恁": {"cool": 1, "warm": 6, "snow": 0}, "譁ｰ貎溽恁": {"cool": 6, "warm": -2, "snow": 9}, "蟇悟ｱｱ逵・: {"cool": 5, "warm": -1, "snow": 6}, "遏ｳ蟾晉恁": {"cool": 4, "warm": 1, "snow": 5}, "遖丈ｺ慕恁": {"cool": 4, "warm": 2, "snow": 4}, "螻ｱ譴ｨ逵・: {"cool": 6, "warm": 1, "snow": 4}, "髟ｷ驥守恁": {"cool": 10, "warm": -3, "snow": 8}, "蟯宣・逵・: {"cool": 5, "warm": 0, "snow": 5}, "髱吝ｲ｡逵・: {"cool": 3, "warm": 8, "snow": 0}, "諢帷衍逵・: {"cool": 1, "warm": 5, "snow": 0}, "荳蛾㍾逵・: {"cool": 1, "warm": 7, "snow": 0}, "貊玖ｳ逵・: {"cool": 2, "warm": 3, "snow": 2}, "莠ｬ驛ｽ蠎・: {"cool": 1, "warm": 4, "snow": 1}, "螟ｧ髦ｪ蠎・: {"cool": 0, "warm": 5, "snow": 0}, "蜈ｵ蠎ｫ逵・: {"cool": 2, "warm": 5, "snow": 1}, "螂郁憶逵・: {"cool": 2, "warm": 4, "snow": 1}, "蜥梧ｭ悟ｱｱ逵・: {"cool": 1, "warm": 9, "snow": 0}, "魑･蜿也恁": {"cool": 3, "warm": 4, "snow": 2}, "蟲ｶ譬ｹ逵・: {"cool": 3, "warm": 5, "snow": 2}, "蟯｡螻ｱ逵・: {"cool": 1, "warm": 7, "snow": 0}, "蠎・ｳｶ逵・: {"cool": 1, "warm": 6, "snow": 0}, "螻ｱ蜿｣逵・: {"cool": 2, "warm": 7, "snow": 0}, "蠕ｳ蟲ｶ逵・: {"cool": 1, "warm": 7, "snow": 0}, "鬥吝ｷ晉恁": {"cool": 1, "warm": 8, "snow": 0}, "諢帛ｪ帷恁": {"cool": 1, "warm": 8, "snow": 0}, "鬮倡衍逵・: {"cool": 2, "warm": 9, "snow": 0}, "遖丞ｲ｡逵・: {"cool": 1, "warm": 7, "snow": 0}, "菴占ｳ逵・: {"cool": 1, "warm": 7, "snow": 0}, "髟ｷ蟠守恁": {"cool": 2, "warm": 8, "snow": 0}, "辭頑悽逵・: {"cool": 3, "warm": 7, "snow": 0}, "螟ｧ蛻・恁": {"cool": 3, "warm": 7, "snow": 0}, "螳ｮ蟠守恁": {"cool": 2, "warm": 10, "snow": 0}, "鮖ｿ蜈仙ｳｶ逵・: {"cool": 2, "warm": 10, "snow": 0}, "豐也ｸ・恁": {"cool": 4, "warm": 10, "snow": 0}};
+const PREF_CODES = {'北海道':1,'青森県':2,'岩手県':3,'宮城県':4,'秋田県':5,'山形県':6,'福島県':7,'茨城県':8,'栃木県':9,'群馬県':10,'埼玉県':11,'千葉県':12,'東京都':13,'神奈川県':14,'新潟県':15,'富山県':16,'石川県':17,'福井県':18,'山梨県':19,'長野県':20,'岐阜県':21,'静岡県':22,'愛知県':23,'三重県':24,'滋賀県':25,'京都府':26,'大阪府':27,'兵庫県':28,'奈良県':29,'和歌山県':30,'鳥取県':31,'島根県':32,'岡山県':33,'広島県':34,'山口県':35,'徳島県':36,'香川県':37,'愛媛県':38,'高知県':39,'福岡県':40,'佐賀県':41,'長崎県':42,'熊本県':43,'大分県':44,'宮崎県':45,'鹿児島県':46,'沖縄県':47};
+const AREAS = {all:Object.keys(PREF_CODES),hokkaido:['北海道'],tohoku:['青森県','岩手県','宮城県','秋田県','山形県','福島県'],kanto:['茨城県','栃木県','群馬県','埼玉県','千葉県','東京都','神奈川県'],chubu:['新潟県','富山県','石川県','福井県','山梨県','長野県','岐阜県','静岡県','愛知県','三重県'],kinki:['滋賀県','京都府','大阪府','兵庫県','奈良県','和歌山県'],chugoku:['鳥取県','島根県','岡山県','広島県','山口県'],shikoku:['徳島県','香川県','愛媛県','高知県'],kyushu:['福岡県','佐賀県','長崎県','熊本県','大分県','宮崎県','鹿児島県'],okinawa:['沖縄県'],pref:[]};
+const BRANDS = ['GRAND PGM','PGM','アコーディア','その他'];
+const REGION_SCORE = {"北海道": {"cool": 10, "warm": -6, "snow": 10}, "青森県": {"cool": 8, "warm": -4, "snow": 8}, "岩手県": {"cool": 8, "warm": -4, "snow": 7}, "宮城県": {"cool": 5, "warm": 0, "snow": 3}, "秋田県": {"cool": 8, "warm": -4, "snow": 8}, "山形県": {"cool": 8, "warm": -3, "snow": 8}, "福島県": {"cool": 6, "warm": -1, "snow": 5}, "茨城県": {"cool": 2, "warm": 4, "snow": 0}, "栃木県": {"cool": 5, "warm": 2, "snow": 4}, "群馬県": {"cool": 5, "warm": 2, "snow": 4}, "埼玉県": {"cool": 0, "warm": 3, "snow": 0}, "千葉県": {"cool": 1, "warm": 8, "snow": 0}, "東京都": {"cool": 0, "warm": 4, "snow": 0}, "神奈川県": {"cool": 1, "warm": 6, "snow": 0}, "新潟県": {"cool": 6, "warm": -2, "snow": 9}, "富山県": {"cool": 5, "warm": -1, "snow": 6}, "石川県": {"cool": 4, "warm": 1, "snow": 5}, "福井県": {"cool": 4, "warm": 2, "snow": 4}, "山梨県": {"cool": 6, "warm": 1, "snow": 4}, "長野県": {"cool": 10, "warm": -3, "snow": 8}, "岐阜県": {"cool": 5, "warm": 0, "snow": 5}, "静岡県": {"cool": 3, "warm": 8, "snow": 0}, "愛知県": {"cool": 1, "warm": 5, "snow": 0}, "三重県": {"cool": 1, "warm": 7, "snow": 0}, "滋賀県": {"cool": 2, "warm": 3, "snow": 2}, "京都府": {"cool": 1, "warm": 4, "snow": 1}, "大阪府": {"cool": 0, "warm": 5, "snow": 0}, "兵庫県": {"cool": 2, "warm": 5, "snow": 1}, "奈良県": {"cool": 2, "warm": 4, "snow": 1}, "和歌山県": {"cool": 1, "warm": 9, "snow": 0}, "鳥取県": {"cool": 3, "warm": 4, "snow": 2}, "島根県": {"cool": 3, "warm": 5, "snow": 2}, "岡山県": {"cool": 1, "warm": 7, "snow": 0}, "広島県": {"cool": 1, "warm": 6, "snow": 0}, "山口県": {"cool": 2, "warm": 7, "snow": 0}, "徳島県": {"cool": 1, "warm": 7, "snow": 0}, "香川県": {"cool": 1, "warm": 8, "snow": 0}, "愛媛県": {"cool": 1, "warm": 8, "snow": 0}, "高知県": {"cool": 2, "warm": 9, "snow": 0}, "福岡県": {"cool": 1, "warm": 7, "snow": 0}, "佐賀県": {"cool": 1, "warm": 7, "snow": 0}, "長崎県": {"cool": 2, "warm": 8, "snow": 0}, "熊本県": {"cool": 3, "warm": 7, "snow": 0}, "大分県": {"cool": 3, "warm": 7, "snow": 0}, "宮崎県": {"cool": 2, "warm": 10, "snow": 0}, "鹿児島県": {"cool": 2, "warm": 10, "snow": 0}, "沖縄県": {"cool": 4, "warm": 10, "snow": 0}};
 
-const GRAND_PGM_NAMES = ['邱乗ｭｦ繧ｫ繝ｳ繝医Μ繝ｼ繧ｯ繝ｩ繝・,'pgm繝槭Μ繧｢繧ｴ繝ｫ繝輔Μ繝ｳ繧ｯ繧ｹ','pgm豁ｦ阡ｵ繧ｴ繝ｫ繝輔け繝ｩ繝・,'pgm遏ｳ蟯｡繧ｴ繝ｫ繝輔け繝ｩ繝・,'蛻ｩ蠎懊ざ繝ｫ繝募ｶ讌ｽ驛ｨ','譯ゅざ繝ｫ繝募ｶ讌ｽ驛ｨ','蜊・ｻ｣逕ｰ繧ｫ繝ｳ繝医Μ繝ｼ繧ｯ繝ｩ繝・,'繧ｻ繧ｴ繝薙い繧ｴ繝ｫ繝輔け繝ｩ繝・,'螟ｧ螳晏｡壹ざ繝ｫ繝輔け繝ｩ繝・,'闃ｱ縺ｮ譛ｨ繧ｴ繝ｫ繝輔け繝ｩ繝・,'繧ｶ繝ｻ繧ｴ繝ｫ繝輔け繝ｩ繝也ｫ懊Ω蟠・,'鄒取ｵｦ繧ｴ繝ｫ繝募ｶ讌ｽ驛ｨ','闌ｨ譛ｨ蝗ｽ髫帙ざ繝ｫ繝募ｶ讌ｽ驛ｨ','繧ｵ繝ｳ繝偵Ν繧ｺ繧ｫ繝ｳ繝医Μ繝ｼ繧ｯ繝ｩ繝・];
-const PGM_NAMES = ['繝√し繝ｳ繧ｫ繝ｳ繝医Μ繝ｼ繧ｯ繝ｩ繝・,'繝繝ｼ繝ｳ繝ｬ繧､繧ｯ','蜊・痩蝗ｽ髫帙き繝ｳ繝医Μ繝ｼ繧ｯ繝ｩ繝・,'螟ｧ螟壼万繧ｫ繝ｳ繝医Μ繝ｼ繧ｯ繝ｩ繝・,'謌千伐縺ｮ譽ｮ繧ｫ繝ｳ繝医Μ繝ｼ繧ｯ繝ｩ繝・,'髟ｷ螟ｪ驛弱き繝ｳ繝医Μ繝ｼ繧ｯ繝ｩ繝・,'繧ｶ繝ｻ繧､繝ｳ繝壹Μ繧｢繝ｫ繧ｫ繝ｳ繝医Μ繝ｼ繧ｯ繝ｩ繝・,'逧先怦繧ｴ繝ｫ繝募ｶ讌ｽ驛ｨ','霑第ｱ溘ヲ繝ｫ繧ｺ繧ｴ繝ｫ繝募ｶ讌ｽ驛ｨ','譫壽婿蝗ｽ髫帙ざ繝ｫ繝募ｶ讌ｽ驛ｨ','髢｢隘ｿ遨ｺ貂ｯ繧ｴ繝ｫ繝募ｶ讌ｽ驛ｨ','蟯ｸ蜥檎伐繧ｫ繝ｳ繝医Μ繝ｼ繧ｯ繝ｩ繝・,'pgm繧ｴ繝ｫ繝輔Μ繧ｾ繝ｼ繝域ｲ也ｸ・,'莠ｬ繧ｫ繝ｳ繝医Μ繝ｼ繧ｯ繝ｩ繝・,'蜊礼ｷ上ヲ繝ｫ繧ｺ繧ｫ繝ｳ繝医Μ繝ｼ繧ｯ繝ｩ繝・,'繧ｯ繝ｪ繧｢繝薙Η繝ｼ繧ｴ繝ｫ繝輔け繝ｩ繝・,'蟯｡驛ｨ繝√し繝ｳ繧ｫ繝ｳ繝医Μ繝ｼ繧ｯ繝ｩ繝・,'蟇瑚ｲｴ繧ｴ繝ｫ繝募ｶ讌ｽ驛ｨ','遘ｦ驥弱き繝ｳ繝医Μ繝ｼ繧ｯ繝ｩ繝・,'譚ｱ蜷榊字譛ｨ繧ｫ繝ｳ繝医Μ繝ｼ繧ｯ繝ｩ繝・,'莨雁兇蜴溘き繝ｳ繝医Μ繝ｼ繧ｯ繝ｩ繝・,'蠕｡谿ｿ蝣ｴ譚ｱ蜷阪ざ繝ｫ繝輔け繝ｩ繝・,'譁ｰ蝓弱き繝ｳ繝医Μ繝ｼ蛟ｶ讌ｽ驛ｨ','蜷埼亂繝√し繝ｳ繧ｫ繝ｳ繝医Μ繝ｼ繧ｯ繝ｩ繝・,'莠螻ｱ繧ｴ繝ｫ繝輔け繝ｩ繝・,'譛ｨ豢･蟾昴き繝ｳ繝医Μ繝ｼ繧ｯ繝ｩ繝・,'豕暮嚀蟇ｺ繧ｫ繝ｳ繝医Μ繝ｼ蛟ｶ讌ｽ驛ｨ','繧｢繝ｼ繧ｯ繧医°繧上ざ繝ｫ繝募ｶ讌ｽ驛ｨ','繝ｩ繧､繧ｪ繝ｳ繧ｺ繧ｫ繝ｳ繝医Μ繝ｼ蛟ｶ讌ｽ驛ｨ','荳画律譛医き繝ｳ繝医Μ繝ｼ繧ｯ繝ｩ繝・];
-const ACCORDIA_NAMES = ['譚ｱ莠ｬ逶ｸ豁ｦ繧ｫ繝ｳ繝医Μ繝ｼ繧ｯ繝ｩ繝・,'鄙貞ｿ鈴㍽繧ｫ繝ｳ繝医Μ繝ｼ繧ｯ繝ｩ繝・,'譚ｱ蜊・痩繧ｫ繝ｳ繝医Μ繝ｼ繧ｯ繝ｩ繝・,'闃ｱ逕溘き繝ｳ繝医Μ繝ｼ繧ｯ繝ｩ繝・,'謌千伐譚ｱ繧ｫ繝ｳ繝医Μ繝ｼ繧ｯ繝ｩ繝・,'繝九Η繝ｼ蜊礼ｷ上ざ繝ｫ繝募ｶ讌ｽ驛ｨ','繝ｭ繝ｼ繧ｿ繝ｪ繝ｼ繧ｴ繝ｫ繝募ｶ讌ｽ驛ｨ','蜈ｭ逕ｲ繧ｫ繝ｳ繝医Μ繝ｼ蛟ｶ讌ｽ驛ｨ','繝代・繝繝偵Ν繧ｺ繧ｴ繝ｫ繝輔Μ繧ｾ繝ｼ繝医け繝ｩ繝・,'繧ｶ繝ｻ繧ｵ繧ｶ繝ｳ繝ｪ繝ｳ繧ｯ繧ｹ繧ｴ繝ｫ繝輔け繝ｩ繝・,'謌ｿ蟾槭き繝ｳ繝医Μ繝ｼ繧ｯ繝ｩ繝・,'繝ｩ繝ｻ繝ｴ繧｣繧ｹ繧ｿ繧ｴ繝ｫ繝輔Μ繧ｾ繝ｼ繝・,'謗帛ｷ昴き繝ｳ繝医Μ繝ｼ繧ｯ繝ｩ繝・,'蜊・㈹譛ｨ繧ｫ繝ｳ繝医Μ繝ｼ繧ｯ繝ｩ繝・,'荳牙ｳｶ繧ｫ繝ｳ繝医Μ繝ｼ繧ｯ繝ｩ繝・,'譚ｱ譚｡繝代う繝ｳ繝舌Ξ繝ｼ繧ｴ繝ｫ繝輔け繝ｩ繝・,'謦ｭ逎ｨ繧ｫ繝ｳ繝医Μ繝ｼ繧ｯ繝ｩ繝・,'謦ｭ蟾樊擲豢九ざ繝ｫ繝募ｶ讌ｽ驛ｨ','蟇悟｣ｫ蟆城㍽繧ｴ繝ｫ繝輔け繝ｩ繝・,'荳画惠繧ｻ繝悶Φ繝上Φ繝峨Ξ繝・ラ蛟ｶ讌ｽ驛ｨ','繧・＠繧肴擲譚｡繧ｴ繝ｫ繝輔け繝ｩ繝・,'螻ｱ縺ｮ蜴溘ざ繝ｫ繝輔け繝ｩ繝・];
+const GRAND_PGM_NAMES = ['総武カントリークラブ','pgmマリアゴルフリンクス','pgm武蔵ゴルフクラブ','pgm石岡ゴルフクラブ','利府ゴルフ倶楽部','桂ゴルフ倶楽部','千代田カントリークラブ','セゴビアゴルフクラブ','大宝塚ゴルフクラブ','花の木ゴルフクラブ','ザ・ゴルフクラブ竜ヶ崎','美浦ゴルフ倶楽部','茨木国際ゴルフ倶楽部','サンヒルズカントリークラブ'];
+const PGM_NAMES = ['チサンカントリークラブ','ムーンレイク','千葉国際カントリークラブ','大多喜カントリークラブ','成田の森カントリークラブ','長太郎カントリークラブ','ザ・インペリアルカントリークラブ','皐月ゴルフ倶楽部','近江ヒルズゴルフ倶楽部','枚方国際ゴルフ倶楽部','関西空港ゴルフ倶楽部','岸和田カントリークラブ','pgmゴルフリゾート沖縄','京カントリークラブ','南総ヒルズカントリークラブ','クリアビューゴルフクラブ','岡部チサンカントリークラブ','富貴ゴルフ倶楽部','秦野カントリークラブ','東名厚木カントリークラブ','伊勢原カントリークラブ','御殿場東名ゴルフクラブ','新城カントリー倶楽部','名阪チサンカントリークラブ','亀山ゴルフクラブ','木津川カントリークラブ','法隆寺カントリー倶楽部','アークよかわゴルフ倶楽部','ライオンズカントリー倶楽部','三日月カントリークラブ'];
+const ACCORDIA_NAMES = ['東京相武カントリークラブ','習志野カントリークラブ','東千葉カントリークラブ','花生カントリークラブ','成田東カントリークラブ','ニュー南総ゴルフ倶楽部','ロータリーゴルフ倶楽部','六甲カントリー倶楽部','パームヒルズゴルフリゾートクラブ','ザ・サザンリンクスゴルフクラブ','房州カントリークラブ','ラ・ヴィスタゴルフリゾート','掛川カントリークラブ','十里木カントリークラブ','三島カントリークラブ','東条パインバレーゴルフクラブ','播磨カントリークラブ','播州東洋ゴルフ倶楽部','富士小野ゴルフクラブ','三木セブンハンドレッド倶楽部','やしろ東条ゴルフクラブ','山の原ゴルフクラブ'];
 
 
-const PREF_EN = {"蛹玲ｵｷ驕・:"Hokkaido","髱呈｣ｮ逵・:"Aomori","蟯ｩ謇狗恁":"Iwate","螳ｮ蝓守恁":"Miyagi","遘狗伐逵・:"Akita","螻ｱ蠖｢逵・:"Yamagata","遖丞ｳｶ逵・:"Fukushima","闌ｨ蝓守恁":"Ibaraki","譬・惠逵・:"Tochigi","鄒､鬥ｬ逵・:"Gunma","蝓ｼ邇臥恁":"Saitama","蜊・痩逵・:"Chiba","譚ｱ莠ｬ驛ｽ":"Tokyo","逾槫･亥ｷ晉恁":"Kanagawa","譁ｰ貎溽恁":"Niigata","蟇悟ｱｱ逵・:"Toyama","遏ｳ蟾晉恁":"Ishikawa","遖丈ｺ慕恁":"Fukui","螻ｱ譴ｨ逵・:"Yamanashi","髟ｷ驥守恁":"Nagano","蟯宣・逵・:"Gifu","髱吝ｲ｡逵・:"Shizuoka","諢帷衍逵・:"Aichi","荳蛾㍾逵・:"Mie","貊玖ｳ逵・:"Shiga","莠ｬ驛ｽ蠎・:"Kyoto","螟ｧ髦ｪ蠎・:"Osaka","蜈ｵ蠎ｫ逵・:"Hyogo","螂郁憶逵・:"Nara","蜥梧ｭ悟ｱｱ逵・:"Wakayama","魑･蜿也恁":"Tottori","蟲ｶ譬ｹ逵・:"Shimane","蟯｡螻ｱ逵・:"Okayama","蠎・ｳｶ逵・:"Hiroshima","螻ｱ蜿｣逵・:"Yamaguchi","蠕ｳ蟲ｶ逵・:"Tokushima","鬥吝ｷ晉恁":"Kagawa","諢帛ｪ帷恁":"Ehime","鬮倡衍逵・:"Kochi","遖丞ｲ｡逵・:"Fukuoka","菴占ｳ逵・:"Saga","髟ｷ蟠守恁":"Nagasaki","辭頑悽逵・:"Kumamoto","螟ｧ蛻・恁":"Oita","螳ｮ蟠守恁":"Miyazaki","鮖ｿ蜈仙ｳｶ逵・:"Kagoshima","豐也ｸ・恁":"Okinawa"};
+const PREF_EN = {"北海道":"Hokkaido","青森県":"Aomori","岩手県":"Iwate","宮城県":"Miyagi","秋田県":"Akita","山形県":"Yamagata","福島県":"Fukushima","茨城県":"Ibaraki","栃木県":"Tochigi","群馬県":"Gunma","埼玉県":"Saitama","千葉県":"Chiba","東京都":"Tokyo","神奈川県":"Kanagawa","新潟県":"Niigata","富山県":"Toyama","石川県":"Ishikawa","福井県":"Fukui","山梨県":"Yamanashi","長野県":"Nagano","岐阜県":"Gifu","静岡県":"Shizuoka","愛知県":"Aichi","三重県":"Mie","滋賀県":"Shiga","京都府":"Kyoto","大阪府":"Osaka","兵庫県":"Hyogo","奈良県":"Nara","和歌山県":"Wakayama","鳥取県":"Tottori","島根県":"Shimane","岡山県":"Okayama","広島県":"Hiroshima","山口県":"Yamaguchi","徳島県":"Tokushima","香川県":"Kagawa","愛媛県":"Ehime","高知県":"Kochi","福岡県":"Fukuoka","佐賀県":"Saga","長崎県":"Nagasaki","熊本県":"Kumamoto","大分県":"Oita","宮崎県":"Miyazaki","鹿児島県":"Kagoshima","沖縄県":"Okinawa"};
 const BRAND_LABELS = {
-  ja: {"GRAND PGM":"GRAND PGM","PGM":"PGM","繧｢繧ｳ繝ｼ繝・ぅ繧｢":"繧｢繧ｳ繝ｼ繝・ぅ繧｢","縺昴・莉・:"縺昴・莉・},
-  en: {"GRAND PGM":"GRAND PGM","PGM":"PGM","繧｢繧ｳ繝ｼ繝・ぅ繧｢":"Accordia","縺昴・莉・:"Others"}
+  ja: {"GRAND PGM":"GRAND PGM","PGM":"PGM","アコーディア":"アコーディア","その他":"その他"},
+  en: {"GRAND PGM":"GRAND PGM","PGM":"PGM","アコーディア":"Accordia","その他":"Others"}
 };
 const AREA_LABELS = {
-  ja: {"all":"蜈ｨ蝗ｽ","hokkaido":"蛹玲ｵｷ驕・,"tohoku":"譚ｱ蛹・,"kanto":"髢｢譚ｱ","chubu":"荳ｭ驛ｨ","kinki":"霑醍柄","chugoku":"荳ｭ蝗ｽ","shikoku":"蝗帛嵜","kyushu":"荵晏ｷ・,"okinawa":"豐也ｸ・,"pref":"驛ｽ驕灘ｺ懃恁繧呈欠螳・},
+  ja: {"all":"全国","hokkaido":"北海道","tohoku":"東北","kanto":"関東","chubu":"中部","kinki":"近畿","chugoku":"中国","shikoku":"四国","kyushu":"九州","okinawa":"沖縄","pref":"都道府県を指定"},
   en: {"all":"All Japan","hokkaido":"Hokkaido","tohoku":"Tohoku","kanto":"Kanto","chubu":"Chubu","kinki":"Kinki","chugoku":"Chugoku","shikoku":"Shikoku","kyushu":"Kyushu","okinawa":"Okinawa","pref":"Select Prefecture"}
 };
 const SEASON_NAMES = {
-  ja: {"auto":"閾ｪ蜍募愛螳・,"spring":"譏･","summer":"螟・,"autumn":"遘・,"winter":"蜀ｬ"},
+  ja: {"auto":"自動判定","spring":"春","summer":"夏","autumn":"秋","winter":"冬"},
   en: {"auto":"Auto","spring":"Spring","summer":"Summer","autumn":"Autumn","winter":"Winter"}
 };
 const HOKKAIDO_AREA_LABELS = {
   ja: {
-    all: '蛹玲ｵｷ驕灘・菴・,
-    central: '驕灘､ｮ',
-    south: '驕灘漉',
-    east: '驕捺擲',
-    north: '驕灘圏'
+    all: '北海道全体',
+    central: '道央',
+    south: '道南',
+    east: '道東',
+    north: '道北'
   },
   en: {
     all: 'All Hokkaido',
@@ -301,18 +301,18 @@ const HOKKAIDO_AREA_LABELS = {
 };
 const T = {
   ja: {
-    htmlLang:"ja", gateEyebrow:"WELCOME", gateTitle:"Golf Journey Roulette", gateSub:"譛蛻昴↓險隱槭ｒ驕ｸ繧薙〒縺上□縺輔＞縲ら恁繝ｫ繝ｼ繝ｬ繝・ヨ繧貞屓縺吶→縲・∈縺ｰ繧後◆逵後・讌ｽ螟ｩGORA蛟呵｣懊ｒ陦ｨ遉ｺ縺励∪縺吶・, gateNote:"繧｢繝励Μ縺ｫ蜈･縺｣縺溷ｾ後ｂ縲∵律譛ｬ隱槭→闍ｱ隱槭・縺・▽縺ｧ繧ょ・繧頑崛縺医〒縺阪∪縺吶・,
-    appSub:"逵後Ν繝ｼ繝ｬ繝・ヨ繧貞・縺ｫ蝗槭＠縺ｦ縲√◎縺ｮ逵後・讌ｽ螟ｩGORA蛟呵｣懊ｒ蜿門ｾ励＠縺ｾ縺吶・,
+    htmlLang:"ja", gateEyebrow:"WELCOME", gateTitle:"Golf Journey Roulette", gateSub:"最初に言語を選んでください。県ルーレットを回すと、選ばれた県の楽天GORA候補を表示します。", gateNote:"アプリに入った後も、日本語と英語はいつでも切り替えできます。",
+    appSub:"県ルーレットを先に回して、その県の楽天GORA候補を取得します。",
     seasonTtl:"Season", areaTtl:"Area", hokkaidoAreaTtl:"Hokkaido Area", brandTtl:"Brand",
-    spin:"繝ｫ繝ｼ繝ｬ繝・ヨ髢句ｧ・, reroll:"蜷後§逵後〒蜀肴歓驕ｸ",
-    envNotice:'谺｡縺ｮ繧ｴ繝ｫ繝墓羅縲√←縺薙↓縺吶ｋ・・br>莉ｲ髢薙→繝ｫ繝ｼ繝ｬ繝・ヨ繧貞屓縺励※縲∬｡後″蜈磯∈縺ｳ縺ｾ縺ｧ讌ｽ縺励ｂ縺・・,
-    seasonPill:"蟄｣遽", areaPill:"繧ｨ繝ｪ繧｢", statusPill:"蠕・ｩ滉ｸｭ",
-    noResultYet:"縺ｾ縺邨先棡縺後≠繧翫∪縺帙ｓ", pleaseSpin:"繝ｫ繝ｼ繝ｬ繝・ヨ繧貞屓縺励※縺上□縺輔＞縲・, candidateTitle:"蛟呵｣應ｸ隕ｧ",
-    noMatch:"譚｡莉ｶ縺ｫ蜷医≧蛟呵｣懊′縺ゅｊ縺ｾ縺帙ｓ縲・, brand:"繝悶Λ繝ｳ繝・, comfort:"蠢ｫ驕ｩ蠎ｦ", rating:"隧穂ｾ｡", detail:"隧ｳ邏ｰ", reserve:"莠育ｴ・き繝ｬ繝ｳ繝繝ｼ",
-    noCandidates:"蛟呵｣懊′縺ゅｊ縺ｾ縺帙ｓ", checkFilters:"迺ｰ蠅・､画焚繧・ヶ繝ｩ繝ｳ繝蛾∈謚槭ｒ遒ｺ隱阪＠縺ｦ縺上□縺輔＞縲・, golfDetail:"繧ｴ繝ｫ繝募ｴ隧ｳ邏ｰ",
-    spinning:"繝ｫ繝ｼ繝ｬ繝・ヨ荳ｭ", spinningStatus:"逵後Ν繝ｼ繝ｬ繝・ヨ繧貞屓縺励※縺・∪縺吶・, prefDecided:"逵梧ｱｺ螳・, loadingCourses:"驕ｸ縺ｰ繧後◆逵後・蛟呵｣懊ｒ蜿門ｾ励＠縺ｦ縺・∪縺吶・,
-    decided:"豎ｺ螳・, okFetched:"蛟呵｣懷錐繝ｻ隧穂ｾ｡繝ｻ隧ｳ邏ｰURL繝ｻ莠育ｴ・き繝ｬ繝ｳ繝繝ｼ縺ｯ讌ｽ螟ｩGORA縺ｮ螳溘ョ繝ｼ繧ｿ縺ｧ縺吶・, rerolled:"蜀肴歓驕ｸ", error:"繧ｨ繝ｩ繝ｼ",
-    noArea:"繧ｨ繝ｪ繧｢蛟呵｣懊′縺ゅｊ縺ｾ縺帙ｓ縲・, notFound:"蛟呵｣懊′隕九▽縺九ｊ縺ｾ縺帙ｓ縺ｧ縺励◆縲・, hotelSearch:"妾 霑鷹團繝帙ユ繝ｫ繧呈爾縺・, hotelCapital:"徐・・逵悟ｺ∵園蝨ｨ蝨ｰ蜻ｨ霎ｺ縺ｮ繝帙ユ繝ｫ繧呈爾縺・
+    spin:"ルーレット開始", reroll:"同じ県で再抽選",
+    envNotice:'次のゴルフ旅、どこにする？<br>仲間とルーレットを回して、行き先選びまで楽しもう。',
+    seasonPill:"季節", areaPill:"エリア", statusPill:"待機中",
+    noResultYet:"まだ結果がありません", pleaseSpin:"ルーレットを回してください。", candidateTitle:"候補一覧",
+    noMatch:"条件に合う候補がありません。", brand:"ブランド", comfort:"快適度", rating:"評価", detail:"詳細", reserve:"予約カレンダー",
+    noCandidates:"候補がありません", checkFilters:"環境変数やブランド選択を確認してください。", golfDetail:"ゴルフ場詳細",
+    spinning:"ルーレット中", spinningStatus:"県ルーレットを回しています。", prefDecided:"県決定", loadingCourses:"選ばれた県の候補を取得しています。",
+    decided:"決定", okFetched:"候補名・評価・詳細URL・予約カレンダーは楽天GORAの実データです。", rerolled:"再抽選", error:"エラー",
+    noArea:"エリア候補がありません。", notFound:"候補が見つかりませんでした。", hotelSearch:"🏨 近隣ホテルを探す", hotelCapital:"🏙️ 県庁所在地周辺のホテルを探す"
   },
   en: {
     htmlLang:"en", gateEyebrow:"WELCOME", gateTitle:"Golf Journey Roulette", gateSub:"Choose your language first. Then spin the roulette to pick a prefecture and get real golf course candidates from Rakuten GORA.", gateNote:"You can switch between Japanese and English anytime after entering.",
@@ -326,7 +326,7 @@ const T = {
     noCandidates:"No candidates found", checkFilters:"Please check your environment variables or selected brands.", golfDetail:"Course Details",
     spinning:"Spinning", spinningStatus:"Spinning the prefecture roulette.", prefDecided:"Prefecture picked", loadingCourses:"Fetching candidates for the selected prefecture.",
     decided:"Selected", okFetched:"Course name, rating, detail URL, and booking calendar are pulled from live Rakuten GORA data.", rerolled:"Rerolled", error:"Error",
-    noArea:"No prefectures are available in this area.", notFound:"No matching candidates were found.", hotelSearch:"妾 Find Nearby Hotels", hotelCapital:"徐・・Hotels Near Prefecture Capital"
+    noArea:"No prefectures are available in this area.", notFound:"No matching candidates were found.", hotelSearch:"🏨 Find Nearby Hotels", hotelCapital:"🏙️ Hotels Near Prefecture Capital"
   }
 };
 
@@ -353,7 +353,7 @@ function displayPref(pref) { return currentLang === 'en' ? (PREF_EN[pref] || pre
 function displayBrand(brand) { return BRAND_LABELS[currentLang][brand] || brand; }
 
 function esc(s) { return String(s || '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
-function normalize(s) { return (s || '').replace(/[・｡-・ｺ・・・夲ｼ・・兢/g, ch => String.fromCharCode(ch.charCodeAt(0)-0xFEE0)).replace(/[縲]/g,' ').replace(/\s+/g,' ').trim().toLowerCase(); }
+function normalize(s) { return (s || '').replace(/[Ａ-Ｚａ-ｚ０-９]/g, ch => String.fromCharCode(ch.charCodeAt(0)-0xFEE0)).replace(/[　]/g,' ').replace(/\s+/g,' ').trim().toLowerCase(); }
 function seasonKey() {
   const v = document.getElementById('season').value;
   if (v !== 'auto') return v;
@@ -367,18 +367,18 @@ function seasonLabel(v) { return SEASON_NAMES[currentLang][v] || v; }
 
 function inferBrand(name) {
   const n = normalize(name);
-  if (n.includes('繧｢繧ｳ繝ｼ繝・ぅ繧｢') || n.includes('accordia')) return '繧｢繧ｳ繝ｼ繝・ぅ繧｢';
-  if (n.includes('grand pgm') || n.includes('繧ｰ繝ｩ繝ｳ繝英gm')) return 'GRAND PGM';
-  if (n.includes('pgm') || n.includes('繝√し繝ｳ') || n.includes('繝代す繝輔ぅ繝・け繧ｴ繝ｫ繝・)) return 'PGM';
+  if (n.includes('アコーディア') || n.includes('accordia')) return 'アコーディア';
+  if (n.includes('grand pgm') || n.includes('グランドpgm')) return 'GRAND PGM';
+  if (n.includes('pgm') || n.includes('チサン') || n.includes('パシフィックゴルフ')) return 'PGM';
   if (GRAND_PGM_NAMES.some(x => n.includes(normalize(x)))) return 'GRAND PGM';
   if (PGM_NAMES.some(x => n.includes(normalize(x)))) return 'PGM';
-  if (ACCORDIA_NAMES.some(x => n.includes(normalize(x)))) return '繧｢繧ｳ繝ｼ繝・ぅ繧｢';
-  return '縺昴・莉・;
+  if (ACCORDIA_NAMES.some(x => n.includes(normalize(x)))) return 'アコーディア';
+  return 'その他';
 }
 function comfort(pref, brand, evaluation) {
   const s = seasonKey();
   const t = REGION_SCORE[pref] || {cool:0,warm:0,snow:0};
-  let score = 70 + (brand === 'GRAND PGM' ? 8 : brand === 'PGM' ? 5 : brand === '繧｢繧ｳ繝ｼ繝・ぅ繧｢' ? 3 : 0);
+  let score = 70 + (brand === 'GRAND PGM' ? 8 : brand === 'PGM' ? 5 : brand === 'アコーディア' ? 3 : 0);
   score += Math.max(0, ((evaluation || 3.8) - 3.8) * 12);
   if (s === 'summer') score += t.cool * 1.8 - t.warm * 0.2 - t.snow * 0.1;
   if (s === 'winter') score += t.warm * 1.9 - t.snow * 2.2;
@@ -438,7 +438,7 @@ function populatePrefSelect() {
   Object.keys(PREF_CODES).forEach(p => {
     const opt = document.createElement('option');
     opt.value = p;
-    opt.textContent = displayPref(p);
+    opt.textContent = p;
     sel.appendChild(opt);
   });
 }
@@ -491,7 +491,7 @@ async function fetchCourses(pref) {
     '&pref=' +
     encodeURIComponent(pref);
 
-  if (pref === '蛹玲ｵｷ驕・ && selectedHokkaidoArea !== 'all') {
+  if (pref === '北海道' && selectedHokkaidoArea !== 'all') {
     url += '&hokkaidoArea=' + encodeURIComponent(selectedHokkaidoArea);
   }
 
@@ -518,8 +518,8 @@ async function fetchCourses(pref) {
     };
   });
 
-  list = list.filter(c => activeBrands.has(c.brand) || (activeBrands.has('縺昴・莉・) && c.brand === '縺昴・莉・));
-  list = list.filter(c => c.brand !== '縺昴・莉・ || c.evaluation >= 0);
+  list = list.filter(c => activeBrands.has(c.brand) || (activeBrands.has('その他') && c.brand === 'その他'));
+  list = list.filter(c => c.brand !== 'その他' || c.evaluation >= 0);
 
   if (!list.length && rawItems.length) {
     list = rawItems.map(item => ({
@@ -532,8 +532,8 @@ async function fetchCourses(pref) {
       lng: item.longitude || '',
       detailUrl: item.golfCourseDetailUrl || '',
       reserveUrl: item.reserveCalUrl || item.golfCourseDetailUrl || '',
-      brand: '縺昴・莉・,
-      comfort: comfort(pref, '縺昴・莉・, Number(item.evaluation || 0))
+      brand: 'その他',
+      comfort: comfort(pref, 'その他', Number(item.evaluation || 0))
     })).filter(c => c.evaluation >= 0);
   }
 
@@ -616,7 +616,7 @@ function drawCandidates(list, pickedId) {
     const row = document.createElement('div');
     row.className = 'row';
     row.innerHTML = `
-      <div><b>${c.golfCourseId === pickedId ? '笘・' : ''}${esc(c.name)}</b></div>
+      <div><b>${c.golfCourseId === pickedId ? '★ ' : ''}${esc(c.name)}</b></div>
       <div class="subline">${esc(tr('brand'))}: ${esc(displayBrand(c.brand))} / ${esc(tr('comfort'))} ${c.comfort} / ${esc(tr('rating'))} ${Number(c.evaluation || 0).toFixed(1)}</div>
       <div class="subline">${esc(c.address)}</div>
       <div class="subline"><a href="${c.detailUrl}" target="_blank" rel="noopener noreferrer">${esc(tr('detail'))}</a> / <a href="${c.reserveUrl}" target="_blank" rel="noopener noreferrer">${esc(tr('reserve'))}</a></div>
@@ -657,7 +657,7 @@ function updateStaticTexts() {
   document.getElementById('gateTitle').textContent = tr('gateTitle');
   document.getElementById('gateSub').textContent = tr('gateSub');
   document.getElementById('gateNote').textContent = tr('gateNote');
-  document.getElementById('chooseJa').textContent = '譌･譛ｬ隱槭〒蟋九ａ繧・;
+  document.getElementById('chooseJa').textContent = '日本語で始める';
   document.getElementById('chooseEn').textContent = 'Start in English';
   document.getElementById('appTitle').textContent = 'Golf Journey Roulette';
   document.getElementById('appSub').textContent = tr('appSub');
@@ -667,8 +667,8 @@ function updateStaticTexts() {
   document.getElementById('brandTtl').textContent = tr('brandTtl');
   document.getElementById('spinBtn').textContent = tr('spin');
   document.getElementById('rerollBtn').textContent = tr('reroll');
-  document.getElementById('sortComfort').textContent = currentLang === 'ja' ? '蠢ｫ驕ｩ蠎ｦ鬆・ : 'By Comfort';
-  document.getElementById('sortRating').textContent = currentLang === 'ja' ? '隧穂ｾ｡鬆・ : 'By Rating';
+  document.getElementById('sortComfort').textContent = currentLang === 'ja' ? '快適度順' : 'By Comfort';
+  document.getElementById('sortRating').textContent = currentLang === 'ja' ? '評価順' : 'By Rating';
   document.getElementById('candidateTitle').textContent = tr('candidateTitle');
   document.getElementById('langJa').classList.toggle('active', currentLang === 'ja');
   document.getElementById('langEn').classList.toggle('active', currentLang === 'en');
@@ -696,9 +696,9 @@ populatePrefSelect();
   refreshLabels();
   refreshHokkaidoAreaVisibility();
   setStatus('', tr('envNotice'));
-  const boot = makeTickerItems(AREAS.all, '譚ｱ莠ｬ驛ｽ');
+  const boot = makeTickerItems(AREAS.all, '東京都');
   renderTicker(boot);
-  const idx0 = boot.lastIndexOf('譚ｱ莠ｬ驛ｽ');
+  const idx0 = boot.lastIndexOf('東京都');
  const { itemH, boxH } = getTickerMetrics();
 ticker.style.transform = `translateY(${(boxH / 2) - (itemH / 2) - (idx0 * itemH)}px)`;
   if (openApp) {
@@ -799,9 +799,9 @@ document.getElementById('winCourse').textContent = tr('noResultYet');
 document.getElementById('winDesc').textContent = tr('pleaseSpin');
 setStatus('', tr('envNotice'));
 refreshLabels();
-const boot = makeTickerItems(AREAS.all, '譚ｱ莠ｬ驛ｽ');
+const boot = makeTickerItems(AREAS.all, '東京都');
 renderTicker(boot);
-const idx0 = boot.lastIndexOf('譚ｱ莠ｬ驛ｽ');
+const idx0 = boot.lastIndexOf('東京都');
 const { itemH, boxH } = getTickerMetrics();
 ticker.style.transform = `translateY(${(boxH / 2) - (itemH / 2) - (idx0 * itemH)}px)`;
 if (savedLang === 'ja' || savedLang === 'en') {
@@ -810,4 +810,3 @@ if (savedLang === 'ja' || savedLang === 'en') {
 </script>
 </body>
 </html>
-
